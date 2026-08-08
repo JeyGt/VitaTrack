@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>VitaTrack</title>
+<meta name="theme-color" content="#2F6F4E">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VitaTrack">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FAF6EF; --surface:#FFFFFF; --surface-alt:#F1ECE0; --ink:#1F2A24; --ink-soft:#5B6B61;
+  --primary:#2F6F4E; --primary-dark:#234F38; --primary-tint:#E4EFE7;
+  --accent:#E8702A; --accent-tint:#FCE6D6;
+  --gold:#C9A227; --gold-tint:#F7EFD3;
+  --water:#3E7CB1; --water-tint:#DEEAF3;
+  --danger:#C1473A; --border:#E4DDCB;
+  --radius:18px; --radius-sm:12px;
+  --shadow:0 2px 12px rgba(31,42,36,0.06), 0 1px 2px rgba(31,42,36,0.05);
+  color-scheme: light;
+}
+[data-theme="dark"]{
+  --bg:#141D18; --surface:#1C2620; --surface-alt:#222D26; --ink:#EDEAE0; --ink-soft:#93A399;
+  --primary:#4C9270; --primary-dark:#3A7259; --primary-tint:#1F2E26;
+  --accent:#F08749; --accent-tint:#2E2218;
+  --gold:#D9B94A; --gold-tint:#2B2616;
+  --water:#5A9BCB; --water-tint:#1B2A33;
+  --danger:#E0695C; --border:#2B362F;
+  --shadow:0 2px 14px rgba(0,0,0,0.35);
+  color-scheme: dark;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:'Manrope',system-ui,sans-serif; font-size:15px;
+  -webkit-font-smoothing:antialiased; overscroll-behavior-y:none;
+  padding-bottom: calc(78px + env(safe-area-inset-bottom));
+  padding-top: env(safe-area-inset-top);
+  transition: background .25s ease, color .25s ease;
+}
+h1,h2,h3,.num{font-family:'Fraunces',serif;}
+::selection{background:var(--primary); color:#fff;}
+button{font-family:inherit; cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+
+/* ----- top bar ----- */
+.topbar{
+  position:sticky; top:0; z-index:30; background:var(--bg);
+  padding:18px 20px 10px; display:flex; align-items:center; justify-content:space-between;
+}
+.brand{display:flex; align-items:center; gap:9px;}
+.brand-mark{width:30px;height:30px;flex:none;}
+.brand h1{font-size:19px; font-weight:600; margin:0; letter-spacing:.2px;}
+
+/* ----- screens ----- */
+.screen{display:none; padding:6px 18px 28px; animation:fade .25s ease;}
+.screen.active{display:block;}
+@keyframes fade{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+.section-title{font-size:13px; text-transform:uppercase; letter-spacing:.09em; color:var(--ink-soft); font-weight:700; margin:26px 2px 12px;}
+.section-title:first-child{margin-top:6px;}
+.card{
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:18px; box-shadow:var(--shadow);
+}
+.card + .card{margin-top:12px;}
+.row{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+.muted{color:var(--ink-soft);}
+.small{font-size:12.5px;}
+
+/* ----- rings (signature element) ----- */
+.rings-wrap{display:flex; align-items:center; justify-content:center; padding:14px 0 4px; position:relative;}
+.rings-legend{display:flex; justify-content:center; gap:18px; margin-top:6px;}
+.legend-item{display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--ink-soft);}
+.legend-dot{width:9px;height:9px;border-radius:50%;}
+.ring-center{position:absolute; text-align:center;}
+.ring-center .num{font-size:26px; font-weight:600; line-height:1;}
+.ring-center .lbl{font-size:11px; color:var(--ink-soft); margin-top:2px;}
+
+/* ----- habit checklist ----- */
+.habit-list{display:flex; flex-direction:column; gap:8px;}
+.habit-item{
+  display:flex; align-items:center; gap:12px; padding:11px 12px; border-radius:var(--radius-sm);
+  background:var(--surface-alt); border:1px solid transparent; transition:.15s;
+}
+.habit-item.done{background:var(--primary-tint); border-color:var(--primary);}
+.habit-check{
+  width:24px;height:24px;border-radius:50%;border:2px solid var(--border); flex:none;
+  display:flex;align-items:center;justify-content:center; background:var(--surface); transition:.15s;
+}
+.habit-item.done .habit-check{background:var(--primary); border-color:var(--primary);}
+.habit-check svg{width:13px;height:13px;opacity:0; transition:.15s; stroke:#fff;}
+.habit-item.done .habit-check svg{opacity:1;}
+.habit-label{flex:1; font-weight:600; font-size:14px;}
+.streak-tag{font-size:11px; font-weight:700; color:var(--accent); display:flex; align-items:center; gap:3px;}
+
+/* ----- buttons ----- */
+.btn{
+  border:none; border-radius:99px; padding:12px 18px; font-weight:700; font-size:14px;
+  display:inline-flex; align-items:center; justify-content:center; gap:7px; transition:.15s;
+}
+.btn-primary{background:var(--primary); color:#fff;}
+.btn-primary:active{background:var(--primary-dark);}
+.btn-ghost{background:var(--surface-alt); color:var(--ink);}
+.btn-accent{background:var(--accent); color:#fff;}
+.btn-block{width:100%;}
+.btn-sm{padding:8px 14px; font-size:13px;}
+.fab{
+  position:fixed; right:20px; bottom:calc(92px + env(safe-area-inset-bottom)); z-index:25;
+  width:56px;height:56px;border-radius:50%; background:var(--primary); color:#fff; border:none;
+  box-shadow:0 6px 18px rgba(47,111,78,.4); display:flex;align-items:center;justify-content:center;
+}
+.fab svg{width:24px;height:24px;}
+
+/* ----- lists/items ----- */
+.item-row{
+  display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--border);
+}
+.item-row:last-child{border-bottom:none;}
+.item-ico{
+  width:38px;height:38px;border-radius:11px; flex:none; display:flex;align-items:center;justify-content:center;
+  background:var(--surface-alt); font-size:18px;
+}
+.item-main{flex:1; min-width:0;}
+.item-title{font-weight:700; font-size:14px;}
+.item-sub{font-size:12px; color:var(--ink-soft); margin-top:1px;}
+.item-val{font-weight:700; font-size:13.5px; white-space:nowrap;}
+.item-del{background:none;border:none;color:var(--ink-soft); padding:4px; opacity:.6;}
+.item-del svg{width:16px;height:16px;}
+
+.empty-state{
+  text-align:center; padding:30px 14px; color:var(--ink-soft);
+}
+.empty-state svg{width:38px;height:38px; margin-bottom:10px; opacity:.5;}
+.empty-state p{margin:0; font-size:13.5px;}
+
+/* ----- progress bars ----- */
+.pbar{height:10px; border-radius:99px; background:var(--surface-alt); overflow:hidden;}
+.pbar > div{height:100%; border-radius:99px; transition:width .4s ease;}
+
+/* ----- stat grid ----- */
+.stat-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.stat-box{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:13px;}
+.stat-box .num{font-size:20px; font-weight:600;}
+.stat-box .lbl{font-size:11.5px; color:var(--ink-soft); margin-top:2px;}
+
+/* ----- tabs within screens ----- */
+.subtabs{display:flex; gap:6px; background:var(--surface-alt); padding:4px; border-radius:99px; margin-bottom:16px;}
+.subtab{flex:1; text-align:center; padding:9px 4px; border-radius:99px; font-weight:700; font-size:12.5px; color:var(--ink-soft); border:none; background:transparent;}
+.subtab.active{background:var(--surface); color:var(--ink); box-shadow:0 1px 4px rgba(0,0,0,.08);}
+
+/* ----- bottom nav ----- */
+.bottomnav{
+  position:fixed; left:0; right:0; bottom:0; z-index:30; background:var(--surface);
+  border-top:1px solid var(--border); display:flex; padding-bottom:env(safe-area-inset-bottom);
+}
+.navbtn{
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:10px 0 8px;
+  background:none; border:none; color:var(--ink-soft);
+}
+.navbtn svg{width:21px;height:21px;}
+.navbtn span{font-size:10.5px; font-weight:700;}
+.navbtn.active{color:var(--primary);}
+
+/* ----- forms ----- */
+.field{margin-bottom:14px;}
+.field label{display:block; font-size:12.5px; font-weight:700; color:var(--ink-soft); margin-bottom:6px;}
+.field input,.field select{
+  width:100%; padding:11px 13px; border-radius:var(--radius-sm); border:1px solid var(--border);
+  background:var(--surface-alt); color:var(--ink); font-size:14.5px; font-weight:600;
+}
+.field input:focus,.field select:focus{outline:2px solid var(--primary); outline-offset:1px;}
+.field-row{display:flex; gap:10px;}
+.field-row .field{flex:1;}
+
+/* ----- modal/sheet ----- */
+.sheet-overlay{
+  position:fixed; inset:0; background:rgba(20,29,24,.45); z-index:50; opacity:0; pointer-events:none; transition:opacity .2s;
+}
+.sheet-overlay.open{opacity:1; pointer-events:auto;}
+.sheet{
+  position:fixed; left:0; right:0; bottom:0; z-index:51; background:var(--surface);
+  border-radius:22px 22px 0 0; padding:20px 20px calc(24px + env(safe-area-inset-bottom));
+  transform:translateY(100%); transition:transform .28s cubic-bezier(.2,.9,.3,1); max-height:85vh; overflow-y:auto;
+}
+.sheet-overlay.open .sheet{transform:translateY(0);}
+.sheet-handle{width:36px;height:4px; background:var(--border); border-radius:99px; margin:0 auto 16px;}
+.sheet h3{margin:0 0 16px; font-size:18px;}
+.chip-grid{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;}
+.chip{
+  padding:8px 13px; border-radius:99px; background:var(--surface-alt); border:1px solid var(--border);
+  font-size:12.5px; font-weight:700; color:var(--ink-soft);
+}
+.chip.active{background:var(--primary); color:#fff; border-color:var(--primary);}
+.search-results{max-height:180px; overflow-y:auto; margin-bottom:6px;}
+.sr-item{display:flex; justify-content:space-between; padding:9px 4px; border-bottom:1px solid var(--border); font-size:13.5px;}
+.sr-item:last-child{border-bottom:none;}
+
+
+/* ----- toast ----- */
+.toast{
+  position:fixed; left:50%; bottom:calc(95px + env(safe-area-inset-bottom)); transform:translateX(-50%) translateY(10px);
+  background:var(--ink); color:var(--bg); padding:11px 18px; border-radius:99px; font-size:13px; font-weight:700;
+  z-index:60; opacity:0; pointer-events:none; transition:.25s; box-shadow:0 6px 20px rgba(0,0,0,.2);
+  white-space:nowrap; max-width:88vw; overflow:hidden; text-overflow:ellipsis;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+/* ----- weight chart ----- */
+.chart-wrap{width:100%; overflow-x:auto;}
+svg.chart{display:block;}
+
+/* misc */
+a.linklike{color:var(--primary); font-weight:700; text-decoration:none; font-size:13px;}
+.divider{height:1px; background:var(--border); margin:16px 0;}
+.profile-head{display:flex; align-items:center; gap:14px; margin-bottom:6px;}
+.avatar{
+  width:58px;height:58px;border-radius:50%; background:var(--primary); color:#fff;
+  display:flex;align-items:center;justify-content:center; font-family:'Fraunces',serif; font-size:24px; font-weight:600; flex:none;
+}
+.level-bar-wrap{margin-top:10px;}
+input[type="range"]{width:100%;}
+</style>
+</head>
+<body data-theme="light">
+
+<div class="topbar">
+  <div class="brand">
+    <svg class="brand-mark" viewBox="0 0 32 32" fill="none">
+      <circle cx="16" cy="16" r="15" fill="var(--primary)"/>
+      <path d="M16 8c-4 2-6 6-4 11 1.5 3.6 4 5 4 5s2.5-1.4 4-5c2-5 0-9-4-11z" fill="white" opacity=".92"/>
+      <path d="M16 13v9" stroke="var(--primary)" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+    <h1 id="greetTitle">VitaTrack</h1>
+  </div>
+</div>
+
+<!-- ================= ACCUEIL ================= -->
+<section class="screen active" id="screen-home">
+  <div class="card">
+    <div class="rings-wrap">
+      <svg width="200" height="200" viewBox="0 0 200 200" id="ringsSvg">
+        <circle cx="100" cy="100" r="86" fill="none" stroke="var(--surface-alt)" stroke-width="14"/>
+        <circle cx="100" cy="100" r="64" fill="none" stroke="var(--surface-alt)" stroke-width="14"/>
+        <circle cx="100" cy="100" r="42" fill="none" stroke="var(--surface-alt)" stroke-width="14"/>
+        <circle id="ringCal" cx="100" cy="100" r="86" fill="none" stroke="var(--accent)" stroke-width="14" stroke-linecap="round" transform="rotate(-90 100 100)"/>
+        <circle id="ringWater" cx="100" cy="100" r="64" fill="none" stroke="var(--water)" stroke-width="14" stroke-linecap="round" transform="rotate(-90 100 100)"/>
+        <circle id="ringSport" cx="100" cy="100" r="42" fill="none" stroke="var(--primary)" stroke-width="14" stroke-linecap="round" transform="rotate(-90 100 100)"/>
+      </svg>
+      <div class="ring-center">
+        <div class="num" id="kcalCenter">0</div>
+        <div class="lbl">kcal aujourd'hui</div>
+      </div>
+    </div>
+    <div class="rings-legend">
+      <div class="legend-item"><span class="legend-dot" style="background:var(--accent)"></span>Calories</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--water)"></span>Eau</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--primary)"></span>Sport</div>
+    </div>
+  </div>
+
+  <div class="stat-grid" style="margin-top:12px;">
+    <div class="stat-box"><div class="num" id="statWeight">–</div><div class="lbl">Poids actuel (kg)</div></div>
+    <div class="stat-box"><div class="num" id="statSteps">0</div><div class="lbl">Pas aujourd'hui</div></div>
+  </div>
+
+  <div class="section-title">Habitudes du jour</div>
+  <div class="card"><div class="habit-list" id="habitList"></div></div>
+
+  <div class="section-title">Ajout rapide</div>
+  <div class="card" style="display:flex; gap:8px; flex-wrap:wrap;">
+    <button class="btn btn-ghost btn-sm" onclick="openFoodSheet()">🍽️ Repas</button>
+    <button class="btn btn-ghost btn-sm" onclick="openSportSheet()">🏃 Sport</button>
+    <button class="btn btn-ghost btn-sm" onclick="addWater()">💧 +1 verre</button>
+    <button class="btn btn-ghost btn-sm" onclick="openStepsSheet()">👣 Pas</button>
+  </div>
+</section>
+
+<!-- ================= REPAS ================= -->
+<section class="screen" id="screen-food">
+  <div class="card">
+    <div class="row"><strong>Calories du jour</strong><span class="num" id="foodKcalTotal">0</span></div>
+    <div class="pbar" style="margin-top:8px;"><div id="foodBar" style="background:var(--accent); width:0%;"></div></div>
+    <div class="row small muted" style="margin-top:6px;"><span id="foodGoalLabel">Objectif : –</span><span id="macroSummary"></span></div>
+  </div>
+  <div class="section-title">Aliments enregistrés</div>
+  <div class="card" id="foodListCard"></div>
+</section>
+
+<!-- ================= SPORT ================= -->
+<section class="screen" id="screen-sport">
+  <div class="card">
+    <div class="row"><strong>Minutes aujourd'hui</strong><span class="num" id="sportMinTotal">0</span></div>
+    <div class="pbar" style="margin-top:8px;"><div id="sportBar" style="background:var(--primary); width:0%;"></div></div>
+    <div class="row small muted" style="margin-top:6px;"><span id="sportGoalLabel">Objectif : –</span><span id="sportKcalLabel">0 kcal brûlées</span></div>
+  </div>
+  <div class="section-title">Séances du jour</div>
+  <div class="card" id="sportListCard"></div>
+</section>
+
+<!-- ================= SUIVI ================= -->
+<section class="screen" id="screen-track">
+  <div class="subtabs">
+    <button class="subtab active" data-sub="eau" onclick="setSubtab('track','eau')">Eau</button>
+    <button class="subtab" data-sub="sommeil" onclick="setSubtab('track','sommeil')">Sommeil</button>
+    <button class="subtab" data-sub="poids" onclick="setSubtab('track','poids')">Poids</button>
+  </div>
+
+  <div class="sub" data-sub="eau">
+    <div class="card">
+      <div class="row"><strong id="waterLabel">0 / 0 ml</strong><span class="muted small" id="waterCupsLabel">0 verres</span></div>
+      <div class="pbar" style="margin-top:8px;"><div id="waterBar" style="background:var(--water); width:0%;"></div></div>
+      <div class="row" style="margin-top:14px; gap:8px;">
+        <button class="btn btn-ghost btn-block" onclick="removeWater()">− 1 verre</button>
+        <button class="btn btn-primary btn-block" style="background:var(--water)" onclick="addWater()">+ 1 verre</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub" data-sub="sommeil" style="display:none;">
+    <div class="card">
+      <div class="field"><label>Heures de sommeil</label><input type="number" step="0.25" id="sleepHours" placeholder="ex : 7.5"></div>
+      <div class="field"><label>Qualité ressentie</label>
+        <div class="chip-grid">
+          <button class="chip" data-q="1" onclick="setSleepQ(1)">😩 Faible</button>
+          <button class="chip" data-q="2" onclick="setSleepQ(2)">😐 Moyenne</button>
+          <button class="chip" data-q="3" onclick="setSleepQ(3)">😴 Bonne</button>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="saveSleep()">Enregistrer</button>
+    </div>
+  </div>
+
+  <div class="sub" data-sub="poids" style="display:none;">
+    <div class="card">
+      <div class="row"><strong>Évolution du poids</strong><span class="muted small" id="weightDeltaLabel"></span></div>
+      <div class="chart-wrap" style="margin-top:10px;"><svg class="chart" id="weightChart" width="100%" height="140"></svg></div>
+    </div>
+    <div class="card" style="margin-top:12px;">
+      <div class="field-row">
+        <div class="field"><label>Poids (kg)</label><input type="number" step="0.1" id="newWeight"></div>
+        <div class="field"><label>Tour de taille (cm)</label><input type="number" step="0.5" id="newWaist"></div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="logWeight()">Ajouter une pesée</button>
+    </div>
+    <div class="section-title">Historique</div>
+    <div class="card" id="weightListCard"></div>
+  </div>
+</section>
+
+<!-- ================= PROFIL ================= -->
+<section class="screen" id="screen-profile">
+  <div class="card">
+    <div class="profile-head">
+      <div class="avatar" id="avatarLetter">?</div>
+      <div>
+        <div style="font-weight:700; font-size:16.5px;" id="profName">–</div>
+        <div class="muted small" id="profSub">–</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px; padding:14px;">
+      <div class="row small"><span class="muted">Objectif calorique actuel</span><strong id="profileCalorieTarget">À calculer</strong></div>
+      <div class="row small" style="margin-top:8px;"><span class="muted">Protéines</span><strong id="profileProteinTarget">À calculer</strong></div>
+    </div>
+  </div>
+
+  <div class="subtabs">
+    <button class="subtab active" data-sub="infos" onclick="setSubtab('profile','infos')">Infos</button>
+    <button class="subtab" data-sub="objectifs" onclick="setSubtab('profile','objectifs')">Objectifs</button>
+    <button class="subtab" data-sub="reglages" onclick="setSubtab('profile','reglages')">Réglages</button>
+  </div>
+
+  <div class="sub" data-sub="infos">
+    <div class="card">
+      <div class="field"><label>Prénom</label><input id="pf_name"></div>
+      <div class="field-row">
+        <div class="field"><label>Âge</label><input type="number" id="pf_age"></div>
+        <div class="field"><label>Sexe</label>
+          <select id="pf_sex"><option value="homme">Homme</option><option value="femme">Femme</option></select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Taille (cm)</label><input type="number" id="pf_height"></div>
+        <div class="field"><label>Poids actuel (kg)</label><input type="number" step="0.1" id="pf_weight"></div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="saveProfile()">Enregistrer</button>
+    </div>
+  </div>
+
+  <div class="sub" data-sub="objectifs" style="display:none;">
+    <div class="card">
+      <div class="field"><label>Objectif</label>
+        <select id="pf_goal"><option value="fat_loss">Perdre du gras</option><option value="recomposition">Recomposition</option><option value="muscle_gain">Prise de muscle</option><option value="maintain">Maintien</option><option value="weight_target">Atteindre un poids</option></select>
+      </div>
+      <div class="field"><label>Niveau d'activité</label>
+        <select id="pf_activity">
+          <option value="sedentary">Sédentaire</option>
+          <option value="light">Légère</option>
+          <option value="moderate">Modérée</option>
+          <option value="active">Active</option>
+          <option value="very_active">Très active</option>
+        </select>
+      </div>
+      <div class="field"><label>Poids cible (kg, facultatif)</label><input type="number" step="0.1" id="pf_target"></div>
+      <div class="field-row"><div class="field"><label>% masse grasse cible (facultatif)</label><input type="number" step="0.1" id="pf_bodyfat_target"></div><div class="field"><label>Tour de taille cible (cm, facultatif)</label><input type="number" step="0.5" id="pf_waist_target"></div></div>
+      <div class="field-row">
+        <div class="field"><label>Objectif pas / jour</label><input type="number" id="st_steps"></div>
+        <div class="field"><label>Objectif sport (min)</label><input type="number" id="st_sport"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Objectif eau (ml)</label><input type="number" id="st_water"></div>
+        <div class="field"><label>Taille du verre (ml)</label><input type="number" id="st_cup"></div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="saveGoals()">Enregistrer les objectifs</button>
+    </div>
+  </div>
+
+
+  <div class="sub" data-sub="reglages" style="display:none;">
+    <div class="card">
+      <div class="row"><strong>Thème sombre</strong>
+        <label class="chip" id="themeToggle" onclick="toggleTheme()" style="cursor:pointer;">Activer</label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row" style="margin-bottom:10px;"><strong>Données</strong></div>
+      <button class="btn btn-ghost btn-block" onclick="exportData()">⤓ Exporter mes données (.json)</button>
+      <div style="height:8px;"></div>
+      <button class="btn btn-ghost btn-block" onclick="document.getElementById('importFile').click()">⤒ Importer un fichier .json</button>
+      <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData(event)">
+      <div style="height:8px;"></div>
+      <button class="btn btn-block" style="background:var(--danger); color:#fff;" onclick="resetToday()">Réinitialiser la journée</button>
+    </div>
+    <div class="card">
+      <p class="muted small" style="margin:0;">VitaTrack — données stockées uniquement sur cet appareil.</p>
+    </div>
+  </div>
+</section>
+
+<div class="bottomnav">
+  <button class="navbtn active" data-screen="home" onclick="go('home')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg>
+    <span>Accueil</span>
+  </button>
+  <button class="navbtn" data-screen="food" onclick="go('food')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 2v8M5 4v4a2 2 0 0 0 4 0V4M17 2c-2 1-2 5-2 7s0 4 2 4V22"/></svg>
+    <span>Repas</span>
+  </button>
+  <button class="navbtn" data-screen="sport" onclick="go('sport')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13" cy="4" r="2"/><path d="M5 21l4-7 3 3 3-6M9 14l-3-3 4-3 3 2 4-2"/></svg>
+    <span>Sport</span>
+  </button>
+  <button class="navbtn" data-screen="track" onclick="go('track')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2s6 7 6 12a6 6 0 0 1-12 0c0-5 6-12 6-12z"/></svg>
+    <span>Suivi</span>
+  </button>
+  <button class="navbtn" data-screen="profile" onclick="go('profile')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+    <span>Profil</span>
+  </button>
+</div>
+
+<button class="fab" id="globalFab" onclick="openFoodSheet()">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+</button>
+
+<!-- FOOD SHEET -->
+<div class="sheet-overlay" id="foodSheetOverlay" onclick="closeSheetIfBg(event,'foodSheetOverlay')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h3>Ajouter un aliment</h3>
+    <input id="foodSearch" oninput="renderFoodSearch()" placeholder="Rechercher (poulet, riz, pomme...)" style="width:100%; padding:11px 13px; border-radius:12px; border:1px solid var(--border); background:var(--surface-alt); color:var(--ink); font-size:14.5px; margin-bottom:10px;">
+    <div class="search-results" id="foodSearchResults"></div>
+    <div class="divider"></div>
+    <div id="foodPickedBox" style="display:none;">
+      <div class="row" style="margin-bottom:10px;"><strong id="foodPickedName"></strong><span class="muted small" id="foodPickedKcal"></span></div>
+      <div class="field"><label>Quantité (g / ml)</label><input type="number" id="foodQty" value="100"></div>
+      <button class="btn btn-primary btn-block" onclick="confirmAddFood()">Ajouter au journal</button>
+    </div>
+    <a class="linklike" onclick="toggleCustomFoodForm()">+ Créer un aliment personnalisé</a>
+    <div id="customFoodForm" style="display:none; margin-top:12px;">
+      <div class="field"><label>Nom</label><input id="cf_name"></div>
+      <div class="field-row">
+        <div class="field"><label>kcal / 100g</label><input type="number" id="cf_kcal"></div>
+        <div class="field"><label>Protéines /100g</label><input type="number" id="cf_protein"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Glucides /100g</label><input type="number" id="cf_carbs"></div>
+        <div class="field"><label>Lipides /100g</label><input type="number" id="cf_fat"></div>
+      </div>
+      <button class="btn btn-ghost btn-block" onclick="saveCustomFood()">Enregistrer l'aliment</button>
+    </div>
+  </div>
+</div>
+
+<!-- SPORT SHEET -->
+<div class="sheet-overlay" id="sportSheetOverlay" onclick="closeSheetIfBg(event,'sportSheetOverlay')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h3>Ajouter une séance</h3>
+    <div class="chip-grid" id="sportChips"></div>
+    <div class="field"><label>Durée (minutes)</label><input type="number" id="sportDuration" value="30"></div>
+    <div class="row small muted" style="margin-bottom:14px;">Calories estimées : <strong id="sportKcalEstimate">–</strong></div>
+    <button class="btn btn-primary btn-block" onclick="confirmAddSport()">Ajouter au journal</button>
+  </div>
+</div>
+
+<!-- STEPS SHEET -->
+<div class="sheet-overlay" id="stepsSheetOverlay" onclick="closeSheetIfBg(event,'stepsSheetOverlay')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h3>Pas du jour</h3>
+    <div class="field"><label>Nombre de pas</label><input type="number" id="stepsInput"></div>
+    <button class="btn btn-primary btn-block" onclick="confirmSteps()">Enregistrer</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
