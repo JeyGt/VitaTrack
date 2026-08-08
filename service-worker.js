@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vitatrack-cache-v3';
+const CACHE_NAME = 'vitatrack-cache-v1-1';
 const ASSETS = [
   './index.html',
   './data.js',
