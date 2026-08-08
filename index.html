@@ -227,303 +227,58 @@ a.linklike{color:var(--primary); font-weight:700; text-decoration:none; font-siz
 .level-bar-wrap{margin-top:10px;}
 input[type="range"]{width:100%;}
 </style>
+<style>
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);font-weight:800}.hero-card{padding:22px}.hero-kcal{font-family:Fraunces,serif;font-size:42px;line-height:1}.hero-kcal span{font-family:Manrope,sans-serif;font-size:14px;color:var(--ink-soft)}.metric-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}.metric{background:var(--surface-alt);border-radius:14px;padding:12px}.metric strong{font-size:21px}.metric span{display:block;font-size:11px;color:var(--ink-soft);margin-top:2px}.mini-stats{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.mini-stats span{background:var(--surface-alt);padding:7px 9px;border-radius:10px;font-size:12px;font-weight:700}.coach-note{background:var(--primary-tint);border-radius:14px;padding:13px;margin-top:12px}.coach-note p{margin:6px 0 0;line-height:1.5;font-size:13px}.guide-row{width:100%;border:0;border-bottom:1px solid var(--border);background:transparent;padding:13px 2px;display:flex;justify-content:space-between;text-align:left;color:var(--ink)}.guide-row:last-child{border-bottom:0}.guide-hero{background:var(--surface-alt);border-radius:16px;padding:18px;text-align:center}.guide-hero .num{font-size:34px}.guide-hero span{display:block;color:var(--ink-soft);font-size:12px}.guide-gi{padding:14px 0;border-bottom:1px solid var(--border);line-height:1.5}.report-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.report-grid>div{background:var(--surface-alt);padding:12px;border-radius:12px}.report-grid strong{display:block;font-family:Fraunces,serif;font-size:21px}.report-grid span{font-size:11px;color:var(--ink-soft)}.setup-intro{font-size:13px;color:var(--ink-soft);line-height:1.5;margin-top:-7px}.scanner{display:flex;gap:8px}.scanner button{flex:1}.barcode-video{width:100%;border-radius:14px;margin-top:10px;display:none;background:#111}.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.quick-actions .btn{width:100%}.goal-pill{display:inline-flex;align-items:center;padding:6px 10px;border-radius:99px;background:var(--primary-tint);color:var(--primary);font-size:11px;font-weight:800}.small-link{color:var(--primary);font-weight:800;font-size:12px;border:0;background:none;padding:0}.warning{background:var(--accent-tint);border-radius:14px;padding:12px;font-size:12.5px;line-height:1.45}.subtabs{margin-top:2px}.screen .card h2{margin:4px 0 6px;font-size:23px}.muted strong{color:var(--ink)}
+</style>
 </head>
 <body data-theme="light">
+<div class="topbar"><div class="brand"><svg class="brand-mark" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="var(--primary)"/><path d="M16 8c-4 2-6 6-4 11 1.5 3.6 4 5 4 5s2.5-1.4 4-5c2-5 0-9-4-11z" fill="white" opacity=".92"/><path d="M16 13v9" stroke="var(--primary)" stroke-width="1.6" stroke-linecap="round"/></svg><h1 id="greetTitle">VitaTrack</h1></div></div>
 
-<div class="topbar">
-  <div class="brand">
-    <svg class="brand-mark" viewBox="0 0 32 32" fill="none">
-      <circle cx="16" cy="16" r="15" fill="var(--primary)"/>
-      <path d="M16 8c-4 2-6 6-4 11 1.5 3.6 4 5 4 5s2.5-1.4 4-5c2-5 0-9-4-11z" fill="white" opacity=".92"/>
-      <path d="M16 13v9" stroke="var(--primary)" stroke-width="1.6" stroke-linecap="round"/>
-    </svg>
-    <h1 id="greetTitle">VitaTrack</h1>
-  </div>
-</div>
-
-<!-- ================= ACCUEIL ================= -->
 <section class="screen active" id="screen-home">
-  <div class="card">
-    <div class="rings-wrap">
-      <svg width="200" height="200" viewBox="0 0 200 200" id="ringsSvg">
-        <circle cx="100" cy="100" r="86" fill="none" stroke="var(--surface-alt)" stroke-width="14"/>
-        <circle cx="100" cy="100" r="64" fill="none" stroke="var(--surface-alt)" stroke-width="14"/>
-        <circle cx="100" cy="100" r="42" fill="none" stroke="var(--surface-alt)" stroke-width="14"/>
-        <circle id="ringCal" cx="100" cy="100" r="86" fill="none" stroke="var(--accent)" stroke-width="14" stroke-linecap="round" transform="rotate(-90 100 100)"/>
-        <circle id="ringWater" cx="100" cy="100" r="64" fill="none" stroke="var(--water)" stroke-width="14" stroke-linecap="round" transform="rotate(-90 100 100)"/>
-        <circle id="ringSport" cx="100" cy="100" r="42" fill="none" stroke="var(--primary)" stroke-width="14" stroke-linecap="round" transform="rotate(-90 100 100)"/>
-      </svg>
-      <div class="ring-center">
-        <div class="num" id="kcalCenter">0</div>
-        <div class="lbl">kcal aujourd'hui</div>
-      </div>
-    </div>
-    <div class="rings-legend">
-      <div class="legend-item"><span class="legend-dot" style="background:var(--accent)"></span>Calories</div>
-      <div class="legend-item"><span class="legend-dot" style="background:var(--water)"></span>Eau</div>
-      <div class="legend-item"><span class="legend-dot" style="background:var(--primary)"></span>Sport</div>
-    </div>
+  <div class="card hero-card">
+    <div class="eyebrow">Aujourd'hui</div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-top:7px"><div><div class="hero-kcal"><span id="homeCalories">0</span> <span>kcal</span></div><div class="muted small" style="margin-top:4px">sur <span id="homeCaloriesGoal">—</span></div></div><span class="goal-pill" id="homeRemaining">Configure ton profil</span></div>
+    <div class="pbar" style="margin-top:15px"><div id="homeCalBar" style="background:var(--accent);width:0%"></div></div>
+    <div class="metric-row"><div class="metric"><strong id="homeProtein">0 g</strong><span>protéines / <b id="homeProteinGoal">—</b></span></div><div class="metric"><strong id="homeWeight">—</strong><span>poids actuel</span></div></div>
   </div>
-
-  <div class="stat-grid" style="margin-top:12px;">
-    <div class="stat-box"><div class="num" id="statWeight">–</div><div class="lbl">Poids actuel (kg)</div></div>
-    <div class="stat-box"><div class="num" id="statSteps">0</div><div class="lbl">Pas aujourd'hui</div></div>
-  </div>
-
-  <div class="section-title">Habitudes du jour</div>
-  <div class="card"><div class="habit-list" id="habitList"></div></div>
-
-  <div class="section-title">Ajout rapide</div>
-  <div class="card" style="display:flex; gap:8px; flex-wrap:wrap;">
-    <button class="btn btn-ghost btn-sm" onclick="openFoodSheet()">🍽️ Repas</button>
-    <button class="btn btn-ghost btn-sm" onclick="openSportSheet()">🏃 Sport</button>
-    <button class="btn btn-ghost btn-sm" onclick="addWater()">💧 +1 verre</button>
-    <button class="btn btn-ghost btn-sm" onclick="openStepsSheet()">👣 Pas</button>
-  </div>
+  <div class="section-title">Le coach</div>
+  <div class="card"><div class="eyebrow">Bilan / décision</div><h2 id="homeCoachTitle">Je commence par observer</h2><p id="homeCoachText" class="muted" style="line-height:1.55;margin:0;font-size:13px"></p><button class="btn btn-primary btn-block" style="margin-top:13px" onclick="go('track');setTimeout(()=>setSubtab('track','rapport'),0)" id="homeCoachLink">Voir mon bilan</button></div>
+  <div class="section-title">Accès rapide</div>
+  <div class="card quick-actions"><button class="btn btn-ghost" onclick="openFoodSheet()">🍽️ Ajouter un repas</button><button class="btn btn-ghost" onclick="go('guide')">📖 Guide nutrition</button><button class="btn btn-ghost" onclick="go('track');setTimeout(()=>setSubtab('track','poids'),0)">⚖️ Enregistrer mon poids</button><button class="btn btn-ghost" onclick="go('profile')">🎯 Mon objectif</button></div>
+  <div class="section-title">Tendance</div><div class="card"><div class="row"><strong>Poids</strong><span class="muted small" id="homeTrend">Pas encore de données</span></div><div class="small muted" style="margin-top:7px">Le coach regarde les tendances, pas une pesée isolée.</div></div>
 </section>
 
-<!-- ================= REPAS ================= -->
 <section class="screen" id="screen-food">
-  <div class="card">
-    <div class="row"><strong>Calories du jour</strong><span class="num" id="foodKcalTotal">0</span></div>
-    <div class="pbar" style="margin-top:8px;"><div id="foodBar" style="background:var(--accent); width:0%;"></div></div>
-    <div class="row small muted" style="margin-top:6px;"><span id="foodGoalLabel">Objectif : –</span><span id="macroSummary"></span></div>
-  </div>
-  <div class="section-title">Aliments enregistrés</div>
-  <div class="card" id="foodListCard"></div>
+  <div class="card"><div class="row"><strong>Calories du jour</strong><span class="num" id="foodKcalTotal">0</span></div><div class="pbar" style="margin-top:8px"><div id="foodBar" style="background:var(--accent);width:0%"></div></div><div class="row small muted" style="margin-top:6px"><span id="foodGoalLabel">Objectif à calculer</span><span><b id="foodProteinTotal">0 g</b> <span id="foodProteinGoal">/ —</span></span></div></div>
+  <div class="section-title">Aujourd'hui</div><div class="card" id="foodListCard"></div>
+  <div class="section-title">Besoin d'une idée ?</div><div class="card"><div class="coach-note" style="margin:0"><strong>🎯 Ne cherche pas la perfection</strong><p>Enregistre simplement ce que tu manges. Le bilan de fin de semaine servira à repérer les habitudes utiles et celles à améliorer.</p></div></div>
 </section>
 
-<!-- ================= SPORT ================= -->
-<section class="screen" id="screen-sport">
-  <div class="card">
-    <div class="row"><strong>Minutes aujourd'hui</strong><span class="num" id="sportMinTotal">0</span></div>
-    <div class="pbar" style="margin-top:8px;"><div id="sportBar" style="background:var(--primary); width:0%;"></div></div>
-    <div class="row small muted" style="margin-top:6px;"><span id="sportGoalLabel">Objectif : –</span><span id="sportKcalLabel">0 kcal brûlées</span></div>
-  </div>
-  <div class="section-title">Séances du jour</div>
-  <div class="card" id="sportListCard"></div>
+<section class="screen" id="screen-guide">
+  <div class="card"><div class="eyebrow">Référence rapide</div><h2>Guide nutrition</h2><p class="muted small">Cherche un aliment pour voir surtout ce qui compte pour ton objectif : calories, protéines et indication glycémique lorsqu'elle est disponible.</p><input id="guideSearch" oninput="filterGuide(this.value)" placeholder="Rechercher un aliment…" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--surface-alt);color:var(--ink);font-size:14px"></div>
+  <div class="section-title">Aliments</div><div class="card" id="guideList"></div>
 </section>
 
-<!-- ================= SUIVI ================= -->
 <section class="screen" id="screen-track">
-  <div class="subtabs">
-    <button class="subtab active" data-sub="eau" onclick="setSubtab('track','eau')">Eau</button>
-    <button class="subtab" data-sub="sommeil" onclick="setSubtab('track','sommeil')">Sommeil</button>
-    <button class="subtab" data-sub="poids" onclick="setSubtab('track','poids')">Poids</button>
-  </div>
-
-  <div class="sub" data-sub="eau">
-    <div class="card">
-      <div class="row"><strong id="waterLabel">0 / 0 ml</strong><span class="muted small" id="waterCupsLabel">0 verres</span></div>
-      <div class="pbar" style="margin-top:8px;"><div id="waterBar" style="background:var(--water); width:0%;"></div></div>
-      <div class="row" style="margin-top:14px; gap:8px;">
-        <button class="btn btn-ghost btn-block" onclick="removeWater()">− 1 verre</button>
-        <button class="btn btn-primary btn-block" style="background:var(--water)" onclick="addWater()">+ 1 verre</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="sub" data-sub="sommeil" style="display:none;">
-    <div class="card">
-      <div class="field"><label>Heures de sommeil</label><input type="number" step="0.25" id="sleepHours" placeholder="ex : 7.5"></div>
-      <div class="field"><label>Qualité ressentie</label>
-        <div class="chip-grid">
-          <button class="chip" data-q="1" onclick="setSleepQ(1)">😩 Faible</button>
-          <button class="chip" data-q="2" onclick="setSleepQ(2)">😐 Moyenne</button>
-          <button class="chip" data-q="3" onclick="setSleepQ(3)">😴 Bonne</button>
-        </div>
-      </div>
-      <button class="btn btn-primary btn-block" onclick="saveSleep()">Enregistrer</button>
-    </div>
-  </div>
-
-  <div class="sub" data-sub="poids" style="display:none;">
-    <div class="card">
-      <div class="row"><strong>Évolution du poids</strong><span class="muted small" id="weightDeltaLabel"></span></div>
-      <div class="chart-wrap" style="margin-top:10px;"><svg class="chart" id="weightChart" width="100%" height="140"></svg></div>
-    </div>
-    <div class="card" style="margin-top:12px;">
-      <div class="field-row">
-        <div class="field"><label>Poids (kg)</label><input type="number" step="0.1" id="newWeight"></div>
-        <div class="field"><label>Tour de taille (cm)</label><input type="number" step="0.5" id="newWaist"></div>
-      </div>
-      <button class="btn btn-primary btn-block" onclick="logWeight()">Ajouter une pesée</button>
-    </div>
-    <div class="section-title">Historique</div>
-    <div class="card" id="weightListCard"></div>
-  </div>
+  <div class="subtabs"><button class="subtab active" data-sub="rapport" onclick="setSubtab('track','rapport')">Bilan</button><button class="subtab" data-sub="poids" onclick="setSubtab('track','poids')">Poids</button></div>
+  <div class="sub" data-sub="rapport"><div id="weeklyReport"></div></div>
+  <div class="sub" data-sub="poids" style="display:none"><div class="card"><div class="row"><strong>Évolution du poids</strong><span class="muted small">Tendance</span></div><div class="chart-wrap" style="margin-top:10px"><svg class="chart" id="weightChart" width="100%" height="150"></svg></div></div><div class="card" style="margin-top:12px"><div class="field-row"><div class="field"><label>Poids (kg)</label><input type="number" step="0.1" id="newWeight"></div><div class="field"><label>Tour de taille (cm)</label><input type="number" step="0.5" id="newWaist"></div></div><button class="btn btn-primary btn-block" onclick="logWeight()">Enregistrer</button></div><div class="section-title">Historique</div><div class="card" id="weightListCard"></div></div>
 </section>
 
-<!-- ================= PROFIL ================= -->
 <section class="screen" id="screen-profile">
-  <div class="card">
-    <div class="profile-head">
-      <div class="avatar" id="avatarLetter">?</div>
-      <div>
-        <div style="font-weight:700; font-size:16.5px;" id="profName">–</div>
-        <div class="muted small" id="profSub">–</div>
-      </div>
-    </div>
-    <div class="card" style="margin-top:12px; padding:14px;">
-      <div class="row small"><span class="muted">Objectif calorique actuel</span><strong id="profileCalorieTarget">À calculer</strong></div>
-      <div class="row small" style="margin-top:8px;"><span class="muted">Protéines</span><strong id="profileProteinTarget">À calculer</strong></div>
-    </div>
-  </div>
-
-  <div class="subtabs">
-    <button class="subtab active" data-sub="infos" onclick="setSubtab('profile','infos')">Infos</button>
-    <button class="subtab" data-sub="objectifs" onclick="setSubtab('profile','objectifs')">Objectifs</button>
-    <button class="subtab" data-sub="reglages" onclick="setSubtab('profile','reglages')">Réglages</button>
-  </div>
-
-  <div class="sub" data-sub="infos">
-    <div class="card">
-      <div class="field"><label>Prénom</label><input id="pf_name"></div>
-      <div class="field-row">
-        <div class="field"><label>Âge</label><input type="number" id="pf_age"></div>
-        <div class="field"><label>Sexe</label>
-          <select id="pf_sex"><option value="homme">Homme</option><option value="femme">Femme</option></select>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field"><label>Taille (cm)</label><input type="number" id="pf_height"></div>
-        <div class="field"><label>Poids actuel (kg)</label><input type="number" step="0.1" id="pf_weight"></div>
-      </div>
-      <button class="btn btn-primary btn-block" onclick="saveProfile()">Enregistrer</button>
-    </div>
-  </div>
-
-  <div class="sub" data-sub="objectifs" style="display:none;">
-    <div class="card">
-      <div class="field"><label>Objectif</label>
-        <select id="pf_goal"><option value="fat_loss">Perdre du gras</option><option value="recomposition">Recomposition</option><option value="muscle_gain">Prise de muscle</option><option value="maintain">Maintien</option><option value="weight_target">Atteindre un poids</option></select>
-      </div>
-      <div class="field"><label>Niveau d'activité</label>
-        <select id="pf_activity">
-          <option value="sedentary">Sédentaire</option>
-          <option value="light">Légère</option>
-          <option value="moderate">Modérée</option>
-          <option value="active">Active</option>
-          <option value="very_active">Très active</option>
-        </select>
-      </div>
-      <div class="field"><label>Poids cible (kg, facultatif)</label><input type="number" step="0.1" id="pf_target"></div>
-      <div class="field-row"><div class="field"><label>% masse grasse cible (facultatif)</label><input type="number" step="0.1" id="pf_bodyfat_target"></div><div class="field"><label>Tour de taille cible (cm, facultatif)</label><input type="number" step="0.5" id="pf_waist_target"></div></div>
-      <div class="field-row">
-        <div class="field"><label>Objectif pas / jour</label><input type="number" id="st_steps"></div>
-        <div class="field"><label>Objectif sport (min)</label><input type="number" id="st_sport"></div>
-      </div>
-      <div class="field-row">
-        <div class="field"><label>Objectif eau (ml)</label><input type="number" id="st_water"></div>
-        <div class="field"><label>Taille du verre (ml)</label><input type="number" id="st_cup"></div>
-      </div>
-      <button class="btn btn-primary btn-block" onclick="saveGoals()">Enregistrer les objectifs</button>
-    </div>
-  </div>
-
-
-  <div class="sub" data-sub="reglages" style="display:none;">
-    <div class="card">
-      <div class="row"><strong>Thème sombre</strong>
-        <label class="chip" id="themeToggle" onclick="toggleTheme()" style="cursor:pointer;">Activer</label>
-      </div>
-    </div>
-    <div class="card">
-      <div class="row" style="margin-bottom:10px;"><strong>Données</strong></div>
-      <button class="btn btn-ghost btn-block" onclick="exportData()">⤓ Exporter mes données (.json)</button>
-      <div style="height:8px;"></div>
-      <button class="btn btn-ghost btn-block" onclick="document.getElementById('importFile').click()">⤒ Importer un fichier .json</button>
-      <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData(event)">
-      <div style="height:8px;"></div>
-      <button class="btn btn-block" style="background:var(--danger); color:#fff;" onclick="resetToday()">Réinitialiser la journée</button>
-    </div>
-    <div class="card">
-      <p class="muted small" style="margin:0;">VitaTrack — données stockées uniquement sur cet appareil.</p>
-    </div>
-  </div>
+  <div class="card"><div class="profile-head"><div class="avatar" id="avatarLetter">?</div><div><div style="font-weight:700;font-size:16.5px" id="profName">Ton profil</div><div class="muted small" id="profSub">Complète tes informations</div></div></div><div class="card" style="margin-top:12px;padding:14px"><div class="row small"><span class="muted">Calories de départ</span><strong id="profileCalorieTarget">À calculer</strong></div><div class="row small" style="margin-top:8px"><span class="muted">Protéines</span><strong id="profileProteinTarget">À calculer</strong></div></div></div>
+  <div class="subtabs"><button class="subtab active" data-sub="infos" onclick="setSubtab('profile','infos')">Profil</button><button class="subtab" data-sub="objectifs" onclick="setSubtab('profile','objectifs')">Objectif</button><button class="subtab" data-sub="reglages" onclick="setSubtab('profile','reglages')">Réglages</button></div>
+  <div class="sub" data-sub="infos"><div class="card"><div class="field"><label>Prénom (facultatif)</label><input id="pf_name"></div><div class="field-row"><div class="field"><label>Âge</label><input type="number" id="pf_age"></div><div class="field"><label>Sexe</label><select id="pf_sex"><option value="homme">Homme</option><option value="femme">Femme</option></select></div></div><div class="field-row"><div class="field"><label>Taille (cm)</label><input type="number" id="pf_height"></div><div class="field"><label>Poids actuel (kg)</label><input type="number" step="0.1" id="pf_weight"></div></div><button class="btn btn-primary btn-block" onclick="saveProfile()">Enregistrer</button></div></div>
+  <div class="sub" data-sub="objectifs" style="display:none"><div class="card"><div class="field"><label>Objectif principal</label><select id="pf_goal"><option value="fat_loss">🔥 Perdre du gras</option><option value="recomposition">🔄 Recomposition</option><option value="muscle_gain">💪 Construire du muscle</option><option value="maintain">⚖️ Maintenir</option><option value="weight_target">🎯 Atteindre un poids</option></select></div><div class="field"><label>Activité quotidienne</label><select id="pf_activity"><option value="sedentary">Peu actif</option><option value="light">Légèrement actif</option><option value="moderate">Actif</option><option value="active">Très actif</option><option value="very_active">Très actif +</option></select></div><div class="field"><label>Poids cible (facultatif)</label><input type="number" step="0.1" id="pf_target"></div><div class="field-row"><div class="field"><label>% masse grasse cible</label><input type="number" step="0.1" id="pf_bodyfat_target"></div><div class="field"><label>Tour de taille cible</label><input type="number" step="0.5" id="pf_waist_target"></div></div><button class="btn btn-primary btn-block" onclick="saveGoals()">Enregistrer l'objectif</button></div><div class="warning" style="margin-top:12px">Le poids cible n'est qu'un indicateur. Le coach regarde aussi la tendance du poids et, quand tu les renseignes, le tour de taille et la composition corporelle.</div></div>
+  <div class="sub" data-sub="reglages" style="display:none"><div class="card"><div class="row"><strong>Thème sombre</strong><button class="chip" id="themeToggle" onclick="toggleTheme()">Activer</button></div></div><div class="card"><button class="btn btn-ghost btn-block" onclick="exportData()">⤓ Exporter mes données</button><div style="height:8px"></div><button class="btn btn-ghost btn-block" onclick="document.getElementById('importFile').click()">⤒ Importer mes données</button><input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)"><div style="height:8px"></div><button class="btn btn-block" style="background:var(--danger);color:#fff" onclick="resetToday()">Réinitialiser aujourd'hui</button></div><div class="card"><p class="muted small" style="margin:0">VitaTrack stocke actuellement les données sur cet appareil. Les intégrations externes viendront ensuite.</p></div></div>
 </section>
 
-<div class="bottomnav">
-  <button class="navbtn active" data-screen="home" onclick="go('home')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg>
-    <span>Accueil</span>
-  </button>
-  <button class="navbtn" data-screen="food" onclick="go('food')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 2v8M5 4v4a2 2 0 0 0 4 0V4M17 2c-2 1-2 5-2 7s0 4 2 4V22"/></svg>
-    <span>Repas</span>
-  </button>
-  <button class="navbtn" data-screen="sport" onclick="go('sport')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13" cy="4" r="2"/><path d="M5 21l4-7 3 3 3-6M9 14l-3-3 4-3 3 2 4-2"/></svg>
-    <span>Sport</span>
-  </button>
-  <button class="navbtn" data-screen="track" onclick="go('track')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2s6 7 6 12a6 6 0 0 1-12 0c0-5 6-12 6-12z"/></svg>
-    <span>Suivi</span>
-  </button>
-  <button class="navbtn" data-screen="profile" onclick="go('profile')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
-    <span>Profil</span>
-  </button>
-</div>
+<div class="bottomnav"><button class="navbtn active" data-screen="home" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg><span>Accueil</span></button><button class="navbtn" data-screen="food" onclick="go('food')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 2v8M5 4v4a2 2 0 0 0 4 0V4M17 2c-2 1-2 5-2 7s0 4 2 4V22"/></svg><span>Repas</span></button><button class="navbtn" data-screen="guide" onclick="go('guide')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16"/></svg><span>Guide</span></button><button class="navbtn" data-screen="track" onclick="go('track')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5M4 19h16"/><path d="M7 15l4-5 3 3 5-7"/></svg><span>Bilan</span></button><button class="navbtn" data-screen="profile" onclick="go('profile')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>Profil</span></button></div>
+<button class="fab" id="globalFab" onclick="openFoodSheet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
 
-<button class="fab" id="globalFab" onclick="openFoodSheet()">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-</button>
-
-<!-- FOOD SHEET -->
-<div class="sheet-overlay" id="foodSheetOverlay" onclick="closeSheetIfBg(event,'foodSheetOverlay')">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <h3>Ajouter un aliment</h3>
-    <input id="foodSearch" oninput="renderFoodSearch()" placeholder="Rechercher (poulet, riz, pomme...)" style="width:100%; padding:11px 13px; border-radius:12px; border:1px solid var(--border); background:var(--surface-alt); color:var(--ink); font-size:14.5px; margin-bottom:10px;">
-    <div class="search-results" id="foodSearchResults"></div>
-    <div class="divider"></div>
-    <div id="foodPickedBox" style="display:none;">
-      <div class="row" style="margin-bottom:10px;"><strong id="foodPickedName"></strong><span class="muted small" id="foodPickedKcal"></span></div>
-      <div class="field"><label>Quantité (g / ml)</label><input type="number" id="foodQty" value="100"></div>
-      <button class="btn btn-primary btn-block" onclick="confirmAddFood()">Ajouter au journal</button>
-    </div>
-    <a class="linklike" onclick="toggleCustomFoodForm()">+ Créer un aliment personnalisé</a>
-    <div id="customFoodForm" style="display:none; margin-top:12px;">
-      <div class="field"><label>Nom</label><input id="cf_name"></div>
-      <div class="field-row">
-        <div class="field"><label>kcal / 100g</label><input type="number" id="cf_kcal"></div>
-        <div class="field"><label>Protéines /100g</label><input type="number" id="cf_protein"></div>
-      </div>
-      <div class="field-row">
-        <div class="field"><label>Glucides /100g</label><input type="number" id="cf_carbs"></div>
-        <div class="field"><label>Lipides /100g</label><input type="number" id="cf_fat"></div>
-      </div>
-      <button class="btn btn-ghost btn-block" onclick="saveCustomFood()">Enregistrer l'aliment</button>
-    </div>
-  </div>
-</div>
-
-<!-- SPORT SHEET -->
-<div class="sheet-overlay" id="sportSheetOverlay" onclick="closeSheetIfBg(event,'sportSheetOverlay')">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <h3>Ajouter une séance</h3>
-    <div class="chip-grid" id="sportChips"></div>
-    <div class="field"><label>Durée (minutes)</label><input type="number" id="sportDuration" value="30"></div>
-    <div class="row small muted" style="margin-bottom:14px;">Calories estimées : <strong id="sportKcalEstimate">–</strong></div>
-    <button class="btn btn-primary btn-block" onclick="confirmAddSport()">Ajouter au journal</button>
-  </div>
-</div>
-
-<!-- STEPS SHEET -->
-<div class="sheet-overlay" id="stepsSheetOverlay" onclick="closeSheetIfBg(event,'stepsSheetOverlay')">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <h3>Pas du jour</h3>
-    <div class="field"><label>Nombre de pas</label><input type="number" id="stepsInput"></div>
-    <button class="btn btn-primary btn-block" onclick="confirmSteps()">Enregistrer</button>
-  </div>
-</div>
-
+<div class="sheet-overlay" id="foodSheetOverlay" onclick="closeSheetIfBg(event,'foodSheetOverlay')"><div class="sheet"><div class="sheet-handle"></div><h3>Ajouter un aliment</h3><div class="scanner"><button class="btn btn-ghost" onclick="scanBarcode()">📷 Scanner</button><button class="btn btn-ghost" onclick="document.getElementById('barcodeManual').focus()">⌨️ Code-barres</button></div><input id="barcodeManual" onkeydown="if(event.key==='Enter')lookupBarcode(this.value.trim())" placeholder="Code-barres (optionnel)" style="width:100%;padding:11px 13px;border-radius:12px;border:1px solid var(--border);background:var(--surface-alt);color:var(--ink);font-size:14px;margin-top:8px"><div id="barcodeStatus" class="muted small" style="margin-top:6px"></div><video id="barcodeVideo" class="barcode-video" playsinline muted></video><div class="divider"></div><input id="foodSearch" oninput="renderFoodSearch()" placeholder="Rechercher poulet, riz, pomme…" style="width:100%;padding:11px 13px;border-radius:12px;border:1px solid var(--border);background:var(--surface-alt);color:var(--ink);font-size:14.5px"><div class="search-results" id="foodSearchResults"></div><div id="foodPickedBox" style="display:none"><div class="row" style="margin-bottom:8px"><strong id="foodPickedName"></strong><span class="muted small" id="foodPickedKcal"></span></div><div id="foodPickedInfo"></div><div class="field"><label>Quantité (g / ml)</label><input type="number" id="foodQty" value="100"></div><button class="btn btn-primary btn-block" onclick="confirmAddFood()">Ajouter au journal</button></div><button class="small-link" onclick="toggleCustomFoodForm()">+ Créer un aliment personnalisé</button><div id="customFoodForm" style="display:none;margin-top:12px"><div class="field"><label>Nom</label><input id="cf_name"></div><div class="field-row"><div class="field"><label>kcal / 100g</label><input type="number" id="cf_kcal"></div><div class="field"><label>Protéines / 100g</label><input type="number" id="cf_protein"></div></div><div class="field-row"><div class="field"><label>Glucides / 100g</label><input type="number" id="cf_carbs"></div><div class="field"><label>Sucres / 100g</label><input type="number" id="cf_sugar"></div></div><div class="field-row"><div class="field"><label>Fibres / 100g</label><input type="number" id="cf_fiber"></div><div class="field"><label>Lipides / 100g</label><input type="number" id="cf_fat"></div></div><div class="field"><label>Glycémie (optionnel)</label><select id="cf_gi"><option value="">Non renseignée</option><option value="faible">Faible</option><option value="moyen">Moyen</option><option value="élevé">Élevé</option></select></div><button class="btn btn-ghost btn-block" onclick="saveCustomFood()">Enregistrer</button></div></div></div>
+<div class="sheet-overlay" id="guideSheetOverlay" onclick="closeSheetIfBg(event,'guideSheetOverlay')"><div class="sheet"><div class="sheet-handle"></div><h3 id="guideTitle">Aliment</h3><div id="guideDetail"></div></div></div>
+<div class="sheet-overlay" id="setupSheetOverlay"><div class="sheet"><div class="sheet-handle"></div><h3>Bienvenue dans VitaTrack</h3><p class="setup-intro">On commence simplement. Donne-moi quelques informations pour estimer tes besoins. Ensuite, tu enregistres normalement tes repas et je regarderai ta progression avant de modifier quoi que ce soit.</p><div class="field"><label>Prénom (facultatif)</label><input id="setup_name"></div><div class="field-row"><div class="field"><label>Âge</label><input type="number" id="setup_age"></div><div class="field"><label>Sexe</label><select id="setup_sex"><option value="homme">Homme</option><option value="femme">Femme</option></select></div></div><div class="field-row"><div class="field"><label>Taille (cm)</label><input type="number" id="setup_height"></div><div class="field"><label>Poids (kg)</label><input type="number" step="0.1" id="setup_weight"></div></div><div class="field"><label>Objectif principal</label><select id="setup_goal"><option value="fat_loss">🔥 Perdre du gras</option><option value="recomposition">🔄 Recomposition</option><option value="muscle_gain">💪 Construire du muscle</option><option value="maintain">⚖️ Maintenir</option><option value="weight_target">🎯 Atteindre un poids</option></select></div><div class="field"><label>Activité quotidienne</label><select id="setup_activity"><option value="sedentary">Peu actif</option><option value="light">Légèrement actif</option><option value="moderate">Actif</option><option value="active">Très actif</option><option value="very_active">Très actif +</option></select></div><div class="field"><label>Poids cible (facultatif)</label><input type="number" step="0.1" id="setup_target"></div><button class="btn btn-primary btn-block" onclick="saveSetup()">Créer mon point de départ</button></div></div>
 <div class="toast" id="toast"></div>
-
-<script src="data.js"></script>
-<script src="app.js"></script>
-</body>
-</html>
+<script src="data.js"></script><script src="app.js"></script>
+</body></html>
