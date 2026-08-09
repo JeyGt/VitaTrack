@@ -58,14 +58,9 @@ input,select,textarea{font-family:inherit;}
 .brand{display:flex; align-items:center; gap:9px;}
 .brand-mark{width:30px;height:30px;flex:none;}
 .brand h1{font-size:19px; font-weight:600; margin:0; letter-spacing:.2px;}
-.xp-chip{
-  display:flex; align-items:center; gap:6px; background:var(--gold-tint); color:var(--gold);
-  padding:6px 11px 6px 8px; border-radius:99px; font-weight:700; font-size:12.5px;
-}
-.xp-chip svg{width:14px;height:14px;}
 
 /* ----- screens ----- */
-.screen{display:none; padding:6px 18px 28px; animation:fade .25s ease;}
+.screen{display:none; padding:6px 18px calc(28px + 96px + env(safe-area-inset-bottom)); animation:fade .25s ease;}
 .screen.active{display:block;}
 @keyframes fade{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
 .section-title{font-size:13px; text-transform:uppercase; letter-spacing:.09em; color:var(--ink-soft); font-weight:700; margin:26px 2px 12px;}
@@ -207,15 +202,6 @@ input,select,textarea{font-family:inherit;}
 .sr-item{display:flex; justify-content:space-between; padding:9px 4px; border-bottom:1px solid var(--border); font-size:13.5px;}
 .sr-item:last-child{border-bottom:none;}
 
-/* ----- badges ----- */
-.badge-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
-.badge-tile{
-  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm);
-  padding:14px 6px; text-align:center; opacity:.35;
-}
-.badge-tile.unlocked{opacity:1;}
-.badge-tile .ico{font-size:24px; margin-bottom:6px;}
-.badge-tile .nm{font-size:10.5px; font-weight:700; line-height:1.25;}
 
 /* ----- toast ----- */
 .toast{
@@ -241,318 +227,647 @@ a.linklike{color:var(--primary); font-weight:700; text-decoration:none; font-siz
 .level-bar-wrap{margin-top:10px;}
 input[type="range"]{width:100%;}
 </style>
+<style>
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);font-weight:800}.hero-card{padding:22px}.hero-kcal{font-family:Fraunces,serif;font-size:42px;line-height:1}.hero-kcal span{font-family:Manrope,sans-serif;font-size:14px;color:var(--ink-soft)}.metric-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}.metric{background:var(--surface-alt);border-radius:14px;padding:12px}.metric strong{font-size:21px}.metric span{display:block;font-size:11px;color:var(--ink-soft);margin-top:2px}.mini-stats{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.mini-stats span{background:var(--surface-alt);padding:7px 9px;border-radius:10px;font-size:12px;font-weight:700}.coach-note{background:var(--primary-tint);border-radius:14px;padding:13px;margin-top:12px}.coach-note p{margin:6px 0 0;line-height:1.5;font-size:13px}.guide-row{width:100%;border:0;border-bottom:1px solid var(--border);background:transparent;padding:13px 2px;display:flex;justify-content:space-between;text-align:left;color:var(--ink)}.guide-row:last-child{border-bottom:0}.guide-hero{background:var(--surface-alt);border-radius:16px;padding:18px;text-align:center}.guide-hero .num{font-size:34px}.guide-hero span{display:block;color:var(--ink-soft);font-size:12px}.guide-gi{padding:14px 0;border-bottom:1px solid var(--border);line-height:1.5}.report-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.report-grid>div{background:var(--surface-alt);padding:12px;border-radius:12px}.report-grid strong{display:block;font-family:Fraunces,serif;font-size:21px}.report-grid span{font-size:11px;color:var(--ink-soft)}.setup-intro{font-size:13px;color:var(--ink-soft);line-height:1.5;margin-top:-7px}.scanner{display:flex;gap:8px}.scanner button{flex:1}.barcode-video{width:100%;border-radius:14px;margin-top:10px;display:none;background:#111}.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.quick-actions .btn{width:100%}.goal-pill{display:inline-flex;align-items:center;padding:6px 10px;border-radius:99px;background:var(--primary-tint);color:var(--primary);font-size:11px;font-weight:800}.small-link{color:var(--primary);font-weight:800;font-size:12px;border:0;background:none;padding:0}.warning{background:var(--accent-tint);border-radius:14px;padding:12px;font-size:12.5px;line-height:1.45}.subtabs{margin-top:2px}.screen .card h2{margin:4px 0 6px;font-size:23px}.muted strong{color:var(--ink)}
+
+<style>
+
+/* ----- nutrition v1.3: calmer hierarchy ----- */
+.nutrition-primary{display:flex;flex-direction:column;gap:12px}
+.nutrition-add{font-size:15px;padding:14px 18px}
+.nutrition-tools{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.nutrition-tool{min-height:64px;border:1px solid var(--border);background:var(--surface);border-radius:14px;padding:10px 8px;font-size:12px;font-weight:800;color:var(--ink);box-shadow:var(--shadow)}
+.nutrition-tool span{display:block;font-size:18px;margin-bottom:4px}
+.nutrition-details{margin-top:12px}
+.nutrition-details details{background:var(--surface);border:1px solid var(--border);border-radius:16px;margin-top:10px;box-shadow:var(--shadow);overflow:hidden}
+.nutrition-details summary{list-style:none;cursor:pointer;padding:15px 16px;font-weight:800;display:flex;align-items:center;justify-content:space-between}
+.nutrition-details summary::-webkit-details-marker{display:none}
+.nutrition-details summary:after{content:'›';font-size:20px;color:var(--ink-soft);transition:transform .15s}
+.nutrition-details details[open] summary:after{transform:rotate(90deg)}
+.nutrition-details .details-body{padding:0 16px 16px}
+.nutrition-details .details-body > .nutrition-block:first-child{margin-top:0}
+.nutrition-section-head{margin-bottom:9px}
+@media(max-width:360px){.nutrition-tools{grid-template-columns:1fr 1fr}.nutrition-tools .nutrition-tool:last-child{grid-column:1/-1}}
+/* VitaTrack unified navigation */
+.nutrition-block{margin-top:18px}.nutrition-section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.nutrition-section-head h2{margin:0;font-size:19px}.inline-link{border:0;background:none;color:var(--primary);font-weight:800;font-size:12px;padding:4px}.timeline-item{display:flex;gap:10px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border)}.timeline-item:last-child{border-bottom:0}.timeline-time{font-size:11px;color:var(--ink-soft);min-width:42px}.timeline-dot{width:8px;height:8px;border-radius:50%;background:var(--primary);margin-top:6px;flex:none}.timeline-main{flex:1;min-width:0}.timeline-title{font-weight:800;font-size:13px}.timeline-meta{font-size:11px;color:var(--ink-soft);margin-top:3px}progress-summary{display:grid;grid-template-columns:1fr 1fr;gap:9px}.progress-summary .metric{padding:12px}.section-divider{height:1px;background:var(--border);margin:18px 0}.coming-card{padding:28px 18px;text-align:center}.coming-card .big{font-size:42px;margin-bottom:8px}.legacy-hidden{display:none!important}.bottomnav{grid-template-columns:repeat(4,1fr)}
+</style>
+</style>
+
+<style>
+/* Nutrition dashboard redesign */
+.nutrition-dashboard{display:flex;flex-direction:column;gap:0}
+.nutrition-day-head{display:flex;justify-content:space-between;align-items:flex-end;margin:2px 2px 8px}
+.calorie-hero{display:grid;grid-template-columns:1fr 150px 1fr;align-items:center;gap:4px;padding:10px 8px 6px;background:var(--surface)}
+.calorie-side{text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px}
+.calorie-side strong{font-family:Fraunces,serif;font-size:29px;line-height:1.05}
+.calorie-side span:last-child{font-size:11px;color:var(--ink-soft);font-weight:700}
+.calorie-icon{font-size:20px!important;margin-bottom:3px}
+.calorie-ring{position:relative;width:150px;height:150px;justify-self:center}
+.calorie-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring-track,.ring-progress{fill:none;stroke-width:9}
+.ring-track{stroke:var(--surface-alt)}
+.ring-progress{stroke:var(--primary);stroke-linecap:round;stroke-dasharray:314.16;stroke-dashoffset:314.16;transition:stroke-dashoffset .45s ease}
+.ring-content{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.ring-content small{font-size:10px;color:var(--ink-soft);font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.ring-content strong{font-family:Fraunces,serif;font-size:27px;color:var(--primary);line-height:1.1}
+.ring-content span{font-size:11px;color:var(--ink-soft)}
+.calorie-target{text-align:center;color:var(--ink-soft);font-size:12px;margin:0 0 12px}
+.calorie-target strong{color:var(--ink)}
+.macro-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:2px}
+.macro-card{text-align:center;min-width:0}
+.macro-card strong{display:block;font-size:11px;margin-bottom:6px}
+.macro-card>span{display:block;color:var(--ink-soft);font-size:10px;margin-top:5px;white-space:nowrap}
+.macro-track{height:7px;border-radius:99px;background:var(--surface-alt);overflow:hidden}
+.macro-track i{display:block;width:0;height:100%;border-radius:inherit;background:var(--primary);transition:width .3s}
+.meal-list-card{padding:0;overflow:hidden}
+.meal-row{width:100%;display:flex;align-items:center;gap:10px;padding:14px 12px;border:0;border-bottom:1px solid var(--border);background:transparent;color:var(--ink);text-align:left}
+.meal-row:last-child{border-bottom:0}
+.meal-icon .meal-ring circle{fill:none}
+.meal-main{flex:1;min-width:0}
+.meal-main strong{display:block;font-size:14px}
+.meal-main small{display:block;font-size:11px;color:var(--ink-soft);margin:3px 0 6px}
+.meal-progress,.water-track{display:block;height:6px;border-radius:99px;background:var(--surface-alt);overflow:hidden}
+.meal-progress i,.water-track i{display:block;height:100%;border-radius:inherit;background:var(--primary);transition:width .3s}
+.meal-side{width:48px;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.meal-side small{font-size:10px;color:var(--ink-soft)}
+.meal-side b{font-size:11px}
+.meal-side span{font-size:18px;color:var(--ink-soft);line-height:.8}
+.water-card{width:100%;display:flex;align-items:center;gap:12px;text-align:left;border:1px solid var(--border);color:var(--ink);padding:14px;background:var(--surface);box-shadow:var(--shadow)}
+.water-icon .water-ring circle{fill:none}
+.water-main{flex:1}.water-main strong{font-size:14px}.water-main small{display:block;color:var(--ink-soft);font-size:11px;margin:2px 0 7px}.water-main small b{color:var(--ink)}
+.water-track{background:var(--surface-alt)}.water-track i{background:var(--water);width:0}
+.water-card>strong{font-size:12px;min-width:35px;text-align:right}
+.add-menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.add-choice{border:1px solid var(--border);background:var(--surface-alt);border-radius:16px;padding:15px 12px;text-align:left;color:var(--ink);display:flex;flex-direction:column;gap:4px}
+.add-choice span{font-size:25px}.add-choice strong{font-size:14px}.add-choice small{font-size:10.5px;color:var(--ink-soft);line-height:1.35}
+.meal-suggestion{background:var(--primary-tint);border-radius:14px;padding:11px 12px;margin-bottom:9px}.meal-suggestion strong{display:block;font-size:13px;color:var(--primary)}.meal-suggestion span{display:block;color:var(--ink-soft);font-size:10.5px;margin-top:2px}
+.meal-chips{display:flex;gap:6px;overflow-x:auto;padding:1px 0 10px}.meal-chip{white-space:nowrap;border:1px solid var(--border);background:var(--surface-alt);color:var(--ink-soft);border-radius:99px;padding:7px 10px;font-size:11px;font-weight:800}.meal-chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.scanner-large{display:grid;grid-template-columns:1fr 1fr}.scanner-large button{font-size:12px}
+.search-label{display:block;font-size:11px;color:var(--ink-soft);font-weight:800;margin-bottom:5px}
+.water-quick{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.water-quick .chip{padding:8px 10px}
+@media(max-width:380px){
+ .calorie-hero{grid-template-columns:1fr 132px 1fr}.calorie-ring{width:132px;height:132px}.calorie-side strong{font-size:25px}.macro-grid{gap:5px}.macro-card strong{font-size:10px}
+}
+
+/* Requested UI refinements */
+.meal-progress{display:none!important}
+.water-track{display:none!important}
+.water-card{border-radius:var(--radius);}
+
+/* Final nutrition refinements */
+.macro-card-wrap{padding:12px 10px;margin:0 0 4px;background:var(--surface);}
+.macro-card-wrap .macro-grid{margin:0;}
+.calorie-ring{width:154px;height:154px;}
+.ring-content strong{font-size:30px;line-height:1.05;max-width:108px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ring-content small{font-size:9px;}
+.ring-content span{font-size:12px;color:var(--ink-soft);margin-top:3px;}
+@media(max-width:380px){
+  .calorie-hero{grid-template-columns:1fr 126px 1fr;padding-left:4px;padding-right:4px;}
+  .calorie-ring{width:126px;height:126px;}
+  .ring-content strong{font-size:26px;max-width:92px;}
+}
+/* Water glass controls + unified nutrition summary */
+.nutrition-summary-card{padding:8px 10px 14px;overflow:hidden}
+.nutrition-summary-card .calorie-hero{border:0;border-radius:0;box-shadow:none}
+.nutrition-summary-card .calorie-target{margin-bottom:10px}
+.nutrition-summary-card .macro-card-wrap{border-top:1px solid var(--border);border-radius:0;padding:12px 2px 0;margin:0;background:transparent}
+.water-card{cursor:default}
+.water-glass-btn{width:38px;height:38px;border:0;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;font-size:25px;font-weight:700;line-height:1;background:var(--surface-alt);color:var(--ink);transition:transform .12s,background .12s}
+.water-glass-btn:active{transform:scale(.92)}
+.water-plus{background:var(--water-tint);color:var(--water)}
+.water-minus{font-size:27px}
+.water-main small{white-space:nowrap}
+@media(max-width:380px){.nutrition-summary-card{padding-left:6px;padding-right:6px}.nutrition-summary-card .macro-card-wrap{padding-left:0;padding-right:0}.water-card{gap:8px}.water-glass-btn{width:34px;height:34px;font-size:23px}}
+</style>
+
+
+<style>
+.weigh-card{padding:0;overflow:hidden;border:1px solid var(--border);box-shadow:0 8px 24px rgba(0,0,0,.05)}
+.weigh-values{display:grid;grid-template-columns:1fr auto 1.2fr auto 1fr;align-items:center;padding:18px 14px 16px}
+.weigh-stat{text-align:center;min-width:0}
+.weigh-label{display:block;font-size:11px;color:var(--ink-soft);margin-bottom:6px;font-weight:600;letter-spacing:.01em}
+.weigh-stat strong{display:block;font-size:20px;line-height:1.1;white-space:nowrap}
+.weigh-current strong{font-size:27px}
+.weigh-divider{width:1px;height:34px;background:var(--border)}
+.weigh-add-btn{width:calc(100% - 24px);margin:0 12px 12px;border:0;border-radius:11px;padding:10px 12px;display:flex;align-items:center;justify-content:center;gap:7px;background:var(--primary);color:#fff;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.10)}
+.weigh-add-icon{font-size:17px;line-height:1}
+.weigh-form{margin:0 12px 12px;padding:13px;border-radius:12px;background:var(--surface-alt);border:1px solid var(--border)}
+.weigh-form-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;font-size:14px}
+.weigh-close{border:0;background:transparent;color:var(--ink-soft);font-size:22px;line-height:1;cursor:pointer;padding:0 2px}
+.weigh-form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.input-with-unit{position:relative}
+.input-with-unit input{width:100%;padding-right:32px}
+.input-with-unit span{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--ink-soft);pointer-events:none}
+.weigh-save-btn{margin-top:11px!important;padding:9px 12px!important}
+@media(max-width:520px){
+  .weigh-values{padding:16px 8px 14px}
+  .weigh-stat strong{font-size:17px}
+  .weigh-current strong{font-size:23px}
+  .weigh-label{font-size:10px}
+  .weigh-form-grid{grid-template-columns:1fr}
+}
+</style>
+
+<style>
+.drink-card{padding:0;overflow:hidden;border:1px solid var(--border);box-shadow:0 8px 24px rgba(0,0,0,.04)}
+.drink-summary{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:15px 14px 13px}
+.drink-stat{text-align:center}
+.drink-label{display:block;font-size:11px;color:var(--ink-soft);font-weight:600;margin-bottom:4px}
+.drink-stat strong{display:block;font-size:22px;line-height:1.1}
+.drink-unit{display:block;font-size:10px;color:var(--ink-soft);margin-top:3px}
+.drink-divider{width:1px;height:34px;background:var(--border)}
+.drink-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 12px 12px}
+.drink-btn{border:1px solid var(--border);background:var(--surface-alt);border-radius:10px;padding:9px 10px;font-weight:700;font-size:12px;color:var(--ink);cursor:pointer}
+.drink-btn:hover{filter:brightness(.98)}
+</style>
+<style>
+.drink-card{padding:0;overflow:hidden;border:1px solid var(--border);box-shadow:0 8px 24px rgba(0,0,0,.04)}
+.drink-total{display:flex;align-items:baseline;justify-content:space-between;padding:14px 14px 10px;border-bottom:1px solid var(--border)}
+.drink-total span{font-size:11px;color:var(--ink-soft);font-weight:700}
+.drink-total strong{font-size:18px}
+.drink-list{padding:3px 14px}
+.drink-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.drink-row:last-child{border-bottom:0}
+.drink-row-main{display:flex;align-items:center;gap:8px;min-width:0}
+.drink-row-name{font-size:12px;font-weight:700}.drink-row-count{font-size:11px;color:var(--ink-soft)}
+.drink-row-kcal{font-size:12px;font-weight:700}
+.drink-add-btn{width:calc(100% - 24px);margin:9px 12px 12px;border:0;border-radius:10px;padding:9px 12px;background:var(--primary-tint);color:var(--primary-dark);font-weight:800;font-size:12px;cursor:pointer}
+.drink-entry{margin:0 12px 12px;padding:11px;border-radius:11px;background:var(--surface-alt);border:1px solid var(--border)}
+.drink-entry-title{font-size:12px;font-weight:800;margin-bottom:8px}
+.drink-options{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.drink-options button{border:1px solid var(--border);background:var(--surface);border-radius:9px;padding:8px;text-align:left;color:var(--ink);font-size:11px;font-weight:700;cursor:pointer}
+.drink-options small{display:block;color:var(--ink-soft);font-weight:500;margin-top:2px}
+@media(max-width:430px){.drink-options{grid-template-columns:1fr 1fr}}
+</style>
+<style>
+.drink-card{padding:0;overflow:hidden;border:1px solid var(--border);box-shadow:0 8px 24px rgba(0,0,0,.04)}
+.drink-summary{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:15px 14px 13px}
+.drink-stat{text-align:center}.drink-label{display:block;font-size:11px;color:var(--ink-soft);font-weight:600;margin-bottom:4px}.drink-stat strong{display:block;font-size:22px;line-height:1.1}.drink-unit{display:block;font-size:10px;color:var(--ink-soft);margin-top:3px}.drink-divider{width:1px;height:34px;background:var(--border)}
+.drink-add-btn{width:calc(100% - 24px);margin:0 12px 12px;border:0;border-radius:11px;padding:10px 12px;background:var(--primary);color:#fff;font-weight:700;font-size:13px;cursor:pointer}
+.drink-picker{margin:0 12px 12px;padding:12px;border-radius:12px;background:var(--surface-alt);border:1px solid var(--border)}
+.drink-picker-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:14px}.drink-close{border:0;background:none;font-size:22px;color:var(--ink-soft);cursor:pointer}
+.drink-category-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.drink-category-grid button,.drink-choice{border:1px solid var(--border);background:var(--surface);border-radius:9px;padding:9px 8px;text-align:left;font-size:12px;font-weight:650;color:var(--ink);cursor:pointer}
+.drink-choices{margin-top:10px;display:grid;gap:6px}.drink-choice{display:flex;justify-content:space-between;align-items:center}.drink-choice small{color:var(--ink-soft);font-weight:500}
+.drink-today-list{padding:0 12px 12px}.drink-item{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-top:1px solid var(--border);font-size:12px}.drink-item-main{display:flex;gap:7px;align-items:center}.drink-item-cal{color:var(--ink-soft)}.drink-remove{border:0;background:none;color:var(--ink-soft);font-size:17px;cursor:pointer}
+@media(max-width:420px){.drink-category-grid{grid-template-columns:1fr 1fr}}
+</style>
+
+<style>
+.drink-history-toggle{width:100%;border:0;border-top:1px solid var(--border);background:transparent;padding:9px 13px;display:flex;justify-content:space-between;align-items:center;color:var(--ink-soft);font-size:11px;font-weight:650;cursor:pointer}
+.drink-history-toggle span:last-child{font-size:16px;line-height:1;transition:transform .15s ease}
+.drink-history-toggle.open span:last-child{transform:rotate(180deg)}
+
+<style>
+/* Menu principal + : 5 icônes rondes alignées */
+.add-menu-grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:8px;
+  align-items:start;
+}
+.add-choice{
+  border:0;
+  background:transparent;
+  border-radius:0;
+  padding:0 2px;
+  text-align:center;
+  color:var(--ink);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  box-shadow:none;
+}
+.add-choice span{
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  background:#111;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  line-height:1;
+}
+.add-choice strong{
+  font-size:10.5px;
+  line-height:1.15;
+  font-weight:800;
+}
+.add-choice small{
+  font-size:9px;
+  line-height:1.2;
+  color:var(--ink-soft);
+}
+@media(max-width:380px){
+  .add-menu-grid{gap:4px}
+  .add-choice span{width:43px;height:43px;font-size:20px}
+  .add-choice strong{font-size:9.5px}
+  .add-choice small{font-size:8px}
+}
+</style>
+
+<style>
+/* Nutrition interface harmonization */
+.page-food .inline-add,
+.inline-add{
+  border:0;background:transparent;color:var(--primary);
+  font-weight:800;font-size:12px;padding:4px 0;cursor:pointer;
+}
+.page-food .drink-add-btn,.page-food .weigh-add-btn{display:none!important}
+.page-food .drink-card-click{cursor:pointer}
+.page-food .drink-card-click:active{opacity:.92}
+.page-food .drink-summary{padding:12px 12px 10px}
+.page-food .weigh-values{padding:12px 10px 10px}
+.page-food .nutrition-section-head{display:flex;align-items:center;justify-content:space-between}
+.page-food .nutrition-section-head h2{font-size:15px;margin:0}
+.page-food .drink-history-toggle{display:none!important}
+.page-food .drink-today-list{padding-top:0}
+.page-food .nutrition-block{margin-bottom:9px}
+ .drink-card-click{cursor:pointer}
+.drink-card-click:active{opacity:.96}
+.drink-card .drink-picker,
+.drink-card .drink-today-list{cursor:default}
+</style>
+<style>
+/* Progression circulaire des repas + commandes hydratation */
+.meal-main{min-width:0}
+.water-controls{display:flex;align-items:center;gap:6px;flex:none}
+.water-card{gap:10px}
+.water-main{min-width:0}
+.water-glass-btn{width:34px;height:34px}
+.macro-head{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px}
+.macro-head strong{font-size:11px;margin:0;white-space:nowrap}
+.macro-head span{font-size:10px;color:var(--ink-soft);font-weight:700;white-space:nowrap}
+.macro-card>span{display:none!important}
+.macro-track{height:7px}
+@media(max-width:380px){
+  .water-controls{gap:4px}
+  .water-glass-btn{width:32px;height:32px}
+  .macro-head{gap:3px}
+  .macro-head strong{font-size:10px}
+  .macro-head span{font-size:9px}
+}
+/* Circular progress rings for meals and hydration */
+.meal-ring-wrap{position:relative;width:52px;height:52px;flex:none}
+.meal-ring-wrap svg{width:100%;height:100%;transform:rotate(-90deg)}
+.meal-ring-track,.meal-ring-progress{fill:none;stroke-width:4.5}
+.meal-ring-track{stroke:var(--surface-alt)}
+.meal-ring-progress{stroke:var(--primary);stroke-linecap:round;stroke-dasharray:125.66;stroke-dashoffset:125.66;transition:stroke-dashoffset .4s ease}
+.meal-ring-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--primary)}
+.water-ring-wrap{position:relative;width:56px;height:56px;flex:none}
+.water-ring-wrap svg{width:100%;height:100%;transform:rotate(-90deg)}
+.water-ring-track,.water-ring-progress{fill:none;stroke-width:4.5}
+.water-ring-track{stroke:var(--surface-alt)}
+.water-ring-progress{stroke:var(--water);stroke-linecap:round;stroke-dasharray:131.95;stroke-dashoffset:131.95;transition:stroke-dashoffset .4s ease}
+.water-ring-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--water)}
+.water-main{flex:1;min-width:0}
+@media(max-width:380px){.meal-ring-wrap{width:48px;height:48px}.water-ring-wrap{width:52px;height:52px}}
+.quick-add-grid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:6px;
+  align-items:start;
+}
+.quick-add-choice{
+  min-height:auto;
+  padding:0 1px;
+  justify-content:flex-start;
+  align-items:center;
+  text-align:center;
+  gap:5px;
+  background:transparent;
+  border:0;
+  border-radius:0;
+}
+.quick-add-choice span svg{width:22px;height:22px;display:block;stroke:currentColor;}
+.quick-add-choice span{
+  width:46px;
+  height:46px;
+  border-radius:50%;
+  background:var(--primary);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:21px;
+  margin:0;
+  line-height:1;
+}
+.quick-add-choice strong{
+  font-size:9.5px;
+  line-height:1.15;
+  white-space:normal;
+}
+.quick-add-choice small{
+  font-size:8px;
+  color:var(--ink-soft);
+  line-height:1.15;
+  white-space:normal;
+}
+.quick-add-wide{
+  grid-column:auto;
+  min-height:auto;
+}
+.quick-add-wide span{font-size:21px}
+@media(max-width:380px){
+  .quick-add-grid{gap:3px}
+  .quick-add-choice span{width:40px;height:40px;font-size:19px}
+  .quick-add-choice strong{font-size:8.5px}
+  .quick-add-choice small{font-size:7.5px}
+}
+</style>
 </head>
 <body data-theme="light">
+<div class="topbar"><div class="brand"><svg class="brand-mark" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="var(--primary)"/><path d="M16 8c-4 2-6 6-4 11 1.5 3.6 4 5 4 5s2.5-1.4 4-5c2-5 0-9-4-11z" fill="white" opacity=".92"/><path d="M16 13v9" stroke="var(--primary)" stroke-width="1.6" stroke-linecap="round"/></svg><h1 id="greetTitle">VitaTrack</h1></div></div>
 
-<div class="topbar">
-  <div class="brand">
-    <svg class="brand-mark" viewBox="0 0 32 32" fill="none">
-      <circle cx="16" cy="16" r="15" fill="var(--primary)"/>
-      <path d="M16 8c-4 2-6 6-4 11 1.5 3.6 4 5 4 5s2.5-1.4 4-5c2-5 0-9-4-11z" fill="white" opacity=".92"/>
-      <path d="M16 13v9" stroke="var(--primary)" stroke-width="1.6" stroke-linecap="round"/>
-    </svg>
-    <h1 id="greetTitle">VitaTrack</h1>
-  </div>
-  <button class="xp-chip" id="xpChip" onclick="go('badges')">
-    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3L21 9.3l-4.8 4.4L17.4 21 12 17.7 6.6 21l1.2-7.3L3 9.3l6.1-1L12 2z"/></svg>
-    <span id="xpLabel">Niv. 1</span>
-  </button>
-</div>
-
-<!-- ================= ACCUEIL ================= -->
 <section class="screen active" id="screen-home">
+  <div class="card hero-card">
+    <div class="eyebrow">Aujourd'hui</div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-top:7px"><div><div class="hero-kcal"><span id="homeCalories">0</span> <span>kcal</span></div><div class="muted small" style="margin-top:4px">sur <span id="homeCaloriesGoal">—</span></div></div><span class="goal-pill" id="homeRemaining">Configure ton profil</span></div>
+    <div class="pbar" style="margin-top:15px"><div id="homeCalBar" style="background:var(--accent);width:0%"></div></div>
+    <div class="metric-row"><div class="metric"><strong id="homeProtein">0 g</strong><span>protéines / <b id="homeProteinGoal">—</b></span></div><div class="metric"><strong id="homeWeight">—</strong><span>poids actuel</span></div></div>
+  </div>
+  <div class="section-title">Bilan nutrition</div>
+  <div id="weeklyReportHome"></div>
+  <div class="section-title">Progression</div>
   <div class="card">
-    <div class="rings-wrap">
-      <svg width="200" height="200" viewBox="0 0 200 200" id="ringsSvg">
-        <circle cx="100" cy="100" r="86" fill="none" stroke="var(--surface-alt)" stroke-width="14"/>
-        <circle cx="100" cy="100" r="64" fill="none" stroke="var(--surface-alt)" stroke-width="14"/>
-        <circle cx="100" cy="100" r="42" fill="none" stroke="var(--surface-alt)" stroke-width="14"/>
-        <circle id="ringCal" cx="100" cy="100" r="86" fill="none" stroke="var(--accent)" stroke-width="14" stroke-linecap="round" transform="rotate(-90 100 100)"/>
-        <circle id="ringWater" cx="100" cy="100" r="64" fill="none" stroke="var(--water)" stroke-width="14" stroke-linecap="round" transform="rotate(-90 100 100)"/>
-        <circle id="ringSport" cx="100" cy="100" r="42" fill="none" stroke="var(--primary)" stroke-width="14" stroke-linecap="round" transform="rotate(-90 100 100)"/>
-      </svg>
-      <div class="ring-center">
-        <div class="num" id="kcalCenter">0</div>
-        <div class="lbl">kcal aujourd'hui</div>
-      </div>
-    </div>
-    <div class="rings-legend">
-      <div class="legend-item"><span class="legend-dot" style="background:var(--accent)"></span>Calories</div>
-      <div class="legend-item"><span class="legend-dot" style="background:var(--water)"></span>Eau</div>
-      <div class="legend-item"><span class="legend-dot" style="background:var(--primary)"></span>Sport</div>
+    <div class="row"><strong>Poids et tendance</strong><span class="muted small" id="homeTrend">Pas encore de données</span></div>
+    <div class="chart-wrap" style="margin-top:10px"><svg class="chart" id="homeWeightChart" width="100%" height="150"></svg></div>
+    <div class="progress-summary" style="margin-top:9px">
+      <div class="metric"><strong id="homeCurrentWeight">—</strong><span>poids actuel</span></div>
+      <div class="metric"><strong id="homeWeightGoal">—</strong><span>objectif</span></div>
     </div>
   </div>
-
-  <div class="stat-grid" style="margin-top:12px;">
-    <div class="stat-box"><div class="num" id="statWeight">–</div><div class="lbl">Poids actuel (kg)</div></div>
-    <div class="stat-box"><div class="num" id="statSteps">0</div><div class="lbl">Pas aujourd'hui</div></div>
-  </div>
-
-  <div class="section-title">Habitudes du jour</div>
-  <div class="card"><div class="habit-list" id="habitList"></div></div>
-
-  <div class="section-title">Ajout rapide</div>
-  <div class="card" style="display:flex; gap:8px; flex-wrap:wrap;">
-    <button class="btn btn-ghost btn-sm" onclick="openFoodSheet()">🍽️ Repas</button>
-    <button class="btn btn-ghost btn-sm" onclick="openSportSheet()">🏃 Sport</button>
-    <button class="btn btn-ghost btn-sm" onclick="addWater()">💧 +1 verre</button>
-    <button class="btn btn-ghost btn-sm" onclick="openStepsSheet()">👣 Pas</button>
-  </div>
+  <div class="section-title">Historique des pesées</div>
+  <div class="card" id="homeWeightListCard"></div>
 </section>
 
-<!-- ================= REPAS ================= -->
 <section class="screen" id="screen-food">
-  <div class="card">
-    <div class="row"><strong>Calories du jour</strong><span class="num" id="foodKcalTotal">0</span></div>
-    <div class="pbar" style="margin-top:8px;"><div id="foodBar" style="background:var(--accent); width:0%;"></div></div>
-    <div class="row small muted" style="margin-top:6px;"><span id="foodGoalLabel">Objectif : –</span><span id="macroSummary"></span></div>
+  <div class="nutrition-dashboard">
+    <div class="nutrition-day-head">
+      <div><h2 style="margin:2px 0 0;font-size:24px">Nutrition</h2></div>
+      <button class="chip" onclick="openProfileSheet()">⚙️ Objectif</button>
+    </div>
+    <div class="card nutrition-summary-card">
+      <div class="calorie-hero">
+        <div class="calorie-side calorie-eaten"><strong id="foodKcalTotal">0</strong><span>kcal consommées</span></div>
+        <div class="calorie-ring"><svg viewBox="0 0 120 120" aria-label="Calories restantes"><circle class="ring-track" cx="60" cy="60" r="50"></circle><circle class="ring-progress" id="calorieRing" cx="60" cy="60" r="50"></circle></svg><div class="ring-content"><strong id="foodRemainingPct">0%</strong><span id="foodRemaining">0 kcal</span></div></div>
+        <div class="calorie-side calorie-burned"><strong id="foodBurned">—</strong><span>kcal brûlées</span></div>
+      </div>
+      <div class="calorie-target">Objectif : <strong id="foodGoalLabel">—</strong></div>
+      <div class="macro-card-wrap">
+        <div class="macro-grid">
+          <div class="macro-card"><div class="macro-head"><strong>Glucides</strong><span id="macroCarbs">0 / — g</span></div><div class="macro-track"><i id="macroCarbsBar"></i></div></div>
+          <div class="macro-card"><div class="macro-head"><strong>Protéines</strong><span id="macroProtein">0 / — g</span></div><div class="macro-track"><i id="macroProteinBar"></i></div></div>
+          <div class="macro-card"><div class="macro-head"><strong>Lipides</strong><span id="macroFat">0 / — g</span></div><div class="macro-track"><i id="macroFatBar"></i></div></div>
+          <div class="macro-card"><div class="macro-head"><strong>Fibres</strong><span id="macroFiber">0 / 30 g</span></div><div class="macro-track"><i id="macroFiberBar"></i></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="nutrition-block">
+      <div class="nutrition-section-head"><h2>🍽️ Alimentation</h2><button class="inline-link" onclick="openAddMeal()">+ Ajouter</button></div>
+      <div class="card meal-list-card" id="foodListCard"></div>
+    </div>
+    <div class="nutrition-block">
+      <div class="nutrition-section-head"><h2>💧 Hydratation</h2></div>
+      <div class="card water-card">
+<span class="water-ring-wrap" aria-hidden="true"><svg viewBox="0 0 48 48"><circle class="water-ring-track" cx="24" cy="24" r="21"></circle><circle class="water-ring-progress" id="waterRing" cx="24" cy="24" r="21"></circle></svg><span class="water-ring-label" id="waterRingLabel">0%</span></span>
+        <span class="water-main"><strong id="waterGlasses">0 verre</strong><small><span id="waterTotal">0,00 L</span> · objectif <b id="waterGoal">2,00 L</b></small></span>
+        <span class="water-controls">
+          <button class="water-glass-btn water-minus" type="button" onclick="removeWaterGlass()" aria-label="Enlever un verre d’eau">−</button>
+          <button class="water-glass-btn water-plus" type="button" onclick="addWaterGlass()" aria-label="Ajouter un verre d’eau">+</button>
+        </span>
+      </div>
+    </div>
+    <div class="nutrition-block">
+      <div class="nutrition-section-head"><h2>🥤 Boissons & alcool</h2><button class="inline-link" onclick="openDrinkPicker()">+ Ajouter</button></div>
+      <div class="card drink-card drink-card-click" onclick="toggleDrinkHistory()">
+        <div class="drink-summary">
+          <div class="drink-stat">
+            <span class="drink-label">Aujourd’hui</span>
+            <strong id="drinkCountToday">0</strong>
+            <span class="drink-unit">boisson(s)</span>
+          </div>
+          <div class="drink-divider"></div>
+          <div class="drink-stat">
+            <span class="drink-label">Calories</span>
+            <strong id="drinkCaloriesToday">0</strong>
+            <span class="drink-unit">kcal</span>
+          </div>
+        </div>
+        <div id="drinkPicker" class="drink-picker" style="display:none" onclick="event.stopPropagation()">
+          <div class="drink-picker-head">
+            <strong>Ajouter une boisson</strong>
+            <button class="drink-close" onclick="closeDrinkPicker()">×</button>
+          </div>
+          <div class="drink-category-grid">
+            <button onclick="showDrinkCategory('soft')">🥤 Sodas</button>
+            <button onclick="showDrinkCategory('juice')">🧃 Jus</button>
+            <button onclick="showDrinkCategory('beer')">🍺 Bières</button>
+            <button onclick="showDrinkCategory('wine')">🍷 Vins</button>
+            <button onclick="showDrinkCategory('cider')">🍏 Cidres</button>
+            <button onclick="showDrinkCategory('spirit')">🥃 Alcools</button>
+            <button onclick="showDrinkCategory('cocktail')">🍹 Cocktails</button>
+          </div>
+          <div id="drinkChoices" class="drink-choices" style="display:none"></div>
+        </div>
+<div id="drinkTodayList" class="drink-today-list" style="display:none" onclick="event.stopPropagation()"></div>
+      </div>
+    </div>
+
+    <div class="nutrition-block">
+
+ 
+      <div class="nutrition-section-head"><h2>⚖️ Mes pesées</h2><button class="inline-add" onclick="openWeightEntry()">+ Ajouter</button></div>
+      <div class="card weigh-card">
+        <div class="weigh-values">
+          <div class="weigh-stat">
+            <span class="weigh-label">Précédente</span>
+            <strong id="nutritionPreviousWeight">—</strong>
+          </div>
+          <div class="weigh-divider"></div>
+          <div class="weigh-stat weigh-current">
+            <span class="weigh-label">Poids actuel</span>
+            <strong id="nutritionCurrentWeight">—</strong>
+          </div>
+          <div class="weigh-divider"></div>
+          <div class="weigh-stat">
+            <span class="weigh-label">Objectif</span>
+            <strong id="nutritionWeightGoal">—</strong>
+          </div>
+        </div>
+
+        <div id="weightEntryForm" class="weigh-form" style="display:none">
+          <div class="weigh-form-head">
+            <strong>Nouvelle pesée</strong>
+            <button class="weigh-close" onclick="openWeightEntry()" aria-label="Fermer">×</button>
+          </div>
+          <div class="weigh-form-grid">
+            <div class="field"><label>Poids</label><div class="input-with-unit"><input type="number" step="0.1" id="newWeight" placeholder="81,8"><span>kg</span></div></div>
+            <div class="field"><label>Tour de taille</label><div class="input-with-unit"><input type="number" step="0.5" id="newWaist" placeholder="90"><span>cm</span></div></div>
+            <div class="field"><label>Graisse viscérale</label><div class="input-with-unit"><input type="number" step="0.1" id="newVisceralFat" placeholder="8"><span></span></div></div>
+          </div>
+          <button class="btn btn-primary btn-block weigh-save-btn" onclick="logWeight()">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+    <div class="nutrition-details">
+      <details id="nutritionGuideDetails"><summary id="nutritionGuide">📖 Fiches alimentaires</summary><div class="details-body"><div class="card"><p class="muted small" style="margin-top:0">Quelques aliments courants pour commencer.</p><input id="guideSearch" oninput="filterGuide(this.value)" placeholder="Rechercher un aliment…" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--surface-alt);color:var(--ink);font-size:14px"></div><div class="card" style="margin-top:10px" id="guideList"></div></div></details>
+    </div>
   </div>
-  <div class="section-title">Aliments enregistrés</div>
-  <div class="card" id="foodListCard"></div>
 </section>
 
-<!-- ================= SPORT ================= -->
 <section class="screen" id="screen-sport">
-  <div class="card">
-    <div class="row"><strong>Minutes aujourd'hui</strong><span class="num" id="sportMinTotal">0</span></div>
-    <div class="pbar" style="margin-top:8px;"><div id="sportBar" style="background:var(--primary); width:0%;"></div></div>
-    <div class="row small muted" style="margin-top:6px;"><span id="sportGoalLabel">Objectif : –</span><span id="sportKcalLabel">0 kcal brûlées</span></div>
-  </div>
-  <div class="section-title">Séances du jour</div>
-  <div class="card" id="sportListCard"></div>
+  <div class="section-title">Sport</div>
+  <div class="card coming-card"><div class="big">🏋️</div><h2>Sport arrive ensuite</h2><p class="muted">Cet espace est volontairement simple pour l'instant. Nous y construirons la musculation, la course, la récupération et le coach de séance.</p></div>
 </section>
 
-<!-- ================= SUIVI ================= -->
-<section class="screen" id="screen-track">
-  <div class="subtabs">
-    <button class="subtab active" data-sub="eau" onclick="setSubtab('track','eau')">Eau</button>
-    <button class="subtab" data-sub="sommeil" onclick="setSubtab('track','sommeil')">Sommeil</button>
-    <button class="subtab" data-sub="poids" onclick="setSubtab('track','poids')">Poids</button>
-  </div>
-
-  <div class="sub" data-sub="eau">
-    <div class="card">
-      <div class="row"><strong id="waterLabel">0 / 0 ml</strong><span class="muted small" id="waterCupsLabel">0 verres</span></div>
-      <div class="pbar" style="margin-top:8px;"><div id="waterBar" style="background:var(--water); width:0%;"></div></div>
-      <div class="row" style="margin-top:14px; gap:8px;">
-        <button class="btn btn-ghost btn-block" onclick="removeWater()">− 1 verre</button>
-        <button class="btn btn-primary btn-block" style="background:var(--water)" onclick="addWater()">+ 1 verre</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="sub" data-sub="sommeil" style="display:none;">
-    <div class="card">
-      <div class="field"><label>Heures de sommeil</label><input type="number" step="0.25" id="sleepHours" placeholder="ex : 7.5"></div>
-      <div class="field"><label>Qualité ressentie</label>
-        <div class="chip-grid">
-          <button class="chip" data-q="1" onclick="setSleepQ(1)">😩 Faible</button>
-          <button class="chip" data-q="2" onclick="setSleepQ(2)">😐 Moyenne</button>
-          <button class="chip" data-q="3" onclick="setSleepQ(3)">😴 Bonne</button>
-        </div>
-      </div>
-      <button class="btn btn-primary btn-block" onclick="saveSleep()">Enregistrer</button>
-    </div>
-  </div>
-
-  <div class="sub" data-sub="poids" style="display:none;">
-    <div class="card">
-      <div class="row"><strong>Évolution du poids</strong><span class="muted small" id="weightDeltaLabel"></span></div>
-      <div class="chart-wrap" style="margin-top:10px;"><svg class="chart" id="weightChart" width="100%" height="140"></svg></div>
-    </div>
-    <div class="card" style="margin-top:12px;">
-      <div class="field-row">
-        <div class="field"><label>Poids (kg)</label><input type="number" step="0.1" id="newWeight"></div>
-        <div class="field"><label>Tour de taille (cm)</label><input type="number" step="0.5" id="newWaist"></div>
-      </div>
-      <button class="btn btn-primary btn-block" onclick="logWeight()">Ajouter une pesée</button>
-    </div>
-    <div class="section-title">Historique</div>
-    <div class="card" id="weightListCard"></div>
-  </div>
+<section class="screen" id="screen-game">
+  <div class="section-title">Monde</div>
+  <div class="card coming-card"><div class="big">🎮</div><h2>Le monde viendra plus tard</h2><p class="muted">On construira d'abord une excellente application nutrition et sport. Le jeu viendra ensuite se brancher dessus.</p></div>
 </section>
 
-<!-- ================= PROFIL ================= -->
-<section class="screen" id="screen-profile">
-  <div class="card">
-    <div class="profile-head">
-      <div class="avatar" id="avatarLetter">?</div>
-      <div>
-        <div style="font-weight:700; font-size:16.5px;" id="profName">–</div>
-        <div class="muted small" id="profSub">–</div>
-      </div>
-    </div>
-    <div class="level-bar-wrap">
-      <div class="row small"><span class="muted">Niveau <span id="lvlNum">1</span></span><span class="muted" id="xpDetail">0 / 100 XP</span></div>
-      <div class="pbar" style="margin-top:6px;"><div id="xpBar" style="background:var(--gold); width:0%;"></div></div>
-    </div>
-  </div>
+<section class="screen legacy-hidden" id="screen-guide"></section>
+<section class="screen legacy-hidden" id="screen-track"></section>
+<section class="screen legacy-hidden" id="screen-profile"></section>
 
-  <div class="subtabs">
-    <button class="subtab active" data-sub="infos" onclick="setSubtab('profile','infos')">Infos</button>
-    <button class="subtab" data-sub="objectifs" onclick="setSubtab('profile','objectifs')">Objectifs</button>
-    <button class="subtab" data-sub="badges" onclick="setSubtab('profile','badges')">Badges</button>
-    <button class="subtab" data-sub="reglages" onclick="setSubtab('profile','reglages')">Réglages</button>
-  </div>
+<div class="bottomnav" aria-label="Navigation principale"><button class="navbtn active" data-screen="home" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg><span>Accueil</span></button><button class="navbtn" data-screen="food" onclick="go('food')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 2v8M5 4v4a2 2 0 0 0 4 0V4M17 2c-2 1-2 5-2 7s0 4 2 4V22"/></svg><span>Nutrition</span></button><button class="navbtn" data-screen="sport" onclick="go('sport')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 5h4v14H6zM14 5h4v14h-4zM10 9h4M10 15h4"/></svg><span>Sport</span></button><button class="navbtn" data-screen="game" onclick="go('game')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 8h10a4 4 0 0 1 4 4v2.5a3.5 3.5 0 0 1-6.1 2.3L13 15h-2l-1.9 1.8A3.5 3.5 0 0 1 3 14.5V12a4 4 0 0 1 4-4z"/><path d="M7 12v3M5.5 13.5h3M16.5 13.5h.01M18.5 12h.01"/></svg><span>Monde</span></button></div>
+<button class="fab" id="globalFab" onclick="openFoodSheet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
 
-  <div class="sub" data-sub="infos">
-    <div class="card">
-      <div class="field"><label>Prénom</label><input id="pf_name"></div>
-      <div class="field-row">
-        <div class="field"><label>Âge</label><input type="number" id="pf_age"></div>
-        <div class="field"><label>Sexe</label>
-          <select id="pf_sex"><option value="homme">Homme</option><option value="femme">Femme</option></select>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field"><label>Taille (cm)</label><input type="number" id="pf_height"></div>
-        <div class="field"><label>Poids actuel (kg)</label><input type="number" step="0.1" id="pf_weight"></div>
-      </div>
-      <button class="btn btn-primary btn-block" onclick="saveProfile()">Enregistrer</button>
-    </div>
-  </div>
+<div class="sheet-overlay" id="addMenuOverlay" onclick="closeSheetIfBg(event,'addMenuOverlay')"><div class="sheet"><div class="sheet-handle"></div><h3>Ajouter</h3><p class="muted small">Que veux-tu enregistrer ?</p><div class="add-menu-grid quick-add-grid">
+<button class="add-choice quick-add-choice" onclick="openTraining()"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9v6M4.5 10.5v3M2.5 11.5v1M17 9v6M19.5 10.5v3M21.5 11.5v1M7 12h10"/></svg></span><strong>Entraînement</strong><small id="quickAddTraining">0 kcal à brûler</small></button>
+<button class="add-choice quick-add-choice" onclick="openWeighing()"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M12 7v4M9 14h6"/></svg></span><strong>Poids</strong><small id="quickAddWeight">— kg</small></button>
+<button class="add-choice quick-add-choice" onclick="openWaterSheet()"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/></svg></span><strong>Eau</strong><small id="quickAddWater">0 ml bu</small></button>
+<button class="add-choice quick-add-choice" onclick="openDrinkPicker()"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10l-1 17H8L7 4z"/><path d="M9 8h6M10 12h4"/></svg></span><strong>Boissons</strong><small id="quickAddDrinks">0 kcal</small></button>
+<button class="add-choice quick-add-choice" onclick="openAddMeal()"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v7M3 3v4a2 2 0 0 0 4 0V3M4 9v12M17 3c-2 1-2 5-2 8 0 2 1 3 3 3v7"/></svg></span><strong>Nourriture</strong><small id="quickAddFood">0 kcal restantes</small></button>
+</div></div></div>
 
-  <div class="sub" data-sub="objectifs" style="display:none;">
-    <div class="card">
-      <div class="field"><label>Objectif</label>
-        <select id="pf_goal"><option value="gain">Prise de masse</option><option value="lose">Perte de poids</option><option value="maintain">Maintien</option></select>
-      </div>
-      <div class="field"><label>Niveau d'activité</label>
-        <select id="pf_activity">
-          <option value="sedentary">Sédentaire</option>
-          <option value="light">Légère</option>
-          <option value="moderate">Modérée</option>
-          <option value="active">Active</option>
-          <option value="very_active">Très active</option>
-        </select>
-      </div>
-      <div class="field"><label>Poids cible (kg)</label><input type="number" step="0.1" id="pf_target"></div>
-      <div class="field-row">
-        <div class="field"><label>Objectif pas / jour</label><input type="number" id="st_steps"></div>
-        <div class="field"><label>Objectif sport (min)</label><input type="number" id="st_sport"></div>
-      </div>
-      <div class="field-row">
-        <div class="field"><label>Objectif eau (ml)</label><input type="number" id="st_water"></div>
-        <div class="field"><label>Taille du verre (ml)</label><input type="number" id="st_cup"></div>
-      </div>
-      <button class="btn btn-primary btn-block" onclick="saveGoals()">Enregistrer les objectifs</button>
-    </div>
-  </div>
+<div class="sheet-overlay" id="foodSheetOverlay" onclick="closeSheetIfBg(event,'foodSheetOverlay')"><div class="sheet"><div class="sheet-handle"></div><h3>Ajouter un repas</h3>
+<div class="meal-chips" id="mealTypeChooser"></div>
+<div class="scanner scanner-large"><button class="btn btn-ghost" onclick="scanPlate()">📷 Scanner l’assiette</button><button class="btn btn-ghost" onclick="scanBarcode()">▣ Scanner le code-barres</button></div>
+<video id="barcodeVideo" class="barcode-video" playsinline muted></video>
+<video id="plateVideo" class="barcode-video" playsinline muted></video><div id="plateStatus" class="muted small" style="margin-top:6px"></div>
+<div class="divider"></div><label class="search-label">Recherche automatique</label><input id="foodSearch" oninput="renderFoodSearch()" placeholder="Rechercher poulet, riz, pomme…" style="width:100%;padding:11px 13px;border-radius:12px;border:1px solid var(--border);background:var(--surface-alt);color:var(--ink);font-size:14.5px"><div class="search-results" id="foodSearchResults"></div>
+<div id="foodPickedBox" style="display:none"><div class="row" style="margin-bottom:8px"><strong id="foodPickedName"></strong><span class="muted small" id="foodPickedKcal"></span></div><div id="foodPickedInfo"></div><div class="field"><label>Quantité (g / ml)</label><input type="number" id="foodQty" value="100"></div><button class="btn btn-primary btn-block" onclick="confirmAddFood()">Ajouter au repas</button></div>
+<button class="small-link" onclick="toggleCustomFoodForm()">+ Créer un aliment personnalisé</button><div id="customFoodForm" style="display:none;margin-top:12px"><div class="field"><label>Nom</label><input id="cf_name"></div><div class="field-row"><div class="field"><label>kcal / 100g</label><input type="number" id="cf_kcal"></div><div class="field"><label>Protéines / 100g</label><input type="number" id="cf_protein"></div></div><div class="field-row"><div class="field"><label>Glucides / 100g</label><input type="number" id="cf_carbs"></div><div class="field"><label>Sucres / 100g</label><input type="number" id="cf_sugar"></div></div><div class="field-row"><div class="field"><label>Fibres / 100g</label><input type="number" id="cf_fiber"></div><div class="field"><label>Lipides / 100g</label><input type="number" id="cf_fat"></div></div><div class="field"><label>Glycémie (optionnel)</label><select id="cf_gi"><option value="">Non renseignée</option><option value="faible">Faible</option><option value="moyen">Moyen</option><option value="élevé">Élevé</option></select></div><button class="btn btn-ghost btn-block" onclick="saveCustomFood()">Enregistrer</button></div></div></div>
 
-  <div class="sub" data-sub="badges" style="display:none;">
-    <div class="card">
-      <div class="badge-grid" id="badgeGrid"></div>
-    </div>
-  </div>
+<div class="sheet-overlay" id="mealDetailsOverlay" onclick="closeSheetIfBg(event,'mealDetailsOverlay')"><div class="sheet"><div class="sheet-handle"></div><h3 id="mealDetailsTitle">Repas</h3><div id="mealDetailsBody"></div></div></div>
+<div class="sheet-overlay" id="waterSheetOverlay" onclick="closeSheetIfBg(event,'waterSheetOverlay')"><div class="sheet"><div class="sheet-handle"></div><h3>Ajouter de l’eau</h3><div class="water-quick"><button type="button" class="chip" onclick="setVal('waterQty',200)">200 ml</button><button type="button" class="chip" onclick="setVal('waterQty',250)">250 ml</button><button type="button" class="chip" onclick="setVal('waterQty',330)">330 ml</button><button type="button" class="chip" onclick="setVal('waterQty',500)">500 ml</button></div><div class="field"><label>Quantité (ml)</label><input type="number" id="waterQty" value="250" min="1"></div><button class="btn btn-primary btn-block" onclick="addWater()">Ajouter</button></div></div>
 
-  <div class="sub" data-sub="reglages" style="display:none;">
-    <div class="card">
-      <div class="row"><strong>Thème sombre</strong>
-        <label class="chip" id="themeToggle" onclick="toggleTheme()" style="cursor:pointer;">Activer</label>
-      </div>
-    </div>
-    <div class="card">
-      <div class="row" style="margin-bottom:10px;"><strong>Données</strong></div>
-      <button class="btn btn-ghost btn-block" onclick="exportData()">⤓ Exporter mes données (.json)</button>
-      <div style="height:8px;"></div>
-      <button class="btn btn-ghost btn-block" onclick="document.getElementById('importFile').click()">⤒ Importer un fichier .json</button>
-      <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData(event)">
-      <div style="height:8px;"></div>
-      <button class="btn btn-block" style="background:var(--danger); color:#fff;" onclick="resetToday()">Réinitialiser la journée</button>
-    </div>
-    <div class="card">
-      <p class="muted small" style="margin:0;">VitaTrack — données stockées uniquement sur cet appareil.</p>
-    </div>
-  </div>
-</section>
-
-<div class="bottomnav">
-  <button class="navbtn active" data-screen="home" onclick="go('home')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg>
-    <span>Accueil</span>
-  </button>
-  <button class="navbtn" data-screen="food" onclick="go('food')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 2v8M5 4v4a2 2 0 0 0 4 0V4M17 2c-2 1-2 5-2 7s0 4 2 4V22"/></svg>
-    <span>Repas</span>
-  </button>
-  <button class="navbtn" data-screen="sport" onclick="go('sport')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13" cy="4" r="2"/><path d="M5 21l4-7 3 3 3-6M9 14l-3-3 4-3 3 2 4-2"/></svg>
-    <span>Sport</span>
-  </button>
-  <button class="navbtn" data-screen="track" onclick="go('track')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2s6 7 6 12a6 6 0 0 1-12 0c0-5 6-12 6-12z"/></svg>
-    <span>Suivi</span>
-  </button>
-  <button class="navbtn" data-screen="profile" onclick="go('profile')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
-    <span>Profil</span>
-  </button>
-</div>
-
-<button class="fab" id="globalFab" onclick="openFoodSheet()">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-</button>
-
-<!-- FOOD SHEET -->
-<div class="sheet-overlay" id="foodSheetOverlay" onclick="closeSheetIfBg(event,'foodSheetOverlay')">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <h3>Ajouter ce que j'ai mangé</h3>
-    <div class="card" style="padding:12px; margin-bottom:12px; background:var(--surface-alt); box-shadow:none;">
-      <div class="small muted" style="margin-bottom:7px;">L'heure et le type de repas sont détectés automatiquement.</div>
-      <textarea id="mealDescription" rows="3" placeholder="Ex. 150 g de poulet, 200 g de riz et une pomme" style="width:100%; padding:11px 13px; border-radius:12px; border:1px solid var(--border); background:var(--surface); color:var(--ink); font-size:14.5px; resize:vertical;"></textarea>
-      <button class="btn btn-primary btn-block" style="margin-top:8px;" onclick="addFreeTextMeal()">Analyser et enregistrer · <span id="autoMealTypeLabel">Repas</span></button>
-    </div>
-    <div class="small muted" style="text-align:center; margin:4px 0 10px;">Ou ajoute précisément un aliment</div>
-    <input id="foodSearch" oninput="renderFoodSearch()" placeholder="Rechercher un aliment (poulet, riz, pomme...)" style="width:100%; padding:11px 13px; border-radius:12px; border:1px solid var(--border); background:var(--surface-alt); color:var(--ink); font-size:14.5px; margin-bottom:10px;">
-    <div class="search-results" id="foodSearchResults"></div>
-    <div class="divider"></div>
-    <div id="foodPickedBox" style="display:none;">
-      <div class="row" style="margin-bottom:10px;"><strong id="foodPickedName"></strong><span class="muted small" id="foodPickedKcal"></span></div>
-      <div class="field"><label>Quantité (g / ml)</label><input type="number" id="foodQty" value="100"></div>
-      <button class="btn btn-primary btn-block" onclick="confirmAddFood()">Ajouter au journal</button>
-    </div>
-    <a class="linklike" onclick="toggleCustomFoodForm()">+ Créer un aliment personnalisé</a>
-    <div id="customFoodForm" style="display:none; margin-top:12px;">
-      <div class="field"><label>Nom</label><input id="cf_name"></div>
-      <div class="field-row">
-        <div class="field"><label>kcal / 100g</label><input type="number" id="cf_kcal"></div>
-        <div class="field"><label>Protéines /100g</label><input type="number" id="cf_protein"></div>
-      </div>
-      <div class="field-row">
-        <div class="field"><label>Glucides /100g</label><input type="number" id="cf_carbs"></div>
-        <div class="field"><label>Lipides /100g</label><input type="number" id="cf_fat"></div>
-      </div>
-      <button class="btn btn-ghost btn-block" onclick="saveCustomFood()">Enregistrer l'aliment</button>
-    </div>
-  </div>
-</div>
-
-<!-- SPORT SHEET -->
-<div class="sheet-overlay" id="sportSheetOverlay" onclick="closeSheetIfBg(event,'sportSheetOverlay')">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <h3>Ajouter une séance</h3>
-    <div class="chip-grid" id="sportChips"></div>
-    <div class="field"><label>Durée (minutes)</label><input type="number" id="sportDuration" value="30"></div>
-    <div class="row small muted" style="margin-bottom:14px;">Calories estimées : <strong id="sportKcalEstimate">–</strong></div>
-    <button class="btn btn-primary btn-block" onclick="confirmAddSport()">Ajouter au journal</button>
-  </div>
-</div>
-
-<!-- STEPS SHEET -->
-<div class="sheet-overlay" id="stepsSheetOverlay" onclick="closeSheetIfBg(event,'stepsSheetOverlay')">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <h3>Pas du jour</h3>
-    <div class="field"><label>Nombre de pas</label><input type="number" id="stepsInput"></div>
-    <button class="btn btn-primary btn-block" onclick="confirmSteps()">Enregistrer</button>
-  </div>
-</div>
-
+<div class="sheet-overlay" id="guideSheetOverlay" onclick="closeSheetIfBg(event,'guideSheetOverlay')"><div class="sheet"><div class="sheet-handle"></div><h3 id="guideTitle">Aliment</h3><div id="guideDetail"></div></div></div>
+<div class="sheet-overlay" id="profileSheetOverlay" onclick="closeSheetIfBg(event,'profileSheetOverlay')"><div class="sheet"><div class="sheet-handle"></div><h3>Mon objectif et mes réglages</h3><div class="card" style="padding:12px;margin-bottom:12px"><div class="row small"><span class="muted">Calories de départ</span><strong id="profileCalorieTarget">À calculer</strong></div><div class="row small" style="margin-top:8px"><span class="muted">Protéines</span><strong id="profileProteinTarget">À calculer</strong></div></div><div class="field"><label>Prénom (facultatif)</label><input id="pf_name"></div><div class="field-row"><div class="field"><label>Âge</label><input type="number" id="pf_age"></div><div class="field"><label>Sexe</label><select id="pf_sex"><option value="homme">Homme</option><option value="femme">Femme</option></select></div></div><div class="field-row"><div class="field"><label>Taille (cm)</label><input type="number" id="pf_height"></div><div class="field"><label>Poids actuel (kg)</label><input type="number" step="0.1" id="pf_weight"></div></div><button class="btn btn-primary btn-block" onclick="saveProfile();closeSheet('profileSheetOverlay')">Enregistrer mon profil</button><div class="divider"></div><div class="field"><label>Objectif principal</label><select id="pf_goal"><option value="fat_loss">🔥 Perdre du gras</option><option value="recomposition">🔄 Recomposition</option><option value="muscle_gain">💪 Construire du muscle</option><option value="maintain">⚖️ Maintenir</option><option value="weight_target">🎯 Atteindre un poids</option></select></div><div class="field"><label>Activité quotidienne</label><select id="pf_activity"><option value="sedentary">Peu actif</option><option value="light">Légèrement actif</option><option value="moderate">Actif</option><option value="active">Très actif</option><option value="very_active">Très actif +</option></select></div><div class="field"><label>Poids cible (facultatif)</label><input type="number" step="0.1" id="pf_target"></div><div class="field-row"><div class="field"><label>% masse grasse cible</label><input type="number" step="0.1" id="pf_bodyfat_target"></div><div class="field"><label>Tour de taille cible</label><input type="number" step="0.5" id="pf_waist_target"></div></div><button class="btn btn-primary btn-block" onclick="saveGoals();closeSheet('profileSheetOverlay')">Enregistrer l'objectif</button><div class="divider"></div><div class="row"><strong>Thème sombre</strong><button class="chip" id="themeToggle" onclick="toggleTheme()">Activer</button></div><div style="height:8px"></div><button class="btn btn-ghost btn-block" onclick="exportData()">⤓ Exporter mes données</button><div style="height:8px"></div><button class="btn btn-ghost btn-block" onclick="document.getElementById('importFile').click()">⤒ Importer mes données</button><input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)"></div></div>
+<div class="sheet-overlay" id="setupSheetOverlay"><div class="sheet"><div class="sheet-handle"></div><h3>Bienvenue dans VitaTrack</h3><p class="setup-intro">On commence simplement. Donne-moi quelques informations pour estimer tes besoins. Ensuite, tu enregistres normalement tes repas et je regarderai ta progression avant de modifier quoi que ce soit.</p><div class="field"><label>Prénom (facultatif)</label><input id="setup_name"></div><div class="field-row"><div class="field"><label>Âge</label><input type="number" id="setup_age"></div><div class="field"><label>Sexe</label><select id="setup_sex"><option value="homme">Homme</option><option value="femme">Femme</option></select></div></div><div class="field-row"><div class="field"><label>Taille (cm)</label><input type="number" id="setup_height"></div><div class="field"><label>Poids (kg)</label><input type="number" step="0.1" id="setup_weight"></div></div><div class="field"><label>Objectif principal</label><select id="setup_goal"><option value="fat_loss">🔥 Perdre du gras</option><option value="recomposition">🔄 Recomposition</option><option value="muscle_gain">💪 Construire du muscle</option><option value="maintain">⚖️ Maintenir</option><option value="weight_target">🎯 Atteindre un poids</option></select></div><div class="field"><label>Activité quotidienne</label><select id="setup_activity"><option value="sedentary">Peu actif</option><option value="light">Légèrement actif</option><option value="moderate">Actif</option><option value="active">Très actif</option><option value="very_active">Très actif +</option></select></div><div class="field"><label>Poids cible (facultatif)</label><input type="number" step="0.1" id="setup_target"></div><button class="btn btn-primary btn-block" onclick="saveSetup()">Créer mon point de départ</button></div></div>
 <div class="toast" id="toast"></div>
+<script src="data.js"></script><script src="app.js"></script>
+<script>
+/* Boissons : la carte entière ouvre/ferme la liste du jour. */
+window.toggleDrinkHistory = function(){
+  const list = document.getElementById('drinkTodayList');
+  if(!list) return;
+  const isHidden = getComputedStyle(list).display === 'none';
+  list.style.display = isHidden ? 'block' : 'none';
+};
+</script>
 
-<script src="data.js"></script>
-<script src="app.js"></script>
-</body>
-</html>
+<script>
+/* Résumé dynamique du menu principal + */
+window.renderQuickAddSummary = function(){
+  try {
+    const t=currentTargets(), d=dayTotals();
+    const drinkEl=document.getElementById('drinkCaloriesToday');
+    const drinkKcal=drinkEl ? Math.max(0, Number(String(drinkEl.textContent||'0').replace(/[^0-9.,-]/g,'').replace(',','.'))||0) : 0;
+    const totalKcal=Math.round((d.kcal||0)+drinkKcal);
+    const remaining=t.calories ? Math.max(0, Math.round(t.calories-totalKcal)) : 0;
+    const water=Math.round(waterTotal()||0);
+    const weight=DATA.profile && DATA.profile.weightCurrent ? DATA.profile.weightCurrent : null;
+    setText('quickAddTraining','0 kcal à brûler');
+    setText('quickAddWeight',weight ? weight+' kg' : '— kg');
+    setText('quickAddWater',water.toLocaleString('fr-FR')+' ml bu');
+    setText('quickAddDrinks',Math.round(drinkKcal)+' kcal');
+    setText('quickAddFood',remaining+' kcal restantes');
+  } catch(e) {}
+};
+
+/* UI nutrition : cercles de repas avec progression réelle */
+(function(){
+  const originalRenderAll = window.renderAll;
+  window.renderFood = function(){
+    const t=currentTargets(), d=dayTotals(),
+          drinkKcalEl=document.getElementById('drinkCaloriesToday'),
+          drinkKcal=drinkKcalEl?Math.max(0,Number(String(drinkKcalEl.textContent||'0').replace(/[^0-9.,-]/g,'').replace(',','.'))||0):0,
+          totalKcal=Math.round(d.kcal+drinkKcal),
+          list=(DATA.foodLog[TODAY]||[]).slice().sort((a,b)=>(a.time||'').localeCompare(b.time||'')),
+          rem=t.calories?Math.max(0,Math.round(t.calories-totalKcal)):null,
+          mt=macroTargets(t.calories||2100);
+
+    setText('foodKcalTotal',totalKcal);
+    setText('foodGoalLabel',t.calories?`${t.calories} kcal`:'Objectif à calculer');
+    const remainingPct=t.calories?Math.max(0,Math.min(100,Math.round((rem/t.calories)*100))):0;
+    setText('foodRemainingPct',remainingPct+'%');
+    setText('foodRemaining',rem===null?'0 kcal':rem+' kcal');
+    setText('foodBurned','0');
+    setText('foodProteinTotal',Math.round(d.protein)+' g');
+    setText('foodProteinGoal',t.protein?`${t.protein} g`:'—');
+    setText('foodWeight',DATA.profile.weightCurrent?DATA.profile.weightCurrent+' kg':'—');
+    setText('nutritionCurrentWeight',DATA.profile.weightCurrent?DATA.profile.weightCurrent+' kg':'—');
+    setText('nutritionWeightGoal',DATA.objective.targetWeight?DATA.objective.targetWeight+' kg':'—');
+    setText('nutritionGoalLabel',goalLabel(DATA.objective.type));
+    setText('nutritionCalorieTarget',t.calories?t.calories+' kcal/j':'—');
+
+    const ring=document.getElementById('calorieRing');
+    if(ring){
+      const ratio=t.calories?Math.max(0,Math.min(1,(t.calories-totalKcal)/t.calories)):0;
+      ring.style.strokeDashoffset=(314.16*(1-ratio)).toFixed(2);
+    }
+
+    setText('macroCarbs',`${Math.round(d.carbs)} / ${mt.carbs} g`);
+    setText('macroProtein',`${Math.round(d.protein)} / ${t.protein||'—'} g`);
+    setText('macroFat',`${Math.round(d.fat)} / ${mt.fat} g`);
+    setText('macroFiber',`${Math.round(d.fiber)} / ${mt.fiber} g`);
+    setBar('macroCarbsBar',macroPct(d.carbs,mt.carbs));
+    setBar('macroProteinBar',macroPct(d.protein,t.protein));
+    setBar('macroFatBar',macroPct(d.fat,mt.fat));
+    setBar('macroFiberBar',macroPct(d.fiber,mt.fiber));
+
+    const water=waterTotal(), waterGoal=(DATA.nutrition.waterTarget||2)*1000,
+          glasses=water/250;
+    setText('waterGlasses',`${glasses.toLocaleString('fr-FR',{maximumFractionDigits:1})} ${glasses===1?'verre':'verres'}`);
+    setText('waterTotal',`${(water/1000).toFixed(2).replace('.',',')} L`);
+    setText('waterGoal',`${(waterGoal/1000).toFixed(2).replace('.',',')} L`);
+    const waterPct=Math.min(100,water/waterGoal*100);
+    const waterRing=document.getElementById('waterRing');
+    if(waterRing) waterRing.style.strokeDashoffset=(131.95*(1-waterPct/100)).toFixed(2);
+    setText('waterRingLabel',`${Math.round(waterPct)}%`);
+
+    const groups=[['Petit-déjeuner','☕'],['Déjeuner','🍽️'],['Dîner','🥗'],['En-cas','🍎']];
+    const card=document.getElementById('foodListCard');
+    if(card){
+      card.innerHTML=groups.map(([type,icon])=>{
+        const items=list.filter(f=>(f.mealType||'Repas')===type);
+        const kcal=items.reduce((s,f)=>s+Number(f.kcal||0),0);
+        const goal=Math.round((t.calories||2100)*({'Petit-déjeuner':.25,'Déjeuner':.33,'Dîner':.33,'En-cas':.09}[type]));
+        const pct=goal?Math.min(100,Math.round(kcal/goal*100)):0;
+        const offset=(125.66*(1-pct/100)).toFixed(2);
+        return `<button class="meal-row" onclick="openMealDetails('${type}')">
+          <span class="meal-ring-wrap" aria-hidden="true"><svg viewBox="0 0 48 48"><circle class="meal-ring-track" cx="24" cy="24" r="20"></circle><circle class="meal-ring-progress" style="stroke-dashoffset:${offset}" cx="24" cy="24" r="20"></circle></svg><span class="meal-ring-label">${pct}%</span></span>
+          <span class="meal-main"><strong>${type}</strong><small>${kcal} / ${goal} kcal</small></span>
+          <span class="meal-side"><span>⌄</span></span>
+        </button>`;
+      }).join('');
+    }
+    window.renderQuickAddSummary();
+  };
+
+  // Recalcule le total dès que les calories des boissons/alcools sont mises à jour.
+  const drinkKcalEl=document.getElementById('drinkCaloriesToday');
+  if(drinkKcalEl && window.MutationObserver){
+    new MutationObserver(function(){ window.renderFood(); window.renderQuickAddSummary(); }).observe(drinkKcalEl,{childList:true,characterData:true,subtree:true});
+  }
+})();
+setTimeout(function(){ window.renderQuickAddSummary && window.renderQuickAddSummary(); },0);
+</script>
+
+</body></html>

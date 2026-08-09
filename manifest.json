@@ -1,7 +1,7 @@
 {
   "name": "VitaTrack",
   "short_name": "VitaTrack",
-  "description": "Suivi personnel : repas, sport, eau, sommeil, habitudes et poids.",
+  "description": "Suivi personnel : nutrition, poids, composition corporelle et progression.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
