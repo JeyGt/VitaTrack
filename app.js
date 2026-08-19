@@ -150,7 +150,7 @@ function removeDrink(i){if(!DATA.drinkLog)return;DATA.drinkLog.splice(i,1);saveS
 function renderDrinkLog(){const items=(DATA.drinkLog||[]).map((x,i)=>({...x,idx:i})).filter(x=>x.date===TODAY);const kcal=items.reduce((s,x)=>s+(+x.kcal||0),0);setText('drinkCountToday',items.length);setText('drinkCaloriesToday',Math.round(kcal));const list=document.getElementById('drinkTodayList');if(!list)return;list.innerHTML=items.length?items.map(x=>`<div class="drink-item"><div class="drink-item-main"><span>${x.name}</span><span class="drink-item-cal">${x.portion} · ${x.kcal} kcal</span></div><button class="drink-remove" onclick="removeDrink(${x.idx})">×</button></div>`).join(''):'';
 }
 
-function renderHome(){const p=DATA.profile,t=currentTargets(),today=dayTotals();document.getElementById('greetTitle').textContent=p.name?`Bonjour, ${p.name}`:'VitaTrack';document.getElementById('homeCalories').textContent=Math.round(today.kcal);document.getElementById('homeCaloriesGoal').textContent=t.calories?`${t.calories} kcal`:'—';document.getElementById('homeProtein').textContent=Math.round(today.protein)+' g';document.getElementById('homeProteinGoal').textContent=t.protein?`${t.protein} g`:'—';document.getElementById('homeRemaining').textContent=t.calories?Math.max(0,Math.round(t.calories-today.kcal))+' kcal restantes':'Configure ton profil';const tr=weightTrend();document.getElementById('homeWeight').textContent=p.weightCurrent?p.weightCurrent+' kg':'—';document.getElementById('homeTrend').textContent=tr?`${tr.delta>0?'+':''}${tr.delta.toFixed(1)} kg / période récente`:'Pas encore de données';setText('homeCurrentWeight',p.weightCurrent?p.weightCurrent+' kg':'—');setText('homeWeightGoal',DATA.objective.targetWeight?DATA.objective.targetWeight+' kg':'—');const ws=DATA.weights.slice().sort((a,b)=>b.date.localeCompare(a.date));setText('nutritionPreviousWeight',ws[1]?ws[1].weight+' kg':'—');renderWeeklyReport('weeklyReportHome');renderDrinkLog();const wl=DATA.waterLog?.[TODAY]||0;const wine=DATA.wineLog?.[TODAY]||0;setText('nutritionWaterToday',wl?Math.round(wl)+' ml':'—');setText('nutritionWineToday',wine?wine:'—');}
+function renderHome(){const p=DATA.profile,t=currentTargets(),today=dayTotals();document.getElementById('homeCalories').textContent=Math.round(today.kcal);document.getElementById('homeCaloriesGoal').textContent=t.calories?`${t.calories} kcal`:'—';document.getElementById('homeProtein').textContent=Math.round(today.protein)+' g';document.getElementById('homeProteinGoal').textContent=t.protein?`${t.protein} g`:'—';document.getElementById('homeRemaining').textContent=t.calories?Math.max(0,Math.round(t.calories-today.kcal))+' kcal restantes':'Configure ton profil';const tr=weightTrend();document.getElementById('homeWeight').textContent=p.weightCurrent?p.weightCurrent+' kg':'—';document.getElementById('homeTrend').textContent=tr?`${tr.delta>0?'+':''}${tr.delta.toFixed(1)} kg / période récente`:'Pas encore de données';setText('homeCurrentWeight',p.weightCurrent?p.weightCurrent+' kg':'—');setText('homeWeightGoal',DATA.objective.targetWeight?DATA.objective.targetWeight+' kg':'—');const ws=DATA.weights.slice().sort((a,b)=>b.date.localeCompare(a.date));setText('nutritionPreviousWeight',ws[1]?ws[1].weight+' kg':'—');renderWeeklyReport('weeklyReportHome');renderDrinkLog();const wl=DATA.waterLog?.[TODAY]||0;const wine=DATA.wineLog?.[TODAY]||0;setText('nutritionWaterToday',wl?Math.round(wl)+' ml':'—');setText('nutritionWineToday',wine?wine:'—');}
 
 /* ---------- Food ---------- */
 function allFoods(){return FOOD_DB.concat(DATA.customFoods);}
@@ -290,6 +290,580 @@ function closeSheetIfBg(ev,id){if(ev.target.id===id)closeSheet(id);}
 function exportData(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'}));a.download='vitatrack_'+TODAY+'.json';a.click();toast('Export terminé');}
 function importData(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{try{DATA=migrate(JSON.parse(e.target.result));saveState();document.body.dataset.theme=DATA.settings.theme||'light';renderAll();toast('Données importées');}catch(x){toast('Fichier invalide');}};r.readAsText(f);}
 function resetToday(){if(!confirm('Réinitialiser les repas et données du jour ?'))return;delete DATA.foodLog[TODAY];if(DATA.waterLog)delete DATA.waterLog[TODAY];saveState();renderAll();toast('Journée réinitialisée');}
-function renderAll(){ensureTargets();renderHome();renderFood();renderGuide();renderWeightList();renderProfile();renderWeightChart();renderNutritionCoach();}
-window.addEventListener('load',()=>{document.body.dataset.theme=DATA.settings.theme||'light';renderAll();if(needsSetup())setTimeout(openSetup,350);});
+function ensureSportV3Data(){DATA.sport=DATA.sport||{};DATA.sport.favoriteExercises=DATA.sport.favoriteExercises||[];DATA.sport.progressPhotos=DATA.sport.progressPhotos||[];}
+function renderAll(){ensureSportV3Data();ensureTargets();renderHome();renderFood();renderGuide();renderWeightList();renderProfile();renderWeightChart();renderNutritionCoach();renderSport();}
+/* ========== SPORT MODULE ========== */
+let SPORT_VIEW='today',SPORT_EXPLORE='home',SPORT_FILTER='all',SPORT_PROFILE_RANGE=7;
+function sportStreak(){const done=new Set((DATA.sport.sessionHistory||[]).map(s=>s.completedDate||s.date).filter(Boolean));let d=new Date(),n=0;while(done.has(d.toISOString().slice(0,10))){n++;d.setDate(d.getDate()-1)}return n}
+function sportTodaySession(){const ss=DATA.sport.currentProgram?.sessions||[],dow=['dim','lun','mar','mer','jeu','ven','sam'][new Date().getDay()];return ss.find(s=>s.dayOfWeek===dow&&s.status!=='completed')||ss.find(s=>s.status==='pending')||ss[0]}
+function sportSessionScore(s){if(!s?.exercises?.length)return 0;let t=0,n=0;s.exercises.forEach(e=>{if(e.repsCompleted?.length){const p=(e.plannedReps||[]).reduce((a,b)=>a+b,0),a=e.repsCompleted.reduce((x,y)=>x+y,0),c=Math.min(1,a/Math.max(1,p)),d=1-Math.min(.35,Math.abs((e.difficulty||5)-5)*.07);t+=(c*.8+d*.2)*100;n++}});return n?Math.round(t/n):0}
+function sportKcalForSession(s){return typeof window.sportKcalForActivity==='function' ? window.sportKcalForActivity(s) : Math.round(Number(s?.targetDuration||0)*7)}
+function sportMuscles(s){const set=new Set();(s?.exercises||[]).forEach(e=>{const x=EXERCISES.find(y=>y.id===e.exerciseId);(x?.muscles||[]).forEach(m=>set.add(m))});return [...set].slice(0,4).join(' · ')||'Corps entier'}
+function setSportView(v){SPORT_VIEW=v;renderSport()}
+function renderSport(){
+  const p=DATA.sport.profile||{};
+  if(!p.level||!p.sessionsPerWeek){
+    document.getElementById('sportContent').innerHTML='<div class="card coming-card"><div class="big">🏋️</div><h2>Ton espace Sport</h2><p class="muted">Configure ton niveau, tes objectifs et ton rythme pour créer ton premier programme.</p><button class="btn btn-primary btn-block" onclick="openSportOnboarding()">Créer mon programme</button></div>';
+    return;
+  }
+  document.getElementById('sportContent').innerHTML=`<div class="sport-shell">
+    <div class="sport-top"><div></div>
+      <div class="sport-top-actions"><button class="sport-icon-btn" onclick="openSportPanel('calendar')">📅</button><button class="sport-icon-btn" onclick="openSportPanel('profile')">👤</button></div>
+    </div>
+    <div id="sportV3Body"></div>
+  </div>`;
+  renderSportTodayV3();
+}
+function renderSportTodayV3(){
+  const b=document.getElementById('sportV3Body');
+  const s=sportTodaySession();
+  const c=DATA.sport.monthlyChallenge||{label:'Défi du jour',progress:0,target:1};
+  const st=sportStreak();
+  const done=new Set((DATA.sport.sessionHistory||[]).map(x=>x.completedDate||x.date).filter(Boolean));
+  const today=TODAY;
+  const days=['lun','mar','mer','jeu','ven','sam','dim'],labs=['L','M','M','J','V','S','D'];
+  const now=new Date(),mon=new Date(now);
+  mon.setDate(now.getDate()-(now.getDay()+6)%7);
+  let week='';
+  days.forEach((d,i)=>{
+    const dt=new Date(mon);dt.setDate(mon.getDate()+i);
+    const k=dt.toISOString().slice(0,10);
+    week+=`<div class="sport-day ${done.has(k)?'done ':''}${k===today?'today':''}"><b>${labs[i]}</b><strong>${dt.getDate()}</strong><i></i></div>`;
+  });
+  const cp=Math.min(100,Math.round((c.progress||0)/Math.max(1,c.target)*100));
+
+  b.innerHTML=`
+    <div class="card sport-session-card" style="padding:16px">
+      <div class="sport-section-head">
+        <h3>Aujourd’hui</h3>
+        <span class="sport-chip green">🔥 ${st} ${st>1?'jours':'jour'}</span>
+      </div>
+
+      <!-- PROGRAMME DU JOUR -->
+      <div style="margin-top:14px">
+        <div class="eyebrow">Mon programme du jour</div>
+        ${s?`
+          <div class="row">
+            <div>
+              <strong style="font-size:17px">${s.name}</strong>
+              <small class="muted" style="display:block;margin-top:3px">${s.exercises?.length||0} exercices · ${s.targetDuration||0} min</small>
+            </div>
+            <div class="sport-score">${sportSessionScore(s)||'—'}</div>
+          </div>
+          <div class="sport-session-meta">
+            <span class="sport-chip">💪 ${sportMuscles(s)}</span>
+            <span class="sport-chip green">${pLevel()}</span>
+          </div>
+          <div class="sport-adjusts">
+            <button class="sport-adjust" onclick="sportQuickAdjust('15 min max')">15 min max</button>
+            <button class="sport-adjust" onclick="sportQuickAdjust('Pas de matériel')">Pas de matériel</button>
+            <button class="sport-adjust" onclick="sportQuickAdjust('Plus facile')">Plus facile</button>
+            <button class="sport-adjust" onclick="sportQuickAdjust('Gêne / blessure')">Gêne / blessure</button>
+          </div>
+          <button class="btn btn-primary btn-block" onclick="openSession('${s.id}')">▶ Démarrer la séance</button>
+        `:`<p class="muted small">Pas de séance prévue aujourd’hui.</p>`}
+      </div>
+
+      <!-- DEFI DU JOUR : DANS LE MEME RECTANGLE -->
+      <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border)">
+        <div class="eyebrow">Mon défi du jour</div>
+        <div class="row">
+          <div>
+            <strong style="font-size:16px">${c.label||'Défi du jour'}</strong>
+            <small class="muted" style="display:block;margin-top:3px">${c.progress||0}/${c.target||0} · ${cp}% du défi</small>
+          </div>
+          <strong>${cp}%</strong>
+        </div>
+        <div class="sport-progress" style="margin:10px 0 12px">
+          <i style="width:${cp}%"></i>
+        </div>
+        <button class="btn btn-ghost btn-block" onclick="launchSportChallenge()">▶ Lancer le défi du jour</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sport-section-head">
+        <h3>Cette semaine</h3>
+        <div style="display:flex;gap:8px"><button onclick="openSportHistory()">Historique</button><button onclick="openSportProgress()">Progression</button><button onclick="openSportPanel('calendar')">Calendrier</button></div>
+      </div>
+      <div class="sport-week" style="margin-top:10px">${week}</div>
+    </div>
+
+    <div class="explore-grid" style="margin-top:8px">
+      <button class="explore-card explore-card-wide" onclick="setSportExplore('challenges')"><div class="ico">🏆</div><div><strong>Défis</strong><small>Défis du mois et challenges à relever.</small></div></button>
+      <button class="explore-card explore-card-wide" onclick="setSportExplore('workouts')"><div class="ico">🏋️</div><div><strong>Entraînements</strong><small>Routines prêtes à l’emploi ou personnalisées.</small></div></button>
+      <button class="explore-card explore-card-wide" onclick="setSportExplore('exercises')"><div class="ico">💪</div><div><strong>Exercices</strong><small>Bibliothèque, filtres et favoris.</small></div></button>
+    </div>`;
+}
+function pLevel(){return 'Niveau '+(DATA.sport.profile.level||'')}
+function sportQuickAdjust(x){toast('Adaptation demandée : '+x)}
+function setSportExplore(v){
+  if(v==='exercises' && window.openExerciseLibrary){ window.openExerciseLibrary(); return; }
+  if(v==='workouts' && window.openWorkoutLibrary){ window.openWorkoutLibrary(); return; }
+  SPORT_EXPLORE=v;SPORT_FILTER='all';renderSport();
+}
+function renderSportExploreV3(){const b=document.getElementById('sportV3Body');if(SPORT_EXPLORE==='home'){b.innerHTML='<div class="explore-grid"><button class="explore-card" onclick="setSportExplore(\'programs\')"><div class="ico">📋</div><strong>Programmes</strong><small>Parcours guidés et évolutifs.</small></button><button class="explore-card" onclick="setSportExplore(\'workouts\')"><div class="ico">🏋️</div><strong>Entraînements</strong><small>Routines prêtes à l’emploi ou personnalisées.</small></button><button class="explore-card" onclick="setSportExplore(\'exercises\')"><div class="ico">💪</div><strong>Exercices</strong><small>Bibliothèque, filtres et favoris.</small></button><button class="explore-card" onclick="setSportExplore(\'challenges\')"><div class="ico">🏆</div><strong>Défis</strong><small>Défis du mois et challenges.</small></button><button class="explore-card" onclick="setSportExplore(\'coach\')"><div class="ico">🤖</div><strong>Coach Sport</strong><small>Analyse tes séances et adapte tes prochains entraînements.</small></button></div>';return}const back='<button class="small-link" onclick="setSportExplore(\'home\')">← Explorer</button>';if(SPORT_EXPLORE==='programs'){b.innerHTML=`${back}<div class="card" style="margin-top:10px"><div class="eyebrow">Programmes</div><h2>Choisis ton parcours</h2><div class="filter-row">${['condition_physique','musculation','force','endurance','perte_poids'].map(g=>`<button class="filter-btn ${DATA.sport.objectives?.primary===g?'active':''}" onclick="selectSportGoal('${g}')">${GOALS.find(x=>x.id===g)?.label||g}</button>`).join('')}</div><div class="explore-card"><strong>Programme actuel</strong><small>${DATA.sport.currentProgram?.sessions?.length||0} séances · objectif ${DATA.sport.objectives?.primary||'condition physique'}</small><button class="btn btn-primary btn-block" style="margin-top:10px" onclick="openSportOnboarding()">Modifier mon programme</button></div></div>`;return}if(SPORT_EXPLORE==='workouts'){const ss=DATA.sport.currentProgram?.sessions||[];b.innerHTML=`${back}<div class="card" style="margin-top:10px"><div class="row"><div><div class="eyebrow">Entraînements</div><h2>Routines</h2></div><button class="btn btn-primary btn-sm" onclick="openTraining()">+ Créer</button></div><div class="filter-row"><button class="filter-btn active">Full Body</button><button class="filter-btn">Haut</button><button class="filter-btn">Bas</button></div>${ss.map(x=>`<div class="exercise-row"><div class="exercise-ico">🏋️</div><div class="exercise-main"><strong>${x.name}</strong><small>${x.targetDuration} min · ${x.exercises?.length||0} exercices</small></div><button class="btn btn-primary btn-sm" onclick="openSession('${x.id}')">▶</button></div>`).join('')}</div>`;return}if(SPORT_EXPLORE==='exercises'){const fs=[['all','Tous','🔎'],['cardio','Cardio','❤️'],['bras','Bras','💪'],['pectoraux','Pectoraux','🫀'],['dos','Dos','🦾'],['abdos','Abdos','🔥'],['cuisses','Cuisses','🦵']],f=DATA.sport.favoriteExercises||[],map={cardio:['loco'],bras:['biceps','triceps'],pectoraux:['pectoraux'],dos:['dos','trap'],abdos:['abdo','gainage'],cuisses:['quadr','jambe','fess']};const list=EXERCISES.filter(x=>SPORT_FILTER==='all'||(x.muscles||[]).concat(x.musclesSec||[]).some(m=>map[SPORT_FILTER]?.some(k=>m.toLowerCase().includes(k)))).slice(0,30);b.innerHTML=`${back}<div class="card" style="margin-top:10px"><div class="eyebrow">Répertoire des exercices</div><h2>Bibliothèque</h2><div class="filter-row">${fs.map(x=>`<button class="filter-btn ${SPORT_FILTER===x[0]?'active':''}" onclick="setSportFilter('${x[0]}')">${x[2]} ${x[1]}</button>`).join('')}</div>${list.map(x=>`<div class="exercise-row"><div class="exercise-ico">${MOVEMENTS[x.move]?.icon||'🏋️'}</div><div class="exercise-main"><strong>${x.name}</strong><small>${(x.muscles||[]).join(' · ')} · ${x.level}</small></div><button class="exercise-fav" onclick="toggleSportFavorite('${x.id}')">${f.includes(x.id)?'⭐':'☆'}</button><button class="btn btn-ghost btn-sm" onclick="openExerciseInfo('${x.id}')">Voir</button></div>`).join('')}</div>`;return}if(SPORT_EXPLORE==='challenges'){const c=DATA.sport.monthlyChallenge,p=c?Math.min(100,Math.round(c.progress/Math.max(1,c.target)*100)):0;b.innerHTML=`${back}<div class="card"><div class="eyebrow">Défis</div><h2>Défi du mois</h2>${c?`<strong>${c.label}</strong><p class="muted small">${c.progress}/${c.target} · ${p}%</p><div class="sport-progress"><i style="width:${p}%"></i></div><button class="btn btn-primary btn-block" style="margin-top:12px" onclick="launchSportChallenge()">Lancer le défi du jour</button>`:'<p class="muted">Configure ton programme pour créer un défi.</p>'}</div><div class="card"><h3>Catalogue</h3><p class="muted small">Défis de 7, 14 ou 21 jours : force, cardio, gainage, mobilité.</p></div>`;return}if(SPORT_EXPLORE==='coach'){b.innerHTML=`${back}<div class="card"><div class="eyebrow">Coach IA</div><h2>Ton coach s’adapte</h2><p class="muted">Objectif : <strong>${DATA.sport.objectives?.primary||'condition physique'}</strong></p><p class="muted small">Récupération : ${estimateRecovery().label}</p><button class="btn btn-primary btn-block" onclick="openSportOnboarding()">Modifier mes objectifs</button></div>`}}
+function setSportFilter(v){SPORT_FILTER=v;renderSportExploreV3()}
+function selectSportGoal(g){DATA.sport.objectives.primary=g;saveState();generateInitialProgram();DATA.sport.monthlyChallenge=generateMonthlyChallenge();renderSportExploreV3();toast('Programme adapté')}
+function toggleSportFavorite(id){DATA.sport.favoriteExercises=DATA.sport.favoriteExercises||[];const i=DATA.sport.favoriteExercises.indexOf(id);if(i>=0)DATA.sport.favoriteExercises.splice(i,1);else DATA.sport.favoriteExercises.push(id);saveState();renderSportExploreV3()}
+function openExerciseInfo(id){const x=EXERCISES.find(e=>e.id===id);if(x)alert(x.name+'\\n\\nMuscles : '+(x.muscles||[]).join(', ')+'\\nNiveau : '+x.level+'\\n\\n'+(x.instr||''))}
+function launchSportChallenge(){toast('Défi du jour lancé')}
+function openSportPanel(type){let p=document.getElementById('sportPanel');if(!p){p=document.createElement('div');p.id='sportPanel';p.className='sport-panel';document.body.appendChild(p)}p.classList.add('open');type==='calendar'?renderSportCalendarPanel(p):renderSportProfilePanel(p)}
+function closeSportPanel(){document.getElementById('sportPanel')?.classList.remove('open')}
+function renderSportCalendarPanel(p){const n=new Date(),y=n.getFullYear(),m=n.getMonth(),first=new Date(y,m,1),last=new Date(y,m+1,0),off=(first.getDay()+6)%7,done=new Set((DATA.sport.sessionHistory||[]).map(s=>s.completedDate||s.date).filter(Boolean)),heads=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];let g=heads.map(x=>`<div class="cal-head">${x}</div>`).join('');for(let i=0;i<off;i++)g+='<div></div>';for(let d=1;d<=last.getDate();d++){const k=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');g+=`<button class="cal-day ${k===TODAY?'today ':''}${done.has(k)?'done':''}" onclick="showSportDay('${k}')">${d}${done.has(k)?'<span class="cal-dot"></span>':''}</button>`}p.innerHTML=`<div class="sport-panel-head"><h2>📅 Calendrier</h2><button class="sport-close" onclick="closeSportPanel()">×</button></div><div class="card"><div class="eyebrow">${first.toLocaleDateString('fr-FR',{month:'long',year:'numeric'})}</div><div class="sport-calendar">${g}</div></div><div id="sportDayDetail" class="card" style="margin-top:12px"><p class="muted">Sélectionne une journée.</p></div>`}
+function showSportDay(date){const h=(DATA.sport.sessionHistory||[]).filter(s=>(s.completedDate||s.date)===date),mins=h.reduce((a,s)=>a+Number(s.targetDuration||0),0),k=h.reduce((a,s)=>a+sportKcalForSession(s),0),score=h.length?Math.round(h.reduce((a,s)=>a+(s.score||sportSessionScore(s)),0)/h.length):0;const e=document.getElementById('sportDayDetail');if(e)e.innerHTML=`<div class="eyebrow">${date}</div><h3>${h.length?'Activité réalisée':'Repos / aucune séance'}</h3><div class="sport-metrics"><div class="sport-metric"><strong>${h.length}</strong><small>séances</small></div><div class="sport-metric"><strong>${mins}</strong><small>minutes</small></div><div class="sport-metric"><strong>${k}</strong><small>kcal</small></div></div><p class="muted small">Score global : <strong>${score}%</strong></p>`}
+function renderSportProfilePanel(p){
+  const h=DATA.sport.sessionHistory||[],r=SPORT_PROFILE_RANGE;
+  const cutoff=r===0?0:Date.now()-r*86400000;
+  const f=r===0?h:h.filter(s=>new Date(s.completedDate||s.date||0).getTime()>=cutoff);
+  const mins=f.reduce((a,s)=>a+Number(s.targetDuration||s.durationSeconds/60||0),0);
+  const k=f.reduce((a,s)=>a+sportKcalForSession(s),0);
+  const activeDays=new Set(f.map(s=>String(s.completedDate||s.date||'').slice(0,10)).filter(Boolean)).size;
+  const previousCutoff=r===0?0:cutoff-r*86400000;
+  const prev=r===0?[]:h.filter(s=>{const d=new Date(s.completedDate||s.date||0).getTime();return d>=previousCutoff&&d<cutoff});
+  const prevMins=prev.reduce((a,s)=>a+Number(s.targetDuration||s.durationSeconds/60||0),0);
+  const prevK=prev.reduce((a,s)=>a+sportKcalForSession(s),0);
+  const trend=(a,b)=>b?`${a>=b?'↗️':'↘️'} ${Math.round(Math.abs(a-b))}`:'—';
+  const ex={};
+  f.forEach(s=>{if(s.type==='exercise'){const n=s.exerciseName||s.name||'Exercice';ex[n]=(ex[n]||0)+1;}else (s.exercises||[]).forEach(e=>{const n=e.exerciseName||e.name||'Exercice';ex[n]=(ex[n]||0)+1;});});
+  const top=Object.entries(ex).sort((a,b)=>b[1]-a[1]).slice(0,4);
+  const z=['Pectoraux','Dos','Épaules','Bras','Abdos','Cuisses','Cardio'];
+  p.innerHTML=`<div class="sport-panel-head"><h2>👤 Mon activité</h2><button class="sport-close" onclick="closeSportPanel()">×</button></div>
+  <div class="filter-row"><button class="filter-btn ${r===7?'active':''}" onclick="SPORT_PROFILE_RANGE=7;renderSportProfilePanel(document.getElementById('sportPanel'))">7 jours</button><button class="filter-btn ${r===30?'active':''}" onclick="SPORT_PROFILE_RANGE=30;renderSportProfilePanel(document.getElementById('sportPanel'))">30 jours</button><button class="filter-btn ${r===0?'active':''}" onclick="SPORT_PROFILE_RANGE=0;renderSportProfilePanel(document.getElementById('sportPanel'))">Depuis toujours</button></div>
+  <div class="card"><div class="sport-metrics"><div class="sport-metric"><strong>${f.length}</strong><small>activités</small></div><div class="sport-metric"><strong>${mins}</strong><small>minutes</small></div><div class="sport-metric"><strong>${k}</strong><small>kcal</small></div><div class="sport-metric"><strong>${activeDays}</strong><small>jours actifs</small></div></div></div>
+  ${r!==0?`<div class="card"><div class="eyebrow">Par rapport à la période précédente</div><div class="row small"><span>Activités</span><strong>${trend(f.length,prev.length)}</strong></div><div class="row small" style="margin-top:6px"><span>Temps</span><strong>${trend(mins,prevMins)} min</strong></div><div class="row small" style="margin-top:6px"><span>Calories</span><strong>${trend(k,prevK)} kcal</strong></div></div>`:''}
+  <div class="card"><div class="eyebrow">🏆 Exercices les plus réalisés</div>${top.length?top.map(([n,c])=>`<div class="row small" style="margin-top:7px"><span>${escapeHtml(n)}</span><strong>${c}×</strong></div>`).join(''):'<div class="muted small" style="margin-top:7px">Pas encore assez de séances pour afficher une tendance.</div>'}</div>
+  <div class="card"><div class="eyebrow">Récupération</div><h3>${estimateRecovery().label}</h3><div class="body-map">${z.map((x,i)=>`<div class="body-zone ${i<2?'ready':i===2?'tired':''}">${i<2?'🟢':'🟠'} ${x}</div>`).join('')}</div></div>
+  <div class="card"><div class="row"><div><div class="eyebrow">Photos de suivi</div><strong>Progression visuelle</strong></div><label class="btn btn-ghost btn-sm">+ Photo<input type="file" accept="image/*" onchange="addSportProgressPhoto(this)" hidden></label></div><div id="sportPhotos" class="photo-grid" style="margin-top:10px"></div></div>`;
+  renderSportPhotos();
+}
+function renderSportPhotos(){const b=document.getElementById('sportPhotos');if(!b)return;const p=DATA.sport.progressPhotos||[];b.innerHTML=p.slice(-6).map(x=>`<div class="photo-slot"><img src="${x.data}" alt="Photo de suivi"></div>`).join('')||'<div class="photo-slot">📷</div><div class="photo-slot">📷</div><div class="photo-slot">📷</div>'}
+function addSportProgressPhoto(input){const f=input.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{DATA.sport.progressPhotos=DATA.sport.progressPhotos||[];DATA.sport.progressPhotos.push({date:TODAY,data:r.result});saveState();renderSportPhotos();toast('Photo de suivi enregistrée')};r.readAsDataURL(f)}
+
+function renderSportWeekly(){
+  const program=DATA.sport.currentProgram;
+  if(!program||!program.sessions) return;
+  
+  const box=document.getElementById('sportWeekly');
+  const daysMap={lun:'Lun',mar:'Mar',mer:'Mer',jeu:'Jeu',ven:'Ven',sam:'Sam',dim:'Dim'};
+  
+  box.innerHTML=program.sessions.map(s=>{
+    const statusIcon=s.status==='completed'?'✅':s.status==='in_progress'?'⏱️':'⭕';
+    return `<div class="card session-card" onclick="${s.status!=='completed'?`openSession('${s.id}')`:''}"><div style="display:flex;justify-content:space-between;align-items:start"><div><strong>${s.name}</strong><small class="muted">${s.targetDuration} min</small></div><span style="font-size:18px">${statusIcon}</span></div></div>`;
+  }).join('')||'<div class="card"><p class="muted">Aucune séance planifiée.</p></div>';
+}
+
+function renderSportProgress(){
+  const progress=DATA.sport.exerciseProgress||{};
+  const entries=Object.values(progress).slice(0,5);
+  
+  if(entries.length===0){
+    document.getElementById('sportProgress').innerHTML='<div class="card"><p class="muted small">Complète quelques séances pour voir ta progression.</p></div>';
+    return;
+  }
+  
+  document.getElementById('sportProgress').innerHTML=`<div class="card"><div style="display:flex;flex-direction:column;gap:10px">${entries.map(e=>{
+    const trending=e.trend==='progression'?'📈':e.trend==='regression'?'📉':'➡️';
+    return `<div style="display:flex;justify-content:space-between;align-items:center"><div><strong style="font-size:13px">${EXERCISES.find(ex=>ex.id===e.exerciseId)?.name||'Exercice'}</strong><small class="muted">×${e.bestReps}</small></div><span>${trending}</span></div>`;
+  }).join('')}</div></div>`;
+}
+
+function renderSportChallenge(){
+  const c=DATA.sport.monthlyChallenge;
+  if(!c) return;
+  
+  const pct=Math.round(c.progress/c.target*100);
+  document.getElementById('sportChallenge').innerHTML=`<div class="card"><div style="margin-bottom:12px"><strong>${c.label}</strong><small class="muted" style="display:block;margin-top:4px">${c.progress} / ${c.target}</small></div><div class="pbar" style="height:8px"><div style="background:var(--primary);width:${pct}%;height:100%"></div></div><small class="muted" style="display:block;margin-top:6px">${pct}%</small>${pct===100?'<div style="margin-top:8px;color:var(--primary);font-weight:700;font-size:13px">🎉 Défi réussi!</div>':''}</div>`;
+}
+
+function openSportOnboarding(){
+  openSheet('sportOnboardingOverlay');
+}
+
+/* ===== Test de performance initial (calibrage du niveau) ===== */
+
+let PERF_TEST_STATE = { step: 'intro', pompes: null, squats: null };
+
+function openSportPerfTest(){
+  PERF_TEST_STATE = { step: 'intro', pompes: null, squats: null };
+  renderPerfTestStep();
+  openSheet('sportPerfTestOverlay');
+}
+
+function renderPerfTestStep(){
+  const b=document.getElementById('perfTestBody');
+  if(!b) return;
+
+  if(PERF_TEST_STATE.step==='intro'){
+    b.innerHTML=`<div class="card" style="text-align:center;padding:20px">
+      <div class="big" style="font-size:40px">💪</div>
+      <p class="muted" style="margin-top:8px">Étape 1/2 : pompes (adapte-toi si besoin — sur les genoux, ça compte aussi).</p>
+      <button class="btn btn-primary btn-block" style="margin-top:14px" onclick="startPerfTestTimer('pompes')">Démarrer les 30 secondes</button>
+      <button class="small-link" style="margin-top:10px" onclick="skipPerfTest()">Passer le test</button>
+    </div>`;
+    return;
+  }
+  if(PERF_TEST_STATE.step==='count_pompes'||PERF_TEST_STATE.step==='count_squats'){
+    const label=PERF_TEST_STATE.step==='count_pompes'?'pompes':'squats';
+    b.innerHTML=`<div class="card" style="text-align:center;padding:20px">
+      <p class="muted">Combien de ${label} as-tu réalisées ?</p>
+      <input type="number" id="perfTestReps" min="0" value="0" style="width:100%;text-align:center;font-size:28px;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--surface-alt);color:var(--ink);margin-top:10px">
+      <button class="btn btn-primary btn-block" style="margin-top:14px" onclick="submitPerfTestCount('${label}')">Valider</button>
+    </div>`;
+    return;
+  }
+  if(PERF_TEST_STATE.step==='between'){
+    b.innerHTML=`<div class="card" style="text-align:center;padding:20px">
+      <div class="big" style="font-size:40px">🦵</div>
+      <p class="muted" style="margin-top:8px">Étape 2/2 : squats poids du corps, 30 secondes.</p>
+      <button class="btn btn-primary btn-block" style="margin-top:14px" onclick="startPerfTestTimer('squats')">Démarrer les 30 secondes</button>
+      <button class="small-link" style="margin-top:10px" onclick="skipPerfTest()">Passer le test</button>
+    </div>`;
+    return;
+  }
+  if(PERF_TEST_STATE.step==='result'){
+    const r=PERF_TEST_STATE.evalResult;
+    const labels={debutant:'🌱 Débutant',intermediaire:'💪 Intermédiaire',avance:'🔥 Avancé'};
+    b.innerHTML=`<div class="card" style="text-align:center;padding:20px">
+      <div class="big" style="font-size:32px">${labels[r.level]}</div>
+      <p class="muted small" style="margin-top:10px">${r.detail.pompes.reps} pompes · ${r.detail.squats.reps} squats en 30s</p>
+      <p class="muted small" style="margin-top:6px">${r.detail.reason}</p>
+      <button class="btn btn-primary btn-block" style="margin-top:14px" onclick="applyPerfTestResult()">Utiliser ce niveau</button>
+    </div>`;
+  }
+}
+
+let PERF_TEST_TIMER=null;
+function startPerfTestTimer(which){
+  const b=document.getElementById('perfTestBody');
+  let remaining=30;
+  b.innerHTML=`<div class="card" style="text-align:center;padding:24px">
+    <div class="sport-score" style="width:90px;height:90px;font-size:28px;margin:0 auto" id="perfTestClock">${remaining}</div>
+    <p class="muted" style="margin-top:12px">Fais un maximum de ${which==='pompes'?'pompes':'squats'} !</p>
+  </div>`;
+  clearInterval(PERF_TEST_TIMER);
+  PERF_TEST_TIMER=setInterval(()=>{
+    remaining--;
+    const clock=document.getElementById('perfTestClock');
+    if(clock) clock.textContent=remaining;
+    if(remaining<=0){
+      clearInterval(PERF_TEST_TIMER);
+      PERF_TEST_STATE.step = which==='pompes' ? 'count_pompes' : 'count_squats';
+      renderPerfTestStep();
+    }
+  },1000);
+}
+
+function submitPerfTestCount(which){
+  const val=+(document.getElementById('perfTestReps')?.value||0);
+  if(which==='pompes'){
+    PERF_TEST_STATE.pompes=val;
+    PERF_TEST_STATE.step='between';
+  } else {
+    PERF_TEST_STATE.squats=val;
+    PERF_TEST_STATE.evalResult=evaluatePerformanceTest({pompes:PERF_TEST_STATE.pompes,squats:PERF_TEST_STATE.squats});
+    PERF_TEST_STATE.step='result';
+  }
+  renderPerfTestStep();
+}
+
+function skipPerfTest(){
+  clearInterval(PERF_TEST_TIMER);
+  closeSheet('sportPerfTestOverlay');
+}
+
+function applyPerfTestResult(){
+  const sel=document.getElementById('sport_level');
+  if(sel) sel.value=PERF_TEST_STATE.evalResult.level;
+  // Enregistre aussi le détail du test dès maintenant (sera confirmé par saveSportSetup)
+  DATA.sport.performanceTest={date:new Date().toISOString().split('T')[0],results:{pompes:PERF_TEST_STATE.pompes,squats:PERF_TEST_STATE.squats},...PERF_TEST_STATE.evalResult};
+  closeSheet('sportPerfTestOverlay');
+  toast('Niveau mis à jour : '+PERF_TEST_STATE.evalResult.level);
+}
+
+function saveSportSetup(){
+  const profile=DATA.sport.profile;
+  const objectives=DATA.sport.objectives;
+  
+  profile.level=document.getElementById('sport_level').value;
+  profile.sessionsPerWeek=+document.getElementById('sport_sessions').value;
+  profile.sessionDuration=+document.getElementById('sport_duration').value;
+  
+  const equipment=[];
+  document.querySelectorAll('[name="sport_equipment"]:checked').forEach(cb=>equipment.push(cb.value));
+  profile.equipment=equipment;
+  
+  profile.preferredDays=[
+    document.getElementById('sport_day_1').checked?'lun':'',
+    document.getElementById('sport_day_2').checked?'mar':'',
+    document.getElementById('sport_day_3').checked?'mer':'',
+    document.getElementById('sport_day_4').checked?'jeu':'',
+    document.getElementById('sport_day_5').checked?'ven':'',
+    document.getElementById('sport_day_6').checked?'sam':'',
+    document.getElementById('sport_day_7').checked?'dim':''
+  ].filter(Boolean);
+  
+  objectives.primary=document.getElementById('sport_goal').value;
+  
+  generateInitialProgram();
+  DATA.sport.monthlyChallenge=generateMonthlyChallenge();
+  
+  closeSheet('sportOnboardingOverlay');
+  saveState();
+  toast('Programme créé!');
+  renderSport();
+}
+
+function openSession(sessionId){
+  const program=DATA.sport.currentProgram;
+  const session=program?.sessions?.find(s=>s.id===sessionId);
+  if(!session) return;
+  
+  session.status='in_progress';
+  session.startTime=new Date().toISOString();
+  saveState();
+  
+  const box=document.getElementById('sessionWorkArea');
+  const recovery=estimateRecovery();
+  
+  box.innerHTML = '<div class="card">' +
+    '<div class="eyebrow">Séance en cours</div>' +
+    '<h2>' + session.name + '</h2>' +
+    '<div class="row" style="align-items:center;margin-top:6px"><p class="muted" style="margin:0">' + recovery.label + '</p><strong id="sessionElapsed" class="sport-chip green">0:00</strong></div>' +
+    '<div style="margin:16px 0 0;display:flex;flex-direction:column;gap:8px">' +
+    session.exercises.map((ex,i) =>
+      '<div class="exercise-item" data-exercise-idx="' + i + '">' +
+        '<div style="display:flex;justify-content:space-between;align-items:start">' +
+          '<div><strong>' + ex.exerciseName + '</strong><small class="muted">' + ex.plannedSets + ' × ' + ex.plannedReps.join(' / ') + '</small></div>' +
+          '<button class="btn btn-sm btn-ghost" onclick="toggleExerciseDetail(' + i + ')">+</button>' +
+        '</div>' +
+        '<div class="exercise-detail" id="ex_detail_' + i + '" style="display:none;margin-top:8px;padding:12px;background:var(--surface-alt);border-radius:12px">' +
+          '<div class="row" style="margin-bottom:10px"><small class="muted">Repos conseillé : ' + (ex.plannedRestSeconds||60) + 's</small><button class="btn btn-ghost btn-sm" onclick="startRestTimer(' + i + ',' + (ex.plannedRestSeconds||60) + ')">⏱ Lancer le repos</button></div>' +
+          '<div id="restTimer_' + i + '"></div>' +
+          '<div class="field"><label>Répétitions réalisées</label><input type="text" id="ex_reps_' + i + '" placeholder="15, 14, 13"></div>' +
+          '<div class="field"><label>Difficulté (1-10)</label><input type="number" id="ex_diff_' + i + '" min="1" max="10" value="5"></div>' +
+          '<div class="field"><label>Retour</label><select id="ex_fb_' + i + '"><option value="">Choisir</option><option value="too_easy">Trop facile</option><option value="adapted">Adapté</option><option value="too_difficult">Trop difficile</option></select></div>' +
+          '<button class="btn btn-primary btn-block btn-sm" onclick="recordExerciseFeedback(' + i + ',\'' + sessionId + '\')">Enregistrer</button>' +
+        '</div>' +
+      '</div>'
+    ).join('') +
+    '</div><div style="margin-top:16px"><button class="btn btn-primary btn-block" onclick="finishSession(\'' + sessionId + '\')">Terminer la séance</button></div></div>';
+  
+  document.getElementById('sportContent').innerHTML=box.innerHTML;
+  startSessionClock(session.startTime);
+}
+
+/* ===== Chrono global de la séance (temps écoulé depuis le démarrage) ===== */
+
+let SESSION_CLOCK_INTERVAL=null;
+function startSessionClock(startTimeIso){
+  clearInterval(SESSION_CLOCK_INTERVAL);
+  const start=new Date(startTimeIso).getTime();
+  const render=()=>{
+    const el=document.getElementById('sessionElapsed');
+    if(!el){ clearInterval(SESSION_CLOCK_INTERVAL); return; }
+    const elapsedSec=Math.max(0,Math.floor((Date.now()-start)/1000));
+    const m=Math.floor(elapsedSec/60), s=elapsedSec%60;
+    el.textContent=m+':'+String(s).padStart(2,'0');
+  };
+  render();
+  SESSION_CLOCK_INTERVAL=setInterval(render,1000);
+}
+
+function stopSessionClock(){
+  clearInterval(SESSION_CLOCK_INTERVAL);
+}
+
+/* ===== Minuteur de repos entre séries ===== */
+
+const REST_TIMERS = {}; // idx -> intervalId, pour pouvoir arrêter/relancer sans conflit
+
+function beepSound(){
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator(), gain=ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value=880; gain.gain.value=0.15;
+    osc.start(); osc.stop(ctx.currentTime+0.25);
+  }catch(e){/* pas grave si l'audio n'est pas dispo */}
+}
+
+function startRestTimer(idx, seconds){
+  const box=document.getElementById('restTimer_'+idx);
+  if(!box) return;
+  clearInterval(REST_TIMERS[idx]);
+  let remaining=seconds;
+  const render=()=>{
+    const pct=Math.round((1-remaining/seconds)*100);
+    box.innerHTML='<div class="row" style="align-items:center;gap:10px"><div class="sport-score" style="width:56px;height:56px;font-size:18px">'+remaining+'</div><div style="flex:1"><div class="sport-progress"><i style="width:'+pct+'%"></i></div><small class="muted" style="display:block;margin-top:4px">Repos en cours…</small></div><button class="btn btn-ghost btn-sm" onclick="stopRestTimer('+idx+')">Passer</button></div>';
+  };
+  render();
+  REST_TIMERS[idx]=setInterval(()=>{
+    remaining--;
+    if(remaining<=0){
+      clearInterval(REST_TIMERS[idx]);
+      delete REST_TIMERS[idx];
+      beepSound();
+      box.innerHTML='<div class="row" style="align-items:center;gap:10px"><strong style="color:var(--primary)">✅ Repos terminé, c\'est reparti !</strong></div>';
+      return;
+    }
+    render();
+  },1000);
+}
+
+function stopRestTimer(idx){
+  clearInterval(REST_TIMERS[idx]);
+  delete REST_TIMERS[idx];
+  const box=document.getElementById('restTimer_'+idx);
+  if(box) box.innerHTML='';
+}
+
+function toggleExerciseDetail(idx){
+  const detail=document.getElementById(`ex_detail_${idx}`);
+  if(detail) detail.style.display=detail.style.display==='none'?'block':'none';
+}
+
+function recordExerciseFeedback(exerciseIdx,sessionId){
+  const program=DATA.sport.currentProgram;
+  const session=program?.sessions?.find(s=>s.id===sessionId);
+  if(!session||!session.exercises[exerciseIdx]) return;
+  
+  const ex=session.exercises[exerciseIdx];
+  const repsStr=document.getElementById(`ex_reps_${exerciseIdx}`).value;
+  const difficulty=+document.getElementById(`ex_diff_${exerciseIdx}`).value;
+  const feedback=document.getElementById(`ex_fb_${exerciseIdx}`).value;
+  
+  // Parser les reps (ex: "15, 14, 13")
+  const repsArray=repsStr.split(',').map(r=>+r.trim()).filter(r=>!isNaN(r));
+  ex.repsCompleted=repsArray;
+  ex.difficulty=difficulty;
+  ex.feedback=feedback;
+  
+  trackProgress(ex.exerciseId,repsArray[0]||0,difficulty);
+  updateChallengeProgress(ex.exerciseId,repsArray.reduce((a,b)=>a+b,0));
+  
+  saveState();
+  toast('Exercice enregistré');
+}
+
+function finishSession(sessionId){
+  const program=DATA.sport.currentProgram;
+  const session=program?.sessions?.find(s=>s.id===sessionId);
+  if(!session) return;
+  
+  stopSessionClock();
+  Object.keys(REST_TIMERS).forEach(idx=>stopRestTimer(idx));
+  
+  const decision=completeSession(sessionId);
+  session.score=sportSessionScore(session)||decision?.score||0;
+  session.estimatedKcal=sportKcalForSession(session);
+  
+  saveState();
+  toast(decision?.weekAdvanced ? 'Séance complétée ! Nouvelle semaine générée par le coach.' : 'Séance complétée! Coach a analysé ta performance.');
+  
+  setTimeout(()=>{
+    renderSport();
+  },500);
+}
+
+function closeWelcomeScreen(){
+  const screen=document.getElementById('welcomeScreen');
+  if(!screen)return;
+  screen.classList.add('hidden');
+  setTimeout(()=>screen.remove(),320);
+  if(needsSetup())setTimeout(openSetup,180);
+}
+window.closeWelcomeScreen=closeWelcomeScreen;
+function renderWelcomeScreen(){
+  const screen=document.getElementById('welcomeScreen');
+  if(!screen)return;
+  const name=(DATA.profile&&DATA.profile.name||'').trim();
+  const title=document.getElementById('welcomeTitle');
+  if(name){
+    title.innerHTML=`Bonjour, <strong>${name}</strong>`;
+  }else{
+    title.innerHTML='Bienvenue';
+  }
+  setTimeout(()=>closeWelcomeScreen(),3000);
+}
+window.addEventListener('load',()=>{document.body.dataset.theme=DATA.settings.theme||'light';renderAll();renderWelcomeScreen();});
 window.addEventListener('resize',()=>renderWeightChart());
+
+
+/* ===== Withings — connexion balance (Public API) ===== */
+const WITHINGS_CONNECTOR = {
+  endpoint: '/api/withings',
+  async status(){
+    const r=await fetch(this.endpoint+'?action=status',{credentials:'include'});
+    if(!r.ok) throw new Error('status');
+    return r.json();
+  },
+  connect(){ window.location.href=this.endpoint+'?action=connect'; },
+  async sync(){
+    const r=await fetch(this.endpoint+'?action=measurements',{credentials:'include'});
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.error||'sync');
+    return d;
+  },
+  async disconnect(){
+    const r=await fetch(this.endpoint+'?action=disconnect',{credentials:'include'});
+    return r.json();
+  }
+};
+
+function ensureWithingsUI(){
+  const card=document.querySelector('.weigh-card');
+  if(!card || card.querySelector('#withingsBox')) return;
+  const box=document.createElement('div');
+  box.id='withingsBox';
+  box.style.cssText='margin-top:12px;padding-top:12px;border-top:1px solid var(--border)';
+  box.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div><strong style="font-size:13px">⚖️ Balance Withings</strong><div id="withingsStatus" class="muted small" style="margin-top:3px">Connexion non configurée</div></div><button id="withingsAction" class="btn btn-ghost btn-sm" type="button">Connecter</button></div><div id="withingsData" style="display:none;margin-top:10px"></div>`;
+  card.appendChild(box);
+  refreshWithingsUI();
+}
+
+async function refreshWithingsUI(){
+  const statusEl=document.getElementById('withingsStatus'),btn=document.getElementById('withingsAction');
+  if(!statusEl||!btn)return;
+  try{
+    const d=await WITHINGS_CONNECTOR.status();
+    if(d.connected){
+      statusEl.textContent=d.lastSync?`Connectée · dernière synchro ${d.lastSync}`:'Connectée';
+      btn.textContent='Synchroniser';
+      btn.onclick=async()=>{btn.disabled=true;btn.textContent='…';try{await syncWithings();}catch(e){toast('Synchronisation impossible');}finally{btn.disabled=false;btn.textContent='Synchroniser';}};
+    }else{
+      statusEl.textContent=d.configured?'Prête à être connectée':'Connexion Withings à configurer';
+      btn.textContent='Connecter';
+      btn.onclick=()=>WITHINGS_CONNECTOR.connect();
+    }
+  }catch(e){
+    statusEl.textContent='Connexion serveur indisponible';
+    btn.textContent='Configurer';
+    btn.onclick=()=>toast('Le serveur Withings doit être configuré');
+  }
+}
+
+async function syncWithings(){
+  const d=await WITHINGS_CONNECTOR.sync();
+  const measures=d.measurements||[];
+  let added=0;
+  for(const m of measures){
+    if(!(m.weight>0)) continue;
+    const date=m.date||TODAY;
+    const exists=DATA.weights.some(x=>x.withingsId===m.id || (x.date===date && Math.abs(Number(x.weight)-Number(m.weight))<0.01 && x.source==='withings'));
+    if(exists) continue;
+    DATA.weights.push({date,weight:m.weight,source:'withings',withingsId:m.id||null,bodyFat:m.bodyFat??null,muscleMass:m.muscleMass??null,hydration:m.hydration??null,visceralFat:m.visceralFat??null});
+    added++;
+  }
+  if(added){
+    DATA.weights.sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+    const last=DATA.weights[DATA.weights.length-1];
+    if(last?.weight){DATA.profile.weightCurrent=Number(last.weight);if(!DATA.profile.startingWeight)DATA.profile.startingWeight=Number(last.weight);}
+    saveState(); renderAll();
+  }
+  toast(added?`${added} nouvelle${added>1?'s':''} pesée${added>1?'s':''} importée${added>1?'s':''}`:'Aucune nouvelle pesée');
+  return d;
+}
+
+const _renderAllOriginal=renderAll;
+renderAll=function(){_renderAllOriginal();setTimeout(ensureWithingsUI,0);};

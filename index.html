@@ -578,10 +578,1119 @@ input[type="range"]{width:100%;}
   .quick-add-choice strong{font-size:8.5px}
   .quick-add-choice small{font-size:7.5px}
 }
+
+/* ===== SPORT MODULE ===== */
+.session-next{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;background:var(--surface-alt);border-radius:12px;margin-top:12px}
+.session-next .session-info{flex:1;min-width:0}
+.session-next strong{display:block;margin-bottom:3px}
+.session-next small{color:var(--ink-soft);font-size:11px}
+.session-card{cursor:pointer;transition:.15s}
+.session-card:active{background:var(--surface-alt)}
+.exercise-item{padding:12px;background:var(--surface-alt);border-radius:12px;margin-bottom:8px}
+.exercise-detail{border:1px solid var(--border)}
+.sport-progress-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+.sport-progress-item:last-child{border-bottom:none}
+</style>
+<style>
+.sport-shell{display:flex;flex-direction:column;gap:12px}.sport-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.sport-top-title{font-family:Fraunces,serif;font-size:26px;font-weight:600;margin:0}.sport-top-actions{display:flex;gap:7px}.sport-icon-btn{width:42px;height:42px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--ink);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)}.sport-icon-btn svg{width:19px;height:19px}.sport-tabs{display:none}.sport-tab{border:0;background:transparent;color:var(--ink-soft);border-radius:99px;padding:10px;font-weight:800;font-size:13px}.sport-tab.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 5px rgba(0,0,0,.08)}.sport-streak{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;background:var(--primary-tint);border-radius:16px}.sport-streak .big{font-family:Fraunces,serif;font-size:28px;font-weight:600}.sport-streak small{display:block;color:var(--ink-soft);font-size:11px}.sport-session-card{padding:17px}.sport-session-meta{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 14px}.sport-chip{padding:6px 9px;border-radius:99px;background:var(--surface-alt);font-size:10.5px;font-weight:800;color:var(--ink-soft)}.sport-chip.green{background:var(--primary-tint);color:var(--primary)}.sport-adjusts{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin:10px 0}.sport-adjust{white-space:nowrap;border:1px solid var(--border);background:var(--surface);border-radius:99px;padding:7px 10px;font-size:10.5px;font-weight:800;color:var(--ink-soft)}.sport-week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.sport-day{border:1px solid var(--border);background:var(--surface);border-radius:11px;padding:8px 2px;text-align:center;min-height:65px}.sport-day b{display:block;font-size:10px;color:var(--ink-soft)}.sport-day strong{display:block;font-size:14px;margin:3px 0}.sport-day i{display:block;width:7px;height:7px;border-radius:50%;margin:0 auto;background:var(--border)}.sport-day.done i{background:var(--primary)}.sport-day.today{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary)}.sport-section-head{display:flex;justify-content:space-between;align-items:center;margin:4px 2px 0}.sport-section-head h3{font-family:Fraunces,serif;font-size:19px;margin:0}.sport-section-head button{border:0;background:none;color:var(--primary);font-weight:800;font-size:11px}.sport-challenge-card{background:linear-gradient(135deg,var(--primary-tint),var(--surface))}.sport-progress{height:8px;background:var(--surface-alt);border-radius:99px;overflow:hidden}.sport-progress i{display:block;height:100%;background:var(--primary);border-radius:99px}.sport-score{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;background:var(--primary);color:#fff;font-family:Fraunces,serif;font-size:17px}.explore-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.explore-card{border:1px solid var(--border);background:var(--surface);border-radius:16px;padding:15px;text-align:left;box-shadow:var(--shadow)}.explore-card .ico{font-size:24px;margin-bottom:8px}.explore-card strong{display:block;font-size:14px}.explore-card small{display:block;color:var(--ink-soft);font-size:10.5px;margin-top:4px;line-height:1.35}.filter-row{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px}.filter-btn{white-space:nowrap;border:1px solid var(--border);background:var(--surface);border-radius:99px;padding:8px 10px;font-size:10.5px;font-weight:800;color:var(--ink-soft)}.filter-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}.exercise-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}.exercise-row:last-child{border-bottom:0}.exercise-row .exercise-ico{width:38px;height:38px;border-radius:12px;background:var(--primary-tint);display:flex;align-items:center;justify-content:center;font-size:18px}.exercise-row .exercise-main{flex:1;min-width:0}.exercise-row strong{display:block;font-size:13px}.exercise-row small{display:block;color:var(--ink-soft);font-size:10.5px;margin-top:2px}.exercise-fav{border:0;background:none;font-size:19px;padding:5px}.sport-calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.sport-calendar .cal-head{text-align:center;color:var(--ink-soft);font-size:9px;font-weight:800}.sport-calendar .cal-day{min-height:44px;border:1px solid var(--border);border-radius:9px;background:var(--surface);padding:5px;text-align:center;font-size:11px;position:relative}.sport-calendar .cal-day.today{border-color:var(--primary)}.sport-calendar .cal-day.done{background:var(--primary-tint);color:var(--primary)}.sport-calendar .cal-dot{position:absolute;bottom:4px;left:50%;width:5px;height:5px;border-radius:50%;background:var(--primary);transform:translateX(-50%)}.sport-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.sport-metric{background:var(--surface-alt);border-radius:12px;padding:11px;text-align:center}.sport-metric strong{display:block;font-family:Fraunces,serif;font-size:21px}.sport-metric small{font-size:9.5px;color:var(--ink-soft)}.body-map{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.body-zone{border-radius:12px;padding:11px;background:var(--surface-alt);font-size:11px;font-weight:800}.body-zone.ready{background:var(--primary-tint);color:var(--primary)}.body-zone.tired{background:var(--accent-tint);color:var(--accent)}.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.photo-slot{aspect-ratio:1;border:1px dashed var(--border);border-radius:12px;background:var(--surface-alt);display:flex;align-items:center;justify-content:center;overflow:hidden}.photo-slot img{width:100%;height:100%;object-fit:cover}.sport-panel{position:fixed;inset:0;z-index:55;background:var(--bg);display:none;overflow:auto;padding:18px 18px calc(35px + env(safe-area-inset-bottom))}.sport-panel.open{display:block}.sport-panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}.sport-panel-head h2{margin:0;font-size:23px}.sport-close{border:0;background:var(--surface-alt);border-radius:50%;width:40px;height:40px;font-size:20px}
+</style><style>
+.explore-grid{display:flex;flex-direction:column;gap:10px}
+.explore-card-wide{width:100%;min-height:96px;display:flex;align-items:center;gap:14px;text-align:left;padding:18px}
+.explore-card-wide .ico{width:48px;height:48px;flex:none;border-radius:14px;background:var(--primary-tint);display:flex;align-items:center;justify-content:center;font-size:25px;margin:0}
+.explore-card-wide strong{font-size:16px}
+.explore-card-wide small{font-size:11px;max-width:250px}
+</style><style>.sport-top>div:first-child:empty{display:none}.sport-top{justify-content:flex-end}</style>
+<style id="sport-card-redesign">
+/* Sport — cartes visuelles inspirées des apps fitness modernes */
+.sport-shell{gap:16px}
+.sport-top{min-height:0}
+.sport-hero-title{font-family:'Fraunces',serif;font-size:25px;margin:0 0 2px}
+.sport-today-card{padding:16px;background:var(--surface);border-radius:20px}
+.sport-today-card>.sport-section-head{margin:0 0 12px}
+.sport-visual-card{
+  position:relative; min-height:176px; border:0; overflow:hidden; border-radius:20px;
+  background:#17211c; color:#fff; box-shadow:0 8px 24px rgba(0,0,0,.13);
+  display:flex; align-items:flex-end; text-align:left; padding:20px;
+}
+.sport-visual-card:before{
+  content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(circle at 78% 26%,rgba(255,255,255,.20) 0 10%,transparent 11%),
+    radial-gradient(ellipse at 78% 62%,rgba(255,255,255,.14) 0 18%,transparent 19%),
+    linear-gradient(135deg,rgba(255,255,255,.05),transparent 50%);
+  opacity:.9;
+}
+.sport-visual-card:after{
+  content:"";position:absolute;right:-8%;top:-18%;width:58%;height:140%;
+  background:linear-gradient(135deg,transparent 0 32%,rgba(255,255,255,.08) 33% 52%,transparent 53%);
+  transform:rotate(8deg);
+}
+.sport-visual-card.program{background:
+  linear-gradient(90deg,rgba(8,12,10,.94) 0%,rgba(8,12,10,.72) 48%,rgba(8,12,10,.25) 100%),
+  url('https://images.unsplash.com/photo-1581009146145-b5ef050c2e1a?auto=format&fit=crop&w=1000&q=82') center/cover;}
+.sport-visual-card.challenge{min-height:132px;background:
+  linear-gradient(90deg,rgba(8,12,10,.94) 0%,rgba(8,12,10,.62) 58%,rgba(8,12,10,.18) 100%),
+  url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1000&q=82') center/cover;}
+.sport-visual-card .visual-content{position:relative;z-index:2;max-width:78%}
+.sport-visual-card .visual-level{font-size:11px;color:#F0A14A;font-weight:800;margin-bottom:8px}
+.sport-visual-card .visual-title{font-size:22px;line-height:1.02;font-weight:900;letter-spacing:-.02em;margin:0;text-transform:uppercase}
+.sport-visual-card .visual-sub{font-size:12px;color:rgba(255,255,255,.78);margin-top:7px}
+.sport-visual-card .visual-action{
+  position:absolute;right:16px;bottom:16px;z-index:3;border:0;border-radius:99px;
+  padding:9px 13px;background:#fff;color:#17211c;font-size:11px;font-weight:900;
+}
+.sport-divider{height:1px;background:var(--border);margin:14px 0}
+.sport-explore-title{font-family:'Fraunces',serif;font-size:20px;margin:18px 2px 10px}
+.sport-card-stack{display:flex;flex-direction:column;gap:12px}
+.sport-explore-card{
+  position:relative;min-height:150px;width:100%;border:0;border-radius:20px;overflow:hidden;
+  padding:20px;text-align:left;color:#fff;display:flex;align-items:flex-end;
+  box-shadow:0 7px 20px rgba(0,0,0,.12);background:#17211c;
+}
+.sport-explore-card:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,12,10,.9),rgba(8,12,10,.28));z-index:1}
+.sport-explore-card .visual-content{position:relative;z-index:2;max-width:75%}
+.sport-explore-card .visual-title{font-size:24px;line-height:1;font-weight:900;text-transform:uppercase;margin:0}
+.sport-explore-card .visual-sub{font-size:11px;color:rgba(255,255,255,.78);margin-top:6px}
+.sport-explore-card.challenges{background:url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1000&q=82') center/cover}
+.sport-explore-card.workouts{background:url('https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=1000&q=82') center/cover}
+.sport-explore-card.exercises{background:url('https://images.unsplash.com/photo-1517964603305-11c0f6f66012?auto=format&fit=crop&w=1000&q=82') center/cover}
+.sport-explore-card .card-icon{
+  position:absolute;right:18px;top:16px;z-index:2;width:44px;height:44px;border-radius:50%;
+  background:rgba(255,255,255,.14);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;font-size:22px;
+}
+@media(max-width:380px){
+  .sport-visual-card{min-height:164px;padding:17px}
+  .sport-visual-card .visual-title{font-size:19px}
+  .sport-explore-card{min-height:138px;padding:17px}
+  .sport-explore-card .visual-title{font-size:21px}
+}
+</style>
+
+<style id="welcome-screen-styles">
+#welcomeScreen{
+  position:fixed;inset:0;z-index:100;background:var(--bg);color:var(--ink);
+  display:flex;align-items:center;justify-content:center;padding:28px 22px;
+  opacity:1;visibility:visible;transition:opacity .28s ease,visibility .28s ease;
+}
+#welcomeScreen.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.welcome-inner{width:min(100%,430px);text-align:center}
+.welcome-mark{width:76px;height:76px;margin:0 auto 24px;filter:drop-shadow(0 8px 18px rgba(47,111,78,.18))}
+.welcome-eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-soft);font-weight:800;margin-bottom:8px}
+.welcome-title{font-family:Fraunces,serif;font-size:42px;line-height:1.05;margin:0 0 10px;font-weight:600}
+.welcome-title strong{color:var(--primary)}
+.welcome-subtitle{font-size:15px;line-height:1.55;color:var(--ink-soft);margin:0 auto 28px;max-width:330px}
+.welcome-btn{width:100%;max-width:300px;margin:auto;padding:14px 20px;border:0;border-radius:99px;background:var(--primary);color:#fff;font:700 14px Manrope,sans-serif;box-shadow:0 8px 20px rgba(47,111,78,.22)}
+.welcome-btn:active{transform:scale(.98)}
+@media(max-width:380px){.welcome-title{font-size:36px}.welcome-mark{width:68px;height:68px;margin-bottom:20px}}
+</style>
+
+<style id="v9-header-alignment">
+/* Header : logo et petites icônes parfaitement alignés horizontalement */
+.app-header,.top-header,.main-header,header.app-header,header.top-header,header.main-header{
+  display:flex!important;
+  align-items:center!important;
+}
+.app-header .brand,.top-header .brand,.main-header .brand,header .brand{
+  display:flex!important;
+  align-items:center!important;
+}
+.header-actions,.top-actions,.header-icons,.top-header-actions,.header-right{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+  margin-top:0!important;
+  transform:none!important;
+}
+.header-actions>* ,.top-actions>* ,.header-icons>* ,.top-header-actions>* ,.header-right>*{
+  align-self:center!important;
+  margin-top:0!important;
+  transform:none!important;
+}
+</style>
+
+<style id="v9-final-header">
+/* Logo à gauche et icônes calendrier/profil/objectifs centrées verticalement sur la même ligne */
+.app-header, .top-header, .main-header, header{
+  align-items:center !important;
+}
+.app-header > *, .top-header > *, .main-header > *{
+  align-self:center !important;
+}
+.app-header .header-actions, .top-header .header-actions,
+.main-header .header-actions, .app-header .top-actions,
+.top-header .top-actions, .main-header .top-actions{
+  display:flex !important;
+  align-items:center !important;
+  margin-top:0 !important;
+  transform:translateY(0) !important;
+}
+.app-header button, .top-header button, .main-header button{
+  margin-top:0 !important;
+  transform:translateY(0) !important;
+}
+</style>
+
+<style id="v9-topbar-final">
+/* Barre supérieure : logo et actions sur une seule ligne, même hauteur */
+.topbar{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  min-height:44px !important;
+}
+.topbar .brand{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  height:44px !important;
+}
+.topbar .brand-mark{
+  display:block !important;
+  width:34px !important;
+  height:34px !important;
+}
+.topbar .topbar-actions,
+.topbar .header-actions,
+.topbar .actions,
+.topbar button{
+  align-self:center !important;
+  margin-top:0 !important;
+  transform:none !important;
+}
+</style>
+
+<style id="v10-topbar-actions">
+.topbar{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  padding:12px 18px 10px!important;
+  min-height:52px!important;
+}
+.topbar .brand{display:flex!important;align-items:center!important;height:34px!important}
+.topbar .brand-mark{width:34px!important;height:34px!important;display:block!important}
+.topbar-actions{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+  height:40px!important;
+}
+.topbar-icon{
+  width:34px!important;height:34px!important;
+  border:1px solid var(--border)!important;
+  border-radius:50%!important;
+  background:var(--surface)!important;
+  color:var(--ink)!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  padding:0!important;font-size:16px!important;line-height:1!important;
+  box-shadow:var(--shadow)!important;
+  margin:0!important;transform:none!important;
+}
+</style>
+
+<style id="welcome-smooth-v11">
+#welcomeScreen{
+  opacity:1;
+  transition:opacity .55s ease, visibility .55s ease;
+}
+#welcomeScreen .welcome-inner{
+  opacity:0;
+  transform:translateY(10px) scale(.985);
+  animation:welcomeEnter .7s cubic-bezier(.22,.8,.28,1) .05s forwards;
+}
+@keyframes welcomeEnter{
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
+#welcomeScreen .welcome-mark{
+  animation:welcomeMarkEnter .8s cubic-bezier(.22,.8,.28,1) .05s both;
+}
+@keyframes welcomeMarkEnter{
+  from{opacity:0;transform:scale(.92);}
+  to{opacity:1;transform:scale(1);}
+}
+</style>
+
+<style id="ui-line-icons-v11">
+/* Icônes filaires : topbar + menu + */
+.topbar-icon{
+  width:34px!important;height:34px!important;
+  border:1.5px solid var(--primary)!important;
+  border-radius:50%!important;
+  background:transparent!important;
+  color:var(--primary)!important;
+  box-shadow:none!important;
+  font-size:0!important;
+}
+.topbar-icon::before{
+  font-size:16px;
+  line-height:1;
+}
+.topbar-icon[aria-label="Calendrier"]::before{content:"";display:block;width:15px;height:15px;border:1.7px solid currentColor;border-radius:3px;background:linear-gradient(currentColor,currentColor) 0 4px/100% 1.5px no-repeat;}
+.topbar-icon[aria-label="Profil"]::before{content:"";display:block;width:15px;height:15px;border:1.7px solid currentColor;border-radius:50%;box-sizing:border-box;}
+.topbar-icon[aria-label="Objectifs"]::before{content:"";display:block;width:15px;height:15px;border:1.7px solid currentColor;border-radius:50%;box-shadow:inset 0 0 0 3px transparent;}
+
+/* Menu principal + : cercles filaires */
+.quick-add-choice span{
+  background:transparent!important;
+  color:var(--primary)!important;
+  border:1.7px solid var(--primary)!important;
+  box-shadow:none!important;
+}
+.quick-add-choice span svg{
+  stroke:currentColor!important;
+}
+</style>
+
+<style id="sport-no-explorer-title-v11">
+.sport-explore-title{display:none!important;}
+</style>
+
+<style id="meal-grouped-history-v11">
+.meal-list-card{padding:0 14px!important;}
+.meal-group{padding:13px 0 4px;border-bottom:1px solid var(--border);}
+.meal-group:last-child{border-bottom:0;}
+.meal-group-head{display:flex;align-items:center;gap:10px;padding:2px 0 8px;}
+.meal-group-head .meal-main{flex:1;min-width:0;}
+.meal-group-head .meal-main strong{display:block;font-size:14px;}
+.meal-group-head .meal-main small{display:block;font-size:11px;color:var(--ink-soft);margin-top:3px;}
+.meal-food-list{padding-left:62px;}
+.meal-food-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--border);}
+.meal-food-main{min-width:0;flex:1;}
+.meal-food-main strong{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.meal-food-main small{display:block;color:var(--ink-soft);font-size:10px;margin-top:2px;}
+.meal-food-row>b{font-size:11px;white-space:nowrap;}
+.meal-empty{padding:4px 0 8px;color:var(--ink-soft);font-size:10.5px;font-style:italic;}
+@media(max-width:380px){
+  .meal-food-list{padding-left:58px;}
+}
+</style>
+<style id="food-meal-dropdown">
+.meal-list-card{padding:0;overflow:hidden}
+.meal-group{background:var(--surface);border:0;border-bottom:1px solid var(--border);margin:0;box-shadow:none;overflow:hidden}
+.meal-group:last-child{border-bottom:0}
+.meal-group .meal-group-head{
+  width:100%;display:flex;align-items:center;gap:10px;
+  padding:12px;border:0;background:transparent;color:var(--ink);
+  cursor:pointer;text-align:left;list-style:none;
+}
+.meal-group .meal-group-head::-webkit-details-marker{display:none}
+.meal-group .meal-group-head::marker{display:none}
+.meal-chevron{font-size:22px;color:var(--ink-soft);line-height:1;transition:transform .18s ease;margin-left:2px}
+.meal-group[open] .meal-chevron{transform:rotate(90deg)}
+.meal-group .meal-food-list{padding:0 12px 12px 74px}
+.meal-food-row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--border)}
+.meal-food-main{min-width:0;flex:1}
+.meal-food-main strong{display:block;font-size:12px}
+.meal-food-main small{display:block;color:var(--ink-soft);font-size:10px;margin-top:2px}
+.meal-food-row>b{font-size:11px;white-space:nowrap}
+.meal-empty{font-size:10.5px;color:var(--ink-soft);font-style:italic;padding:6px 0}
+</style>
+
+<style id="meal-food-time-left-v15">
+.meal-food-row{
+  display:grid!important;
+  grid-template-columns:42px minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+}
+.meal-food-time{
+  font-size:10px;
+  color:var(--ink-soft);
+  font-weight:700;
+  text-align:left;
+  white-space:nowrap;
+}
+.meal-food-main{min-width:0}
+</style>
+
+<style id="meal-food-alignment-v17">
+/* Les noms des plats sont alignés exactement sous le titre du repas.
+   L'heure reste à gauche, sans décaler le nom du plat. */
+.meal-food-list{
+  padding-left:62px!important;
+}
+.meal-food-row{
+  position:relative!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:10px!important;
+}
+.meal-food-time{
+  position:absolute!important;
+  left:-50px!important;
+  width:42px!important;
+  text-align:left!important;
+  font-size:10px!important;
+  color:var(--ink-soft)!important;
+  font-weight:700!important;
+  white-space:nowrap!important;
+}
+.meal-food-main{
+  min-width:0!important;
+  flex:1!important;
+}
+@media(max-width:380px){
+  .meal-food-list{padding-left:58px!important}
+  .meal-food-time{left:-48px!important}
+}
+</style>
+
+<style id="meal-alignment-v18">
+/* Alignement demandé :
+   - l'heure commence au même axe horizontal que le cercle de progression ;
+   - le nom de l'aliment commence exactement au même axe que le "D" de Dîner. */
+.meal-group-head{
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+}
+.meal-food-list{
+  padding-left:62px!important; /* 52px cercle + 10px espace = début du titre du repas */
+}
+.meal-food-row{
+  display:grid!important;
+  grid-template-columns:52px minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:10px!important;
+  position:relative!important;
+}
+.meal-food-time{
+  position:static!important;
+  width:auto!important;
+  text-align:left!important;
+  font-size:10px!important;
+  color:var(--ink-soft)!important;
+  font-weight:700!important;
+  white-space:nowrap!important;
+}
+.meal-food-main{
+  min-width:0!important;
+  flex:1!important;
+}
+@media(max-width:380px){
+  .meal-food-list{padding-left:48px!important}
+  .meal-food-row{
+    grid-template-columns:48px minmax(0,1fr) auto!important;
+    gap:8px!important;
+  }
+}
+</style>
+
+<style id="meal-alignment-v19">
+/* Alignement exact :
+   1. L'heure est centrée sous le cercle, exactement dans l'axe du chiffre %.
+   2. Le nom de l'aliment commence au même endroit que le début de
+      "Petit-déjeuner", "Déjeuner", "Dîner" ou "En-cas". */
+.meal-food-list{
+  padding-left:62px!important;
+}
+.meal-food-row{
+  display:grid!important;
+  grid-template-columns:52px minmax(0,1fr) auto!important;
+  align-items:center!important;
+  column-gap:10px!important;
+}
+.meal-food-time{
+  position:static!important;
+  width:52px!important;
+  margin:0!important;
+  padding:0!important;
+  text-align:center!important;
+  justify-self:stretch!important;
+  font-size:10px!important;
+  line-height:1.2!important;
+  color:var(--ink-soft)!important;
+  font-weight:700!important;
+  white-space:nowrap!important;
+}
+.meal-food-main{
+  min-width:0!important;
+  margin:0!important;
+  padding:0!important;
+  text-align:left!important;
+}
+@media(max-width:380px){
+  .meal-food-list{padding-left:58px!important}
+  .meal-food-row{
+    grid-template-columns:48px minmax(0,1fr) auto!important;
+    column-gap:10px!important;
+  }
+  .meal-food-time{width:48px!important}
+}
+</style>
+
+<style id="meal-alignment-v20">
+/* Même grille pour l'entête du repas et pour les aliments */
+.meal-group-head,
+.meal-food-row{
+  display:grid!important;
+  grid-template-columns:48px minmax(0,1fr) auto!important;
+  column-gap:10px!important;
+  align-items:center!important;
+}
+
+/* Le cercle occupe la première colonne */
+.meal-group-head .meal-ring-wrap{
+  grid-column:1!important;
+  justify-self:center!important;
+}
+
+/* Le titre du repas commence en colonne 2 */
+.meal-group-head .meal-main{
+  grid-column:2!important;
+  margin:0!important;
+  padding:0!important;
+  text-align:left!important;
+}
+
+/* Les aliments utilisent EXACTEMENT les mêmes colonnes */
+.meal-food-list{
+  padding-left:0!important;
+}
+.meal-food-time{
+  grid-column:1!important;
+  width:48px!important;
+  margin:0!important;
+  padding:0!important;
+  justify-self:center!important;
+  text-align:center!important;
+  position:static!important;
+  font-size:10px!important;
+  line-height:1.2!important;
+  color:var(--ink-soft)!important;
+  font-weight:700!important;
+  white-space:nowrap!important;
+}
+.meal-food-main{
+  grid-column:2!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0!important;
+  text-align:left!important;
+}
+.meal-food-row>b{
+  grid-column:3!important;
+  margin:0!important;
+  padding:0!important;
+  white-space:nowrap!important;
+}
+
+/* On conserve le chevron dans la troisième colonne de l'entête */
+.meal-group-head .meal-chevron{
+  grid-column:3!important;
+  justify-self:end!important;
+}
+
+@media(max-width:380px){
+  .meal-group-head,
+  .meal-food-row{
+    grid-template-columns:44px minmax(0,1fr) auto!important;
+    column-gap:8px!important;
+  }
+  .meal-food-time{
+    width:44px!important;
+  }
+}
+</style>
+
+<style id="meal-alignment-final-v21">
+/*
+  Référence exacte du header :
+  - le header commence à 12px du bord ;
+  - le cercle fait 48px ;
+  - il y a 10px entre le cercle et le titre.
+  Les lignes alimentaires reprennent exactement ces mêmes coordonnées.
+*/
+.meal-group .meal-group-head{
+  display:grid!important;
+  grid-template-columns:48px minmax(0,1fr) auto!important;
+  column-gap:10px!important;
+  align-items:center!important;
+  padding:12px!important;
+}
+.meal-group .meal-group-head .meal-ring-wrap{
+  grid-column:1!important;
+  width:48px!important;
+  height:48px!important;
+  justify-self:center!important;
+  margin:0!important;
+}
+.meal-group .meal-group-head .meal-main{
+  grid-column:2!important;
+  margin:0!important;
+  padding:0!important;
+  min-width:0!important;
+}
+.meal-group .meal-group-head .meal-chevron{
+  grid-column:3!important;
+  justify-self:end!important;
+  margin:0!important;
+}
+
+/* Important : pas de retrait supplémentaire ici.
+   La première colonne commence exactement sous le cercle. */
+.meal-group .meal-food-list{
+  padding:0 12px 12px 12px!important;
+}
+.meal-group .meal-food-row{
+  display:grid!important;
+  grid-template-columns:48px minmax(0,1fr) auto!important;
+  column-gap:10px!important;
+  align-items:center!important;
+  padding:8px 0!important;
+}
+.meal-group .meal-food-time{
+  grid-column:1!important;
+  width:48px!important;
+  justify-self:center!important;
+  text-align:center!important;
+  margin:0!important;
+  padding:0!important;
+  position:static!important;
+  font-size:10px!important;
+  line-height:1.2!important;
+  color:var(--ink-soft)!important;
+  font-weight:700!important;
+  white-space:nowrap!important;
+}
+.meal-group .meal-food-main{
+  grid-column:2!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0!important;
+  text-align:left!important;
+}
+.meal-group .meal-food-row>b{
+  grid-column:3!important;
+  justify-self:end!important;
+  margin:0!important;
+  padding:0!important;
+  white-space:nowrap!important;
+}
+</style>
+
+<style id="nutrition-icons-wire-v22">
+/* NUTRITION — pictogrammes filaires : aucun fond plein */
+#screen-food .nutrition-card .icon,
+#screen-food .nutrition-card .card-icon,
+#screen-food .nutrition-section-card .icon,
+#screen-food .nutrition-section-card .card-icon,
+#screen-food .food-card .icon,
+#screen-food .drink-card .icon,
+#screen-food .water-card .icon,
+#screen-food .alcohol-card .icon,
+#screen-food .section-icon,
+#screen-food .summary-icon{
+  background:transparent!important;
+  background-color:transparent!important;
+  border:1.7px solid var(--primary)!important;
+  color:var(--primary)!important;
+  box-shadow:none!important;
+  fill:none!important;
+}
+#screen-food .nutrition-card svg,
+#screen-food .nutrition-card .icon svg,
+#screen-food .nutrition-card .card-icon svg,
+#screen-food .nutrition-section-card svg,
+#screen-food .food-card svg,
+#screen-food .drink-card svg,
+#screen-food .water-card svg,
+#screen-food .alcohol-card svg{
+  background:transparent!important;
+  fill:none!important;
+  stroke:currentColor!important;
+  color:var(--primary)!important;
+}
+
+/* Si les pictogrammes sont des emoji, on supprime aussi l'effet pastille */
+#screen-food .nutrition-card .icon > span,
+#screen-food .nutrition-section-card .icon > span{
+  background:transparent!important;
+  color:var(--primary)!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+</style>
+
+<style id="nutrition-heading-line-icons-v23">
+.nutrition-section-head h2{
+  display:flex!important;
+  align-items:center!important;
+  gap:9px!important;
+}
+.nutrition-line-icon{
+  width:24px!important;
+  height:24px!important;
+  flex:0 0 24px!important;
+  fill:none!important;
+  stroke:var(--primary)!important;
+  stroke-width:1.7!important;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
+}
+</style>
+
+<style id="calorie-excess-overlay-v27">
+.calorie-ring svg{overflow:visible}
+.ring-progress{
+  stroke:var(--primary)!important;
+  stroke-width:9;
+}
+.ring-progress-over{
+  fill:none;
+  stroke:var(--danger)!important;
+  stroke-width:9;
+  stroke-linecap:round;
+  stroke-dasharray:314.16;
+  stroke-dashoffset:314.16;
+  transition:stroke-dashoffset .45s ease;
+}
+</style>
+
+<style id="calorie-excess-final-v28">
+.ring-progress-over{
+  fill:none!important;
+  stroke:var(--danger)!important;
+  stroke-width:9!important;
+  stroke-linecap:round!important;
+  stroke-dashoffset:0;
+  opacity:0;
+  transition:stroke-dasharray .45s ease,opacity .2s ease;
+  pointer-events:none;
+}
+</style>
+<style id="sport-hide-week-calendar-v31">#sportVisualWeek,.sport-week{display:none!important}</style>
+<style id="sport-today-highlight-v32">
+/* Carte Aujourd'hui : mise en évidence douce dans le vert de l'application */
+.sport-today-card{
+  background:linear-gradient(135deg, color-mix(in srgb, var(--primary) 12%, var(--surface)), color-mix(in srgb, var(--primary) 5%, var(--surface)))!important;
+  border:1.5px solid color-mix(in srgb, var(--primary) 42%, var(--border))!important;
+  box-shadow:0 5px 18px color-mix(in srgb, var(--primary) 12%, transparent)!important;
+}
+.sport-today-card .visual-level,
+.sport-today-card .visual-title{
+  color:var(--primary)!important;
+}
+.sport-today-card .visual-action{
+  background:var(--primary)!important;
+  color:#fff!important;
+  border-color:var(--primary)!important;
+}
+</style>
+
+<style id="vitatrack-exercises-v33">
+.exercise-library{padding:4px 0}
+.exercise-search{width:100%;box-sizing:border-box;border:1px solid var(--border);background:var(--surface);border-radius:12px;padding:11px 12px;font-size:12px;color:var(--ink);margin-bottom:10px}
+.exercise-filter-title{font-size:10px;font-weight:900;color:var(--ink-soft);margin:9px 0 5px;text-transform:uppercase;letter-spacing:.04em}
+.exercise-filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.exercise-filter{white-space:nowrap;border:1px solid var(--border);background:var(--surface);border-radius:99px;padding:7px 10px;font-size:10px;font-weight:800;color:var(--ink-soft)}
+.exercise-filter.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.exercise-list-card{margin-top:10px}
+.exercise-lib-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}
+.exercise-lib-row:last-child{border-bottom:0}
+.exercise-lib-ico{width:38px;height:38px;border-radius:12px;background:var(--primary-tint);display:flex;align-items:center;justify-content:center;font-size:18px}
+.exercise-lib-main{flex:1;min-width:0}.exercise-lib-main strong{display:block;font-size:12.5px}.exercise-lib-main small{display:block;color:var(--ink-soft);font-size:10px;margin-top:3px;line-height:1.3}
+.exercise-lib-fav{border:0;background:transparent;font-size:19px;padding:4px;cursor:pointer}
+.exercise-empty{padding:20px 8px;text-align:center;color:var(--ink-soft);font-size:11px}
+</style>
+
+<style id="exercise-filter-multiselect-v36">
+.exercise-filter{cursor:pointer;transition:.15s ease}
+.exercise-filter.active{background:var(--primary)!important;border-color:var(--primary)!important;color:#fff!important}
+.exercise-filter:not(.active){background:var(--surface)!important;color:var(--ink-soft)!important}
+</style>
+
+<style id="exercise-library-v26">
+/* Bibliothèque Exercices — écran dédié */
+.exercise-screen{
+  position:fixed!important;inset:0!important;z-index:80!important;
+  display:none!important;background:var(--bg);padding:0!important;
+  overflow:auto!important;
+}
+.exercise-screen.open{display:block!important}
+.exercise-screen .exercise-header{
+  position:sticky;top:0;z-index:5;
+  display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:9px;
+  padding:calc(10px + env(safe-area-inset-top)) 14px 10px;
+  background:var(--bg);border-bottom:1px solid var(--border);
+}
+.exercise-back{
+  width:40px;height:40px;border:0;background:transparent;color:var(--ink);
+  display:flex;align-items:center;justify-content:center;padding:0;
+}
+.exercise-back svg{width:25px;height:25px}
+.exercise-search-wrap{position:relative;min-width:0}
+.exercise-search{
+  width:100%;height:40px!important;margin:0!important;
+  border:1px solid var(--border)!important;background:var(--surface)!important;
+  border-radius:13px!important;padding:0 13px!important;
+  color:var(--ink)!important;font-size:12px!important;outline:none;
+  box-shadow:none!important;
+}
+.exercise-search:focus{border-color:var(--primary)!important;outline:2px solid var(--primary-tint)!important}
+.exercise-filter-open{
+  width:40px;height:40px;border:1px solid var(--border);border-radius:13px;
+  background:var(--surface);color:var(--ink);display:flex;align-items:center;justify-content:center;
+}
+.exercise-filter-open.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.exercise-filter-open svg{width:19px;height:19px}
+.exercise-filter-panel{
+  display:none;padding:11px 14px 13px;background:var(--surface);
+  border-bottom:1px solid var(--border);box-shadow:0 4px 12px rgba(31,42,36,.05);
+}
+.exercise-filter-panel.open{display:block}
+.exercise-filter-title{font-size:9px!important;letter-spacing:.08em;text-transform:uppercase;font-weight:900;color:var(--ink-soft);margin:9px 0 5px}
+.exercise-filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:3px}
+.exercise-filter{white-space:nowrap;cursor:pointer;transition:.15s}
+.exercise-filter.active{background:var(--primary)!important;border-color:var(--primary)!important;color:#fff!important}
+.exercise-results{padding:12px 14px calc(35px + env(safe-area-inset-bottom))}
+.exercise-results-count{font-size:10px;color:var(--ink-soft);font-weight:700;margin:2px 2px 9px}
+.exercise-card{
+  display:flex;align-items:center;gap:12px;width:100%;margin-bottom:9px;
+  padding:13px 12px;background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;box-shadow:var(--shadow);text-align:left;
+}
+.exercise-card:active{background:var(--surface-alt)}
+.exercise-card-icon{
+  width:45px;height:45px;border-radius:13px;flex:none;
+  background:var(--primary-tint);color:var(--primary);
+  display:flex;align-items:center;justify-content:center;
+}
+.exercise-card-icon svg{width:22px;height:22px}
+.exercise-card-main{flex:1;min-width:0}
+.exercise-card-main strong{display:block;font-size:13px;line-height:1.2}
+.exercise-card-main small{display:block;font-size:10px;color:var(--ink-soft);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exercise-card-tags{display:flex;gap:5px;margin-top:6px;overflow:hidden}
+.exercise-card-tag{font-size:8.5px;font-weight:800;color:var(--ink-soft);background:var(--surface-alt);padding:4px 6px;border-radius:7px;white-space:nowrap}
+.exercise-fav{
+  width:34px;height:34px;border:0;background:transparent;color:var(--ink-soft);
+  display:flex;align-items:center;justify-content:center;flex:none;
+}
+.exercise-fav.active{color:var(--primary)}
+.exercise-fav svg{width:20px;height:20px}
+.exercise-empty{padding:34px 14px;text-align:center;color:var(--ink-soft);font-size:11px}
+</style>
+<style id="sport-challenges-v1">
+.challenge-screen{position:fixed!important;inset:0!important;z-index:85!important;display:none!important;background:var(--bg);overflow:auto}
+.challenge-screen.open{display:block!important}
+.challenge-header{position:sticky;top:0;z-index:4;display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:8px;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;background:var(--bg);border-bottom:1px solid var(--border)}
+.challenge-back,.challenge-head-btn{width:40px;height:40px;border:0;background:transparent;color:var(--ink);display:flex;align-items:center;justify-content:center}
+.challenge-header h2{font-size:18px;margin:0;text-align:center}
+.challenge-content{padding:14px 14px calc(35px + env(safe-area-inset-bottom))}
+.challenge-intro{font-size:11px;color:var(--ink-soft);line-height:1.45;margin:0 2px 14px}
+.challenge-section-title{font-size:13px;font-weight:900;margin:18px 2px 9px}
+.challenge-card{width:100%;border:1px solid var(--border);background:var(--surface);border-radius:18px;padding:15px;margin-bottom:10px;text-align:left;box-shadow:var(--shadow)}
+.challenge-card.active{border-color:color-mix(in srgb,var(--primary) 55%,var(--border));background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 9%,var(--surface)),var(--surface))}
+.challenge-card-top{display:flex;gap:11px;align-items:flex-start}
+.challenge-icon{width:45px;height:45px;flex:none;border-radius:13px;background:var(--primary-tint);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:21px}
+.challenge-main{flex:1;min-width:0}
+.challenge-main strong{font-size:14px;display:block}
+.challenge-main small{display:block;color:var(--ink-soft);font-size:10px;line-height:1.35;margin-top:4px}
+.challenge-tag{display:inline-block;margin-top:7px;background:var(--surface-alt);border-radius:7px;padding:4px 6px;font-size:8.5px;font-weight:800;color:var(--ink-soft)}
+.challenge-progress{height:6px;background:var(--surface-alt);border-radius:99px;overflow:hidden;margin-top:12px}
+.challenge-progress>span{display:block;height:100%;background:var(--primary);border-radius:99px}
+.challenge-card-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:9px;font-size:9px;color:var(--ink-soft)}
+.challenge-card-bottom b{color:var(--ink)}
+.challenge-detail-hero{background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 12%,var(--surface)),var(--surface));border:1px solid color-mix(in srgb,var(--primary) 35%,var(--border));border-radius:20px;padding:17px}
+.challenge-detail-hero h1{font-size:22px;margin:8px 0 4px}
+.challenge-detail-hero p{font-size:10px;color:var(--ink-soft);margin:0;line-height:1.45}
+.challenge-exercise-link{margin-top:13px;border-radius:13px;background:var(--surface);padding:11px;display:flex;align-items:center;gap:9px;font-size:11px;font-weight:800}
+.challenge-today{margin-top:12px;border:1px solid var(--border);border-radius:17px;background:var(--surface);padding:14px}
+.challenge-today-title{font-size:11px;font-weight:900}
+.challenge-today-target{font-size:21px;font-weight:950;margin-top:5px}
+.challenge-today-meta{font-size:9px;color:var(--ink-soft);margin-top:3px}
+.challenge-sets{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.challenge-set{background:var(--surface-alt);border-radius:8px;padding:6px 8px;font-size:9px;font-weight:800}
+.challenge-primary{width:100%;height:45px;border:0;border-radius:23px;background:var(--primary);color:#fff;font-weight:900;font-size:12px;margin-top:12px}
+.challenge-secondary{width:100%;height:42px;border:1px solid var(--border);border-radius:21px;background:var(--surface);color:var(--ink);font-weight:800;font-size:11px;margin-top:8px}
+.challenge-days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:10px}
+.challenge-day{height:34px;border-radius:9px;background:var(--surface-alt);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--ink-soft)}
+.challenge-day.done{background:var(--primary);color:#fff}
+.challenge-day.current{outline:2px solid var(--primary);outline-offset:1px}
+</style>
+
+<style id="vitatrack-exercise-redesign-v1">
+.exercise-screen{background:var(--bg)!important}
+.exercise-screen .exercise-header{
+  padding:calc(12px + env(safe-area-inset-top)) 16px 12px!important;
+  grid-template-columns:42px 1fr 42px!important;
+  gap:10px!important;
+  background:rgba(250,246,239,.96)!important;
+  backdrop-filter:blur(14px)!important;
+  border-bottom:1px solid var(--border)!important;
+}
+[data-theme="dark"] .exercise-screen .exercise-header{background:rgba(20,29,24,.96)!important}
+.exercise-back{
+  border:1px solid var(--border)!important;border-radius:13px!important;
+  background:var(--surface)!important;box-shadow:var(--shadow)!important;
+}
+.exercise-search-wrap{position:relative!important}
+.exercise-search{
+  height:43px!important;border:1px solid var(--border)!important;
+  border-radius:14px!important;background:var(--surface)!important;
+  padding:0 13px 0 40px!important;color:var(--ink)!important;
+  font-size:12.5px!important;font-weight:650!important;
+  box-shadow:var(--shadow)!important;
+}
+.exercise-search::placeholder{color:var(--ink-soft)!important}
+.exercise-search-wrap:before{
+  content:"";position:absolute;left:14px;top:50%;transform:translateY(-50%);
+  width:15px;height:15px;border:1.8px solid var(--ink-soft);border-radius:50%;z-index:2;pointer-events:none;
+}
+.exercise-search-wrap:after{
+  content:"";position:absolute;left:28px;top:calc(50% + 5px);width:6px;height:1.8px;
+  background:var(--ink-soft);transform:rotate(45deg);z-index:2;pointer-events:none;
+}
+.exercise-filter-btn{
+  width:42px!important;height:42px!important;border:1px solid var(--border)!important;
+  border-radius:13px!important;background:var(--surface)!important;
+  color:var(--ink)!important;box-shadow:var(--shadow)!important;
+}
+.exercise-filter-btn.active{background:var(--primary-tint)!important;border-color:var(--primary)!important;color:var(--primary)!important}
+.exercise-library{padding:8px 16px 35px!important}
+.exercise-library .exercise-count{
+  font-family:Fraunces,serif!important;font-size:20px!important;font-weight:600!important;
+  color:var(--ink)!important;margin:8px 2px 12px!important;
+}
+.exercise-list{display:flex!important;flex-direction:column!important;gap:9px!important}
+.exercise-card{
+  position:relative!important;display:flex!important;align-items:center!important;gap:12px!important;
+  width:100%!important;min-height:76px!important;padding:12px!important;
+  border:1px solid var(--border)!important;border-radius:17px!important;
+  background:var(--surface)!important;box-shadow:var(--shadow)!important;
+  transition:transform .12s ease,border-color .12s ease,background .12s ease!important;
+}
+.exercise-card:active{transform:scale(.985)!important;background:var(--surface-alt)!important}
+.exercise-card-icon{
+  width:50px!important;height:50px!important;flex:none!important;border-radius:14px!important;
+  background:var(--primary-tint)!important;color:var(--primary)!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+}
+.exercise-card-icon svg{width:28px!important;height:28px!important;stroke:currentColor!important;fill:none!important}
+.exercise-card-main{flex:1!important;min-width:0!important}
+.exercise-card-title{font-size:13.5px!important;font-weight:850!important;line-height:1.2!important;color:var(--ink)!important}
+.exercise-card-sub{font-size:10px!important;color:var(--ink-soft)!important;margin-top:4px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.exercise-card-tags{display:flex!important;gap:5px!important;flex-wrap:wrap!important;margin-top:7px!important}
+.exercise-card-tag{
+  padding:4px 6px!important;border-radius:7px!important;background:var(--surface-alt)!important;
+  color:var(--ink-soft)!important;font-size:8px!important;font-weight:800!important;
+}
+.exercise-card-tag.green{background:var(--primary-tint)!important;color:var(--primary)!important}
+.exercise-fav{
+  width:32px!important;height:32px!important;border:0!important;border-radius:50%!important;
+  background:transparent!important;color:var(--ink-soft)!important;padding:0!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  flex:none!important;
+}
+.exercise-fav svg{width:19px!important;height:19px!important;stroke:currentColor!important;fill:none!important}
+.exercise-fav.active{background:var(--gold-tint)!important;color:var(--gold)!important}
+.exercise-empty{
+  border:1px dashed var(--border)!important;border-radius:18px!important;
+  padding:30px 18px!important;text-align:center!important;color:var(--ink-soft)!important;
+  background:var(--surface)!important;
+}
+.exercise-filter-panel{
+  background:var(--surface)!important;border:1px solid var(--border)!important;
+  border-radius:18px!important;box-shadow:0 12px 35px rgba(31,42,36,.12)!important;
+}
+.exercise-filter-title{font-family:Fraunces,serif!important;font-size:20px!important}
+.exercise-filter-group-title{
+  font-size:10px!important;text-transform:uppercase!important;letter-spacing:.08em!important;
+  color:var(--ink-soft)!important;font-weight:850!important;
+}
+.exercise-filter{
+  border-radius:10px!important;padding:8px 10px!important;font-size:10px!important;
+  border:1px solid var(--border)!important;
+}
+.exercise-filter.active{background:var(--primary)!important;border-color:var(--primary)!important}
+</style>
+
+<style id="exercise-wire-icon-fallback">
+.exercise-card-icon:not(:has(svg)){font-size:0!important}
+.exercise-card-icon:not(:has(svg))::before{
+ content:"";width:25px;height:11px;border:2px solid currentColor;border-radius:5px;
+ display:block;position:relative;
+}
+.exercise-card-icon:not(:has(svg))::after{
+ content:"";position:absolute;width:32px;height:2px;background:currentColor;border-radius:2px;
+}
+</style>
+
+<style id="vitatrack-workout-session-v2">
+.vt-session-screen{position:fixed!important;inset:0!important;z-index:95!important;display:none!important;background:var(--bg);overflow:auto}
+.vt-session-screen.open{display:block!important}
+.vt-session-top{position:sticky;top:0;z-index:5;display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:8px;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;background:var(--bg);border-bottom:1px solid var(--border)}
+.vt-session-icon-btn{width:40px;height:40px;border:1px solid var(--border);border-radius:13px;background:var(--surface);color:var(--ink);display:flex;align-items:center;justify-content:center}
+.vt-session-top-title{text-align:center;font-size:11px;font-weight:900;color:var(--ink)}
+.vt-session-content{padding:14px 15px calc(28px + env(safe-area-inset-bottom))}
+.vt-session-progress{height:5px;background:var(--surface-alt);border-radius:99px;overflow:hidden;margin-bottom:14px}
+.vt-session-progress>span{display:block;height:100%;background:var(--primary);border-radius:99px;transition:width .25s ease}
+.vt-session-step{text-align:center;font-size:9px;color:var(--ink-soft);font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+.vt-session-illustration{height:230px;margin:10px 0 4px;border:1px solid var(--border);border-radius:22px;background:var(--surface);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.vt-session-illustration:before,.vt-session-illustration:after{content:"";position:absolute;border:1px solid var(--primary);opacity:.18;border-radius:50%}
+.vt-session-illustration:before{width:170px;height:170px}
+.vt-session-illustration:after{width:110px;height:110px}
+.vt-session-wire{position:relative;width:110px;height:110px;color:var(--primary)}
+.vt-session-wire .head{position:absolute;width:20px;height:20px;border:2px solid currentColor;border-radius:50%;left:45px;top:7px}
+.vt-session-wire .body{position:absolute;width:4px;height:56px;background:currentColor;left:53px;top:29px;border-radius:5px;transform:rotate(22deg)}
+.vt-session-wire .arm1,.vt-session-wire .arm2,.vt-session-wire .leg1,.vt-session-wire .leg2{position:absolute;height:4px;background:currentColor;border-radius:5px;transform-origin:left center}
+.vt-session-wire .arm1{width:43px;left:52px;top:43px;transform:rotate(65deg)}
+.vt-session-wire .arm2{width:42px;left:53px;top:44px;transform:rotate(150deg)}
+.vt-session-wire .leg1{width:47px;left:54px;top:82px;transform:rotate(68deg)}
+.vt-session-wire .leg2{width:45px;left:54px;top:82px;transform:rotate(120deg)}
+.vt-session-name{text-align:center;font-size:25px;font-weight:950;margin:9px 0 3px;color:var(--ink)}
+.vt-session-sub{text-align:center;font-size:10px;color:var(--ink-soft)}
+.vt-session-prescription{margin:16px 0 10px;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px;text-align:center}
+.vt-session-label{font-size:9px;color:var(--ink-soft);font-weight:900}
+.vt-session-big{font-size:42px;font-weight:950;line-height:1;margin:7px 0}
+.vt-session-small{font-size:10px;color:var(--ink-soft)}
+.vt-session-rest{display:none;text-align:center;background:var(--primary-tint);border:1px solid var(--primary);border-radius:18px;padding:13px;margin:10px 0}
+.vt-session-rest.show{display:block}
+.vt-session-rest-title{font-size:9px;font-weight:900;color:var(--primary);text-transform:uppercase}
+.vt-session-rest-time{font-size:34px;font-weight:950;color:var(--primary);margin:3px 0}
+.vt-session-next{font-size:9px;color:var(--ink-soft)}
+.vt-session-actions{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px}
+.vt-session-primary{height:48px;border:0;border-radius:24px;background:var(--primary);color:#fff;font-size:11px;font-weight:950}
+.vt-session-secondary{height:43px;border:1px solid var(--border);border-radius:22px;background:var(--surface);color:var(--ink);font-size:10px;font-weight:850}
+.vt-session-complete{text-align:center;padding:18px 2px}
+.vt-session-complete-icon{font-size:44px}
+.vt-session-complete h1{font-size:26px;margin:8px 0 4px}
+.vt-session-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:16px 0}
+.vt-session-stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 5px}
+.vt-session-stat b{display:block;font-size:16px}
+.vt-session-stat span{font-size:8px;color:var(--ink-soft);font-weight:800}
+.vt-session-list{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:10px;text-align:left}
+.vt-session-list-row{display:flex;justify-content:space-between;padding:8px 4px;border-bottom:1px solid var(--border);font-size:9px}
+.vt-session-list-row:last-child{border-bottom:0}
+.vt-session-list-row span:last-child{font-weight:900;color:var(--primary)}
+</style>
+
+<style id="vitatrack-exercise-run-v2">
+.vt-run-screen{position:fixed!important;inset:0!important;z-index:110!important;display:none!important;background:var(--bg);overflow:auto}
+.vt-run-screen.open{display:block!important}
+.vt-run-top{position:sticky;top:0;z-index:4;display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:8px;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;background:var(--bg);border-bottom:1px solid var(--border)}
+.vt-run-btn{width:40px;height:40px;border:1px solid var(--border);border-radius:13px;background:var(--surface);color:var(--ink);display:flex;align-items:center;justify-content:center}
+.vt-run-title{text-align:center;font-size:11px;font-weight:900}
+.vt-run-content{padding:14px 15px calc(30px + env(safe-area-inset-bottom))}
+.vt-run-step{text-align:center;font-size:9px;color:var(--ink-soft);font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+.vt-run-visual{height:250px;border:1px solid var(--border);border-radius:22px;background:var(--surface);margin:10px 0;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.vt-run-visual:before{content:"";position:absolute;width:190px;height:190px;border-radius:50%;border:1px solid var(--primary);opacity:.16}
+.vt-run-name{text-align:center;font-size:25px;font-weight:950;margin-top:8px}.vt-run-meta{text-align:center;color:var(--ink-soft);font-size:10px;margin-top:4px}
+.vt-run-target{margin:16px 0 10px;border:1px solid var(--border);border-radius:18px;background:var(--surface);padding:16px;text-align:center}
+.vt-run-label{font-size:9px;color:var(--ink-soft);font-weight:900}.vt-run-big{font-size:48px;font-weight:950;line-height:1.05;margin:7px 0}.vt-run-sub{font-size:9px;color:var(--ink-soft)}
+.vt-run-timer{font-size:54px;font-weight:950;text-align:center;margin:18px 0 8px}.vt-run-progress{height:6px;background:var(--surface-alt);border-radius:99px;overflow:hidden;margin:12px 0}.vt-run-progress span{display:block;height:100%;background:var(--primary);border-radius:99px}
+.vt-run-primary{width:100%;height:49px;border:0;border-radius:25px;background:var(--primary);color:#fff;font-size:11px;font-weight:950}.vt-run-secondary{width:100%;height:43px;border:1px solid var(--border);border-radius:22px;background:var(--surface);color:var(--ink);font-size:10px;font-weight:850;margin-top:8px}
+</style>
+
+<style id="vitatrack-execution-fix-v2">
+.vt-exec-screen{position:fixed!important;inset:0!important;z-index:120!important;display:none!important;background:var(--bg);overflow:auto}
+.vt-exec-screen.open{display:block!important}
+.vt-exec-top{position:sticky;top:0;z-index:5;display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:8px;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;background:var(--bg);border-bottom:1px solid var(--border)}
+.vt-exec-btn{width:40px;height:40px;border:1px solid var(--border);border-radius:13px;background:var(--surface);color:var(--ink);display:flex;align-items:center;justify-content:center}
+.vt-exec-title{text-align:center;font-size:11px;font-weight:900}
+.vt-exec-body{padding:14px 15px calc(30px + env(safe-area-inset-bottom))}
+.vt-exec-step{text-align:center;font-size:9px;color:var(--ink-soft);font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+.vt-exec-visual{height:235px;border:1px solid var(--border);border-radius:22px;background:var(--surface);display:flex;align-items:center;justify-content:center;margin:10px 0;position:relative}
+.vt-exec-circle{width:165px;height:165px;border:1px solid var(--primary);border-radius:50%;opacity:.15;position:absolute}
+.vt-exec-figure{position:relative;width:120px;height:120px;color:var(--primary)}
+.vt-exec-figure i{position:absolute;display:block;background:currentColor;border-radius:5px}
+.vt-exec-figure .head{width:21px;height:21px;border:2px solid currentColor;background:transparent;border-radius:50%;left:50px;top:5px}
+.vt-exec-figure .body{width:5px;height:62px;left:58px;top:28px;transform:rotate(18deg)}
+.vt-exec-figure .a1,.vt-exec-figure .a2{width:48px;height:4px;left:58px;top:47px;transform-origin:left center}
+.vt-exec-figure .a1{transform:rotate(65deg)} .vt-exec-figure .a2{transform:rotate(145deg)}
+.vt-exec-figure .l1,.vt-exec-figure .l2{width:53px;height:4px;left:58px;top:88px;transform-origin:left center}
+.vt-exec-figure .l1{transform:rotate(70deg)} .vt-exec-figure .l2{transform:rotate(115deg)}
+.vt-exec-name{text-align:center;font-size:25px;font-weight:950;margin-top:8px}
+.vt-exec-meta{text-align:center;color:var(--ink-soft);font-size:10px;margin-top:4px}
+.vt-exec-target{margin:15px 0 10px;border:1px solid var(--border);border-radius:18px;background:var(--surface);padding:16px;text-align:center}
+.vt-exec-label{font-size:9px;color:var(--ink-soft);font-weight:900}
+.vt-exec-big{font-size:46px;font-weight:950;line-height:1.05;margin:8px 0}
+.vt-exec-sub{font-size:9px;color:var(--ink-soft)}
+.vt-exec-progress{height:6px;background:var(--surface-alt);border-radius:99px;overflow:hidden;margin:12px 0}
+.vt-exec-progress span{display:block;height:100%;background:var(--primary);border-radius:99px}
+.vt-exec-primary{width:100%;height:49px;border:0;border-radius:25px;background:var(--primary);color:#fff;font-size:11px;font-weight:950}
+.vt-exec-secondary{width:100%;height:43px;border:1px solid var(--border);border-radius:22px;background:var(--surface);color:var(--ink);font-size:10px;font-weight:850;margin-top:8px}
+.vt-exec-rest{text-align:center;background:var(--primary-tint);border:1px solid var(--primary);border-radius:18px;padding:13px;margin:10px 0}
+.vt-exec-rest-title{font-size:9px;font-weight:900;color:var(--primary);text-transform:uppercase}
+.vt-exec-rest-time{font-size:35px;font-weight:950;color:var(--primary);margin:3px 0}
+.vt-exec-complete{text-align:center;padding-top:25px}
+.vt-exec-complete .bigicon{font-size:48px}.vt-exec-complete h1{font-size:26px;margin:8px 0 4px}.vt-exec-complete p{font-size:10px;color:var(--ink-soft)}
+.vt-workout-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:15px 0}
+.vt-workout-stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 4px;text-align:center}
+.vt-workout-stat b{display:block;font-size:16px}.vt-workout-stat span{font-size:8px;color:var(--ink-soft);font-weight:800}
+</style>
+
+<style id="exercise-clickable-v1">
+.exercise-card{cursor:pointer!important}
+.exercise-card:active{transform:scale(.985)}
+</style>
+
+
+<style id="sport-clean-runtime-css">
+.exercise-screen,.workout-screen,.vt-run-screen,.vt-ws{position:fixed!important;inset:0!important;z-index:120!important;display:none!important;background:var(--bg);overflow:auto}
+.exercise-screen.open,.workout-screen.open,.vt-run-screen.open,.vt-ws.open{display:block!important}
+.exercise-header,.workout-header,.vt-run-top,.vt-ws-top{position:sticky;top:0;z-index:4;display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:8px;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;background:var(--bg);border-bottom:1px solid var(--border)}
+.exercise-back,.workout-back,.workout-add,.vt-run-btn,.vt-ws-btn{width:40px;height:40px;border:1px solid var(--border);border-radius:13px;background:var(--surface);color:var(--ink);display:flex;align-items:center;justify-content:center}
+.exercise-search{height:42px;width:100%;box-sizing:border-box;border:1px solid var(--border);border-radius:13px;background:var(--surface);color:var(--ink);padding:0 12px}
+.exercise-filter-open{height:40px;border:1px solid var(--border);border-radius:13px;background:var(--surface);color:var(--ink)}
+.exercise-results,.workout-content,.vt-run-content,.vt-ws-body{padding:14px 15px calc(30px + env(safe-area-inset-bottom))}
+.exercise-results-count{font-size:10px;color:var(--ink-soft);font-weight:800;margin:0 2px 9px}
+.exercise-card{display:flex;align-items:center;gap:11px;padding:12px;border:1px solid var(--border);border-radius:17px;background:var(--surface);box-shadow:var(--shadow);margin-bottom:9px;cursor:pointer}
+.exercise-card-icon,.workout-icon{width:46px;height:46px;flex:none;border-radius:13px;background:var(--primary-tint);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--primary)}
+.exercise-card-main,.workout-main{flex:1;min-width:0}.exercise-card-main strong,.workout-main strong{display:block;font-size:13px}.exercise-card-main small,.workout-main small{display:block;color:var(--ink-soft);font-size:9.5px;margin-top:4px}
+.exercise-card-tags,.workout-meta{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}.exercise-card-tag,.workout-tag{background:var(--surface-alt);border-radius:7px;padding:4px 6px;font-size:8px;font-weight:850;color:var(--ink-soft)}
+.exercise-fav{border:0;background:transparent;font-size:18px;color:var(--ink-soft);padding:5px}
+.exercise-filter-panel{display:none;margin:0 15px 15px;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:18px}.exercise-filter-panel.open{display:block}
+.exercise-filter-title{font-size:11px;font-weight:900;color:var(--ink);margin:10px 0 6px}.exercise-filters,.workout-filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:3px}
+.exercise-filter,.workout-chip{white-space:nowrap;border:1px solid var(--border);border-radius:99px;background:var(--surface);padding:7px 9px;color:var(--ink-soft);font-size:9px;font-weight:850}.exercise-filter.active,.workout-chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.exercise-filter-results{width:100%;height:42px;margin-top:12px;border:0;border-radius:21px;background:var(--primary);color:#fff;font-weight:900}
+.workout-intro{font-size:11px;line-height:1.45;color:var(--ink-soft)}.workout-tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px}.workout-tab{height:39px;border:1px solid var(--border);border-radius:12px;background:var(--surface);font-size:10px;font-weight:900}.workout-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.workout-section-title{font-size:12px;font-weight:900;margin:14px 2px 7px}.workout-card{border:1px solid var(--border);background:var(--surface);border-radius:18px;padding:14px;margin-bottom:9px;box-shadow:var(--shadow)}.workout-card-top{display:flex;gap:10px}.workout-ex-list{margin-top:9px;border-top:1px solid var(--border);padding-top:8px}.workout-ex-line{display:flex;justify-content:space-between;gap:8px;padding:4px 0;font-size:9px}.workout-start{width:100%;height:45px;margin-top:10px;border:0;border-radius:23px;background:var(--primary);color:#fff;font-weight:900}.workout-builder{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px}.workout-builder input,.workout-builder select{width:100%;box-sizing:border-box;height:40px;margin-top:7px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--ink);padding:0 9px}.workout-add-ex{width:100%;height:40px;margin-top:8px;border:1px dashed var(--primary);border-radius:12px;background:var(--primary-tint);color:var(--primary);font-weight:900}.workout-save{width:100%;height:45px;margin-top:10px;border:0;border-radius:23px;background:var(--primary);color:#fff;font-weight:900}.builder-ex{display:flex;align-items:center;gap:6px;margin-top:7px;border:1px solid var(--border);border-radius:10px;padding:7px}.builder-ex input{width:52px!important;margin:0!important;height:32px!important}.builder-ex-name{flex:1;font-size:9.5px;font-weight:800}
+.vt-run-step,.vt-ws-step{text-align:center;font-size:9px;color:var(--ink-soft);font-weight:900;text-transform:uppercase}.vt-run-visual,.vt-ws-visual{height:220px;border:1px solid var(--border);border-radius:22px;background:var(--surface);display:flex;align-items:center;justify-content:center;margin:10px 0}.vt-run-name,.vt-ws-name{text-align:center;font-size:25px;font-weight:950;margin:7px 0 3px}.vt-run-meta,.vt-ws-meta{text-align:center;color:var(--ink-soft);font-size:10px}.vt-run-target,.vt-ws-card{margin:15px 0 10px;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:15px;text-align:center}.vt-run-label,.vt-ws-label{font-size:9px;color:var(--ink-soft);font-weight:900}.vt-run-big,.vt-ws-big{font-size:42px;font-weight:950;line-height:1.05;margin:7px 0}.vt-run-progress,.vt-ws-bar{height:6px;background:var(--surface-alt);border-radius:99px;overflow:hidden;margin:12px 0}.vt-run-progress span,.vt-ws-bar span{display:block;height:100%;background:var(--primary);border-radius:99px}.vt-run-primary,.vt-ws-primary{width:100%;height:49px;border:0;border-radius:25px;background:var(--primary);color:#fff;font-size:11px;font-weight:950}.vt-run-secondary,.vt-ws-secondary{width:100%;height:43px;border:1px solid var(--border);border-radius:22px;background:var(--surface);color:var(--ink);font-size:10px;font-weight:850;margin-top:8px}.vt-ws-rest{background:var(--primary-tint);border:1px solid var(--primary);border-radius:18px;padding:12px;text-align:center;margin:10px 0}.vt-ws-rest strong{display:block;font-size:35px;color:var(--primary)}.vt-run-complete,.vt-ws-complete{text-align:center;padding-top:25px}.vt-run-complete h1,.vt-ws-complete h1{font-size:26px;margin:8px 0 4px}.vt-run-complete p,.vt-ws-complete p{font-size:10px;color:var(--ink-soft)}.vt-ws-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:16px 0}.vt-ws-stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 4px;text-align:center}.vt-ws-stat b{display:block;font-size:16px}.vt-ws-stat span{font-size:8px;color:var(--ink-soft)}
+</style>
+<style id="vt-execution-improvements">
+.vt-run-result{margin:14px auto;padding:14px 20px;border-radius:18px;background:rgba(127,127,127,.08);display:flex;flex-direction:column;gap:4px}.vt-run-result strong{font-size:28px}.vt-run-result span{font-size:12px;opacity:.65}.vt-run-difficulty{margin-top:18px}.vt-diff-row{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin-top:9px}.vt-diff-row button{border:1px solid rgba(127,127,127,.25);background:transparent;border-radius:10px;padding:8px 0;font-weight:700;cursor:pointer}.vt-diff-row button.selected{background:var(--primary);color:#fff;border-color:var(--primary)}.vt-run-primary:disabled{opacity:.45;cursor:not-allowed}.vt-run-primary{transition:transform .15s ease,opacity .15s ease}.vt-run-primary:not(:disabled):active{transform:scale(.98)}
+</style><style id="vt6-regression-fixes">
+.exercise-filter-backdrop{position:fixed!important;inset:0!important;background:rgba(20,28,24,.42)!important;backdrop-filter:blur(3px)!important;z-index:180!important;display:none!important}.exercise-filter-backdrop.open{display:block!important}
+.exercise-filter-panel{position:fixed!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;width:min(680px,calc(100vw - 28px))!important;max-height:min(82vh,760px)!important;overflow:auto!important;margin:0!important;padding:20px!important;border-radius:24px!important;z-index:181!important;display:none!important;box-sizing:border-box!important}.exercise-filter-panel.open{display:block!important}
+.exercise-filter-actions{display:grid;grid-template-columns:1fr 1.6fr;gap:8px;margin-top:16px}.exercise-filter-reset{height:44px;border:1px solid var(--border);border-radius:22px;background:var(--surface);color:var(--ink);font-weight:900}.exercise-filter-results{height:44px!important;margin-top:0!important}.sport-history-panel{z-index:200!important}
+</style>
+
+<style id="sport-progress-v1">
+.sport-progress-row{padding:9px 0;border-bottom:1px solid var(--border)}
+.sport-progress-row:last-child{border-bottom:0}
+.sport-progress-row-head{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:12px}
+.sport-progress-row-head strong{font-size:12px}.sport-progress-row-head span{font-size:10px;color:var(--ink-soft);white-space:nowrap}
+.sport-progress-row small{display:block;color:var(--ink-soft);font-size:9.5px;margin-top:3px}
+.sport-progress-bar{height:6px;background:var(--surface-alt);border-radius:99px;overflow:hidden;margin-top:6px}
+.sport-progress-bar i{display:block;height:100%;background:var(--primary);border-radius:99px}
 </style>
 </head>
 <body data-theme="light">
-<div class="topbar"><div class="brand"><svg class="brand-mark" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="var(--primary)"/><path d="M16 8c-4 2-6 6-4 11 1.5 3.6 4 5 4 5s2.5-1.4 4-5c2-5 0-9-4-11z" fill="white" opacity=".92"/><path d="M16 13v9" stroke="var(--primary)" stroke-width="1.6" stroke-linecap="round"/></svg><h1 id="greetTitle">VitaTrack</h1></div></div>
+<div id="welcomeScreen" aria-label="Bienvenue dans VitaTrack">
+  <div class="welcome-inner">
+    <svg class="welcome-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="var(--primary)"/><path d="M16 8c-4 2-6 6-4 11 1.5 3.6 4 5 4 5s2.5-1.4 4-5c2-5 0-9-4-11z" fill="white" opacity=".92"/><path d="M16 13v9" stroke="var(--primary)" stroke-width="1.6" stroke-linecap="round"/></svg>
+    <div class="welcome-eyebrow">Bienvenue sur VitaTrack</div>
+    <h1 class="welcome-title" id="welcomeTitle">Bonjour</h1>
+  </div>
+</div>
+<div class="topbar">
+  <div class="brand">
+    <svg class="brand-mark" viewBox="0 0 32 32" fill="none" aria-label="VitaTrack">
+      <circle cx="16" cy="16" r="15" fill="var(--primary)"/>
+      <path d="M16 8c-4 2-6 6-4 11 1.5 3.6 4 5 4 5s2.5-1.4 4-5c2-5 0-9-4-11z" fill="white" opacity=".92"/>
+      <path d="M16 13v9" stroke="var(--primary)" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="topbar-actions" aria-label="Raccourcis">
+    <button class="topbar-icon" type="button" onclick="openSportPanel('calendar')" aria-label="Calendrier">📅</button>
+    <button class="topbar-icon" type="button" onclick="openSportPanel('profile')" aria-label="Profil">👤</button>
+    <button class="topbar-icon" type="button" onclick="openProfileSheet()" aria-label="Objectifs">🎯</button>
+  </div>
+</div>
 
 <section class="screen active" id="screen-home">
   <div class="card hero-card">
@@ -589,6 +1698,12 @@ input[type="range"]{width:100%;}
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-top:7px"><div><div class="hero-kcal"><span id="homeCalories">0</span> <span>kcal</span></div><div class="muted small" style="margin-top:4px">sur <span id="homeCaloriesGoal">—</span></div></div><span class="goal-pill" id="homeRemaining">Configure ton profil</span></div>
     <div class="pbar" style="margin-top:15px"><div id="homeCalBar" style="background:var(--accent);width:0%"></div></div>
     <div class="metric-row"><div class="metric"><strong id="homeProtein">0 g</strong><span>protéines / <b id="homeProteinGoal">—</b></span></div><div class="metric"><strong id="homeWeight">—</strong><span>poids actuel</span></div></div>
+  </div>
+  <div class="section-title">Activité</div>
+  <div class="card" id="homeStepsCard">
+    <div class="row"><div><strong>👟 <span id="homeSteps">0</span> pas</strong><div class="muted small" style="margin-top:3px">Objectif <span id="homeStepsGoal">10 000</span></div></div><button class="btn btn-ghost btn-sm" onclick="editSteps()">Modifier</button></div>
+    <div class="pbar" style="margin-top:10px"><div id="homeStepsBar" style="background:var(--primary);width:0%"></div></div>
+    <div class="muted small" style="margin-top:7px" id="homeStepsSource">Saisie locale · connexion Santé à venir</div>
   </div>
   <div class="section-title">Bilan nutrition</div>
   <div id="weeklyReportHome"></div>
@@ -614,7 +1729,7 @@ input[type="range"]{width:100%;}
     <div class="card nutrition-summary-card">
       <div class="calorie-hero">
         <div class="calorie-side calorie-eaten"><strong id="foodKcalTotal">0</strong><span>kcal consommées</span></div>
-        <div class="calorie-ring"><svg viewBox="0 0 120 120" aria-label="Calories restantes"><circle class="ring-track" cx="60" cy="60" r="50"></circle><circle class="ring-progress" id="calorieRing" cx="60" cy="60" r="50"></circle></svg><div class="ring-content"><strong id="foodRemainingPct">0%</strong><span id="foodRemaining">0 kcal</span></div></div>
+        <div class="calorie-ring"><svg viewBox="0 0 120 120" aria-label="Calories restantes"><circle class="ring-track" cx="60" cy="60" r="50"></circle><circle class="ring-progress" id="calorieRing" cx="60" cy="60" r="50"></circle><circle class="ring-progress-over" cx="60" cy="60" r="50"></circle></svg><div class="ring-content"><strong id="foodRemainingPct">0%</strong><span id="foodRemaining">0 kcal</span></div></div>
         <div class="calorie-side calorie-burned"><strong id="foodBurned">—</strong><span>kcal brûlées</span></div>
       </div>
       <div class="calorie-target">Objectif : <strong id="foodGoalLabel">—</strong></div>
@@ -628,11 +1743,11 @@ input[type="range"]{width:100%;}
       </div>
     </div>
     <div class="nutrition-block">
-      <div class="nutrition-section-head"><h2>🍽️ Alimentation</h2><button class="inline-link" onclick="openAddMeal()">+ Ajouter</button></div>
+      <div class="nutrition-section-head"><h2><svg class="nutrition-line-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v8M4.5 3v5.5A2.5 2.5 0 0 0 7 11a2.5 2.5 0 0 0 2.5-2.5V3M7 11v10M17 3v18M14 8h6M17 3c2.2 0 3 2.1 3 4.5S19.2 12 17 12"/></svg> Alimentation</h2><button class="inline-link" onclick="openAddMeal()">+ Ajouter</button></div>
       <div class="card meal-list-card" id="foodListCard"></div>
     </div>
     <div class="nutrition-block">
-      <div class="nutrition-section-head"><h2>💧 Hydratation</h2></div>
+      <div class="nutrition-section-head"><h2><svg class="nutrition-line-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s6 6.2 6 11a6 6 0 0 1-12 0c0-4.8 6-11 6-11Z"/><path d="M9.5 16.5c.6.9 1.4 1.4 2.5 1.5"/></svg> Hydratation</h2></div>
       <div class="card water-card">
 <span class="water-ring-wrap" aria-hidden="true"><svg viewBox="0 0 48 48"><circle class="water-ring-track" cx="24" cy="24" r="21"></circle><circle class="water-ring-progress" id="waterRing" cx="24" cy="24" r="21"></circle></svg><span class="water-ring-label" id="waterRingLabel">0%</span></span>
         <span class="water-main"><strong id="waterGlasses">0 verre</strong><small><span id="waterTotal">0,00 L</span> · objectif <b id="waterGoal">2,00 L</b></small></span>
@@ -643,8 +1758,8 @@ input[type="range"]{width:100%;}
       </div>
     </div>
     <div class="nutrition-block">
-      <div class="nutrition-section-head"><h2>🥤 Boissons & alcool</h2><button class="inline-link" onclick="openDrinkPicker()">+ Ajouter</button></div>
-      <div class="card drink-card drink-card-click" onclick="toggleDrinkHistory()">
+      <div class="nutrition-section-head"><h2><svg class="nutrition-line-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10l-1 15H8L7 4Z"/><path d="M6 4h12M9 8h6M10 19v2M14 19v2"/></svg> Boissons & alcool</h2><button class="inline-link" onclick="openDrinkPicker()">+ Ajouter</button></div>
+      <div class="card drink-card drink-card-click" onclick="if(Number(document.getElementById('drinkCountToday')?.textContent||0)>0) toggleDrinkHistory()">
         <div class="drink-summary">
           <div class="drink-stat">
             <span class="drink-label">Aujourd’hui</span>
@@ -681,7 +1796,7 @@ input[type="range"]{width:100%;}
     <div class="nutrition-block">
 
  
-      <div class="nutrition-section-head"><h2>⚖️ Mes pesées</h2><button class="inline-add" onclick="openWeightEntry()">+ Ajouter</button></div>
+      <div class="nutrition-section-head"><h2><svg class="nutrition-line-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v15M7 7h10M5 20h14"/><path d="m7 7-4 7a4 4 0 0 0 8 0L7 7ZM17 7l-4 7a4 4 0 0 0 8 0l-4-7Z"/></svg> Mes pesées</h2><button class="inline-add" onclick="openWeightEntry()">+ Ajouter</button></div>
       <div class="card weigh-card">
         <div class="weigh-values">
           <div class="weigh-stat">
@@ -721,8 +1836,8 @@ input[type="range"]{width:100%;}
 </section>
 
 <section class="screen" id="screen-sport">
-  <div class="section-title">Sport</div>
-  <div class="card coming-card"><div class="big">🏋️</div><h2>Sport arrive ensuite</h2><p class="muted">Cet espace est volontairement simple pour l'instant. Nous y construirons la musculation, la course, la récupération et le coach de séance.</p></div>
+  <div id="sportContent"></div>
+  <div id="sessionWorkArea"></div>
 </section>
 
 <section class="screen" id="screen-game">
@@ -758,10 +1873,19 @@ input[type="range"]{width:100%;}
 <div class="sheet-overlay" id="waterSheetOverlay" onclick="closeSheetIfBg(event,'waterSheetOverlay')"><div class="sheet"><div class="sheet-handle"></div><h3>Ajouter de l’eau</h3><div class="water-quick"><button type="button" class="chip" onclick="setVal('waterQty',200)">200 ml</button><button type="button" class="chip" onclick="setVal('waterQty',250)">250 ml</button><button type="button" class="chip" onclick="setVal('waterQty',330)">330 ml</button><button type="button" class="chip" onclick="setVal('waterQty',500)">500 ml</button></div><div class="field"><label>Quantité (ml)</label><input type="number" id="waterQty" value="250" min="1"></div><button class="btn btn-primary btn-block" onclick="addWater()">Ajouter</button></div></div>
 
 <div class="sheet-overlay" id="guideSheetOverlay" onclick="closeSheetIfBg(event,'guideSheetOverlay')"><div class="sheet"><div class="sheet-handle"></div><h3 id="guideTitle">Aliment</h3><div id="guideDetail"></div></div></div>
+
+<div class="sheet-overlay" id="sportOnboardingOverlay" onclick="closeSheetIfBg(event,'sportOnboardingOverlay')"><div class="sheet"><div class="sheet-handle"></div><h3>Mon coaching sportif</h3><p class="setup-intro">Raconte-moi un peu de toi. Je créerai un programme qui évolue avec tes performances.</p>
+<div class="field"><label>Mon niveau</label><select id="sport_level"><option value="debutant">🌱 Débutant (peu d'expérience)</option><option value="intermediaire">💪 Intermédiaire</option><option value="avance">🔥 Avancé</option></select></div>
+<div class="field-row"><div class="field"><label>Séances / semaine</label><select id="sport_sessions"><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option></select></div><div class="field"><label>Durée moyenne (min)</label><select id="sport_duration"><option value="20">20</option><option value="30">30</option><option value="35" selected>35</option><option value="45">45</option><option value="60">60</option></select></div></div>
+<div class="field"><label>Matériel disponible</label><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px"><label style="display:flex;align-items:center;gap:6px;font-weight:400"><input type="checkbox" name="sport_equipment" value="aucun" checked> Poids du corps</label><label style="display:flex;align-items:center;gap:6px;font-weight:400"><input type="checkbox" name="sport_equipment" value="halteres"> Haltères</label><label style="display:flex;align-items:center;gap:6px;font-weight:400"><input type="checkbox" name="sport_equipment" value="kettlebell"> Kettlebell</label><label style="display:flex;align-items:center;gap:6px;font-weight:400"><input type="checkbox" name="sport_equipment" value="elastiques"> Élastiques</label><label style="display:flex;align-items:center;gap:6px;font-weight:400"><input type="checkbox" name="sport_equipment" value="barre_traction"> Barre traction</label><label style="display:flex;align-items:center;gap:6px;font-weight:400"><input type="checkbox" name="sport_equipment" value="banc"> Banc</label></div></div>
+<div class="field"><label>Jours préférés</label><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px"><label style="display:flex;align-items:center;gap:4px;font-weight:400;font-size:13px"><input type="checkbox" id="sport_day_1" checked> Lun</label><label style="display:flex;align-items:center;gap:4px;font-weight:400;font-size:13px"><input type="checkbox" id="sport_day_2"> Mar</label><label style="display:flex;align-items:center;gap:4px;font-weight:400;font-size:13px"><input type="checkbox" id="sport_day_3" checked> Mer</label><label style="display:flex;align-items:center;gap:4px;font-weight:400;font-size:13px"><input type="checkbox" id="sport_day_4"> Jeu</label><label style="display:flex;align-items:center;gap:4px;font-weight:400;font-size:13px"><input type="checkbox" id="sport_day_5" checked> Ven</label><label style="display:flex;align-items:center;gap:4px;font-weight:400;font-size:13px"><input type="checkbox" id="sport_day_6"> Sam</label><label style="display:flex;align-items:center;gap:4px;font-weight:400;font-size:13px"><input type="checkbox" id="sport_day_7"> Dim</label></div></div>
+<div class="field"><label>Objectif principal</label><select id="sport_goal"><option value="condition_physique">Condition physique</option><option value="force">Force</option><option value="musculation" selected>Musculation</option><option value="endurance">Endurance</option><option value="perte_poids">Perte de poids</option><option value="mobilite">Mobilité</option></select></div>
+<button class="btn btn-primary btn-block" onclick="saveSportSetup()">Créer mon programme</button></div></div>
+
 <div class="sheet-overlay" id="profileSheetOverlay" onclick="closeSheetIfBg(event,'profileSheetOverlay')"><div class="sheet"><div class="sheet-handle"></div><h3>Mon objectif et mes réglages</h3><div class="card" style="padding:12px;margin-bottom:12px"><div class="row small"><span class="muted">Calories de départ</span><strong id="profileCalorieTarget">À calculer</strong></div><div class="row small" style="margin-top:8px"><span class="muted">Protéines</span><strong id="profileProteinTarget">À calculer</strong></div></div><div class="field"><label>Prénom (facultatif)</label><input id="pf_name"></div><div class="field-row"><div class="field"><label>Âge</label><input type="number" id="pf_age"></div><div class="field"><label>Sexe</label><select id="pf_sex"><option value="homme">Homme</option><option value="femme">Femme</option></select></div></div><div class="field-row"><div class="field"><label>Taille (cm)</label><input type="number" id="pf_height"></div><div class="field"><label>Poids actuel (kg)</label><input type="number" step="0.1" id="pf_weight"></div></div><button class="btn btn-primary btn-block" onclick="saveProfile();closeSheet('profileSheetOverlay')">Enregistrer mon profil</button><div class="divider"></div><div class="field"><label>Objectif principal</label><select id="pf_goal"><option value="fat_loss">🔥 Perdre du gras</option><option value="recomposition">🔄 Recomposition</option><option value="muscle_gain">💪 Construire du muscle</option><option value="maintain">⚖️ Maintenir</option><option value="weight_target">🎯 Atteindre un poids</option></select></div><div class="field"><label>Activité quotidienne</label><select id="pf_activity"><option value="sedentary">Peu actif</option><option value="light">Légèrement actif</option><option value="moderate">Actif</option><option value="active">Très actif</option><option value="very_active">Très actif +</option></select></div><div class="field"><label>Poids cible (facultatif)</label><input type="number" step="0.1" id="pf_target"></div><div class="field-row"><div class="field"><label>% masse grasse cible</label><input type="number" step="0.1" id="pf_bodyfat_target"></div><div class="field"><label>Tour de taille cible</label><input type="number" step="0.5" id="pf_waist_target"></div></div><button class="btn btn-primary btn-block" onclick="saveGoals();closeSheet('profileSheetOverlay')">Enregistrer l'objectif</button><div class="divider"></div><div class="row"><strong>Thème sombre</strong><button class="chip" id="themeToggle" onclick="toggleTheme()">Activer</button></div><div style="height:8px"></div><button class="btn btn-ghost btn-block" onclick="exportData()">⤓ Exporter mes données</button><div style="height:8px"></div><button class="btn btn-ghost btn-block" onclick="document.getElementById('importFile').click()">⤒ Importer mes données</button><input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)"></div></div>
 <div class="sheet-overlay" id="setupSheetOverlay"><div class="sheet"><div class="sheet-handle"></div><h3>Bienvenue dans VitaTrack</h3><p class="setup-intro">On commence simplement. Donne-moi quelques informations pour estimer tes besoins. Ensuite, tu enregistres normalement tes repas et je regarderai ta progression avant de modifier quoi que ce soit.</p><div class="field"><label>Prénom (facultatif)</label><input id="setup_name"></div><div class="field-row"><div class="field"><label>Âge</label><input type="number" id="setup_age"></div><div class="field"><label>Sexe</label><select id="setup_sex"><option value="homme">Homme</option><option value="femme">Femme</option></select></div></div><div class="field-row"><div class="field"><label>Taille (cm)</label><input type="number" id="setup_height"></div><div class="field"><label>Poids (kg)</label><input type="number" step="0.1" id="setup_weight"></div></div><div class="field"><label>Objectif principal</label><select id="setup_goal"><option value="fat_loss">🔥 Perdre du gras</option><option value="recomposition">🔄 Recomposition</option><option value="muscle_gain">💪 Construire du muscle</option><option value="maintain">⚖️ Maintenir</option><option value="weight_target">🎯 Atteindre un poids</option></select></div><div class="field"><label>Activité quotidienne</label><select id="setup_activity"><option value="sedentary">Peu actif</option><option value="light">Légèrement actif</option><option value="moderate">Actif</option><option value="active">Très actif</option><option value="very_active">Très actif +</option></select></div><div class="field"><label>Poids cible (facultatif)</label><input type="number" step="0.1" id="setup_target"></div><button class="btn btn-primary btn-block" onclick="saveSetup()">Créer mon point de départ</button></div></div>
 <div class="toast" id="toast"></div>
-<script src="data.js"></script><script src="app.js"></script>
+<script src="data.js"></script><script src="sport-data.js"></script><script src="sport-engine.js"></script><script src="app.js"></script>
 <script>
 /* Boissons : la carte entière ouvre/ferme la liste du jour. */
 window.toggleDrinkHistory = function(){
@@ -805,10 +1929,16 @@ window.renderQuickAddSummary = function(){
 
     setText('foodKcalTotal',totalKcal);
     setText('foodGoalLabel',t.calories?`${t.calories} kcal`:'Objectif à calculer');
-    const remainingPct=t.calories?Math.max(0,Math.min(100,Math.round((rem/t.calories)*100))):0;
-    setText('foodRemainingPct',remainingPct+'%');
+    const consumedPct=t.calories?Math.max(0,Math.round((totalKcal/t.calories)*100)):0;
+    setText('foodRemainingPct',consumedPct+'%');
     setText('foodRemaining',rem===null?'0 kcal':rem+' kcal');
-    setText('foodBurned','0');
+    const sportHistory=typeof window.getSportHistory==='function'?window.getSportHistory():[];
+    const sportBurnedToday=Math.round(sportHistory.reduce((sum,a)=>{
+      const localDate=a?.recordedAt?new Date(a.recordedAt).toLocaleDateString('en-CA'):String(a?.completedDate||a?.date||'');
+      const kcal=Number(a?.estimatedKcal||((typeof window.sportKcalForActivity==='function')?window.sportKcalForActivity(a):0))||0;
+      return sum+(localDate===TODAY?kcal:0);
+    },0));
+    setText('foodBurned',sportBurnedToday);
     setText('foodProteinTotal',Math.round(d.protein)+' g');
     setText('foodProteinGoal',t.protein?`${t.protein} g`:'—');
     setText('foodWeight',DATA.profile.weightCurrent?DATA.profile.weightCurrent+' kg':'—');
@@ -819,8 +1949,9 @@ window.renderQuickAddSummary = function(){
 
     const ring=document.getElementById('calorieRing');
     if(ring){
-      const ratio=t.calories?Math.max(0,Math.min(1,(t.calories-totalKcal)/t.calories)):0;
+      const ratio=t.calories?Math.max(0,Math.min(1,totalKcal/t.calories)):0;
       ring.style.strokeDashoffset=(314.16*(1-ratio)).toFixed(2);
+      updateCalorieExcessRing(totalKcal,t.calories);
     }
 
     setText('macroCarbs',`${Math.round(d.carbs)} / ${mt.carbs} g`);
@@ -847,15 +1978,28 @@ window.renderQuickAddSummary = function(){
     if(card){
       card.innerHTML=groups.map(([type,icon])=>{
         const items=list.filter(f=>(f.mealType||'Repas')===type);
-        const kcal=items.reduce((s,f)=>s+Number(f.kcal||0),0);
+        const kcal=items.reduce((sum,f)=>sum+Number(f.kcal||0),0);
         const goal=Math.round((t.calories||2100)*({'Petit-déjeuner':.25,'Déjeuner':.33,'Dîner':.33,'En-cas':.09}[type]));
         const pct=goal?Math.min(100,Math.round(kcal/goal*100)):0;
         const offset=(125.66*(1-pct/100)).toFixed(2);
-        return `<button class="meal-row" onclick="openMealDetails('${type}')">
-          <span class="meal-ring-wrap" aria-hidden="true"><svg viewBox="0 0 48 48"><circle class="meal-ring-track" cx="24" cy="24" r="20"></circle><circle class="meal-ring-progress" style="stroke-dashoffset:${offset}" cx="24" cy="24" r="20"></circle></svg><span class="meal-ring-label">${pct}%</span></span>
-          <span class="meal-main"><strong>${type}</strong><small>${kcal} / ${goal} kcal</small></span>
-          <span class="meal-side"><span>⌄</span></span>
-        </button>`;
+        const foodRows=items.length ? items.map(f=>`
+          <div class="meal-food-row">
+            <div class="meal-food-time">${f.time||'—'}</div>
+            <div class="meal-food-main">
+              <strong>${f.name||'Aliment'}</strong>
+              <small>${f.qty?`${f.qty} g`:''}</small>
+            </div>
+            <b>${Math.round(Number(f.kcal||0))} kcal</b>
+          </div>`).join('') :
+          `<div class="meal-empty">Aucun aliment enregistré</div>`;
+        return `<details class="meal-group">
+          <summary class="meal-group-head">
+            <span class="meal-ring-wrap" aria-hidden="true"><svg viewBox="0 0 48 48"><circle class="meal-ring-track" cx="24" cy="24" r="20"></circle><circle class="meal-ring-progress" style="stroke-dashoffset:${offset}" cx="24" cy="24" r="20"></circle></svg><span class="meal-ring-label">${pct}%</span></span>
+            <div class="meal-main"><strong>${type}</strong><small>${kcal} / ${goal} kcal</small></div>
+            <span class="meal-chevron" aria-hidden="true">›</span>
+          </summary>
+          <div class="meal-food-list">${foodRows}</div>
+        </details>`;
       }).join('');
     }
     window.renderQuickAddSummary();
@@ -870,4 +2014,278 @@ window.renderQuickAddSummary = function(){
 setTimeout(function(){ window.renderQuickAddSummary && window.renderQuickAddSummary(); },0);
 </script>
 
-</body></html>
+
+<script id="sport-card-redesign-js">
+(function(){
+  function sportVisualMain(){
+    const root=document.getElementById('sportContent');
+    if(!root) return;
+    const s=typeof sportTodaySession==='function'?sportTodaySession():null;
+    const c=(window.DATA&&DATA.sport&&DATA.sport.monthlyChallenge)||{label:'Défi du jour',progress:0,target:1};
+    const st=typeof sportStreak==='function'?sportStreak():0;
+    const level=(window.DATA&&DATA.sport&&DATA.sport.profile&&DATA.sport.profile.level)||'Facile';
+    const cp=Math.min(100,Math.round((Number(c.progress)||0)/Math.max(1,Number(c.target)||1)*100));
+    const pname=s?.name||'Aucun entraînement programmé';
+    const duration=s?.targetDuration||0;
+    const exos=s?.exercises?.length||0;
+    const muscles=typeof sportMuscles==='function'&&s?sportMuscles(s):'Corps complet';
+
+    root.innerHTML=`
+      <div class="sport-shell">
+        
+
+        <div class="sport-today-card card">
+          <div class="sport-section-head">
+            <h3>Aujourd’hui</h3>
+            <span class="sport-chip green">🔥 ${st} ${st>1?'jours':'jour'}</span>
+          </div>
+
+          <div class="sport-visual-card program">
+            <div class="visual-content">
+              <div class="visual-level">${level} ♡♡☆</div>
+              <div class="visual-title">${pname}</div>
+              <div class="visual-sub">${muscles} · ${duration} min · ${exos} exercices</div>
+            </div>
+            ${s?`<button class="visual-action" onclick="openSession('${s.id}')">Démarrer →</button>`:''}
+          </div>
+
+          <div class="sport-divider"></div>
+
+          <div class="sport-visual-card challenge">
+            <div class="visual-content">
+              <div class="visual-level">DÉFI DU JOUR · ${cp}%</div>
+              <div class="visual-title">${c.label||'Défi du jour'}</div>
+              <div class="visual-sub">${c.progress||0}/${c.target||0} réalisés</div>
+            </div>
+            <button class="visual-action" onclick="openChallengeDetail('pompes-100')">Lancer →</button>
+          </div>
+        </div>
+
+        <div class="sport-section-head" style="margin-top:16px"><h3 style="margin:0">Mon activité</h3><button class="btn btn-ghost btn-sm" onclick="openSportHistory()">📊 Historique</button></div>
+        <div class="sport-explore-title">Explorer</div>
+        <div class="sport-card-stack">
+          <button class="sport-explore-card challenges" onclick="openChallengeLibrary()">
+            <span class="card-icon">🏆</span><div class="visual-content"><div class="visual-title">Défis</div><div class="visual-sub">Challenges du mois et objectifs à relever</div></div>
+          </button>
+          <button class="sport-explore-card workouts" onclick="openWorkoutLibrary()">
+            <span class="card-icon">🏋️</span><div class="visual-content"><div class="visual-title">Entraînements</div><div class="visual-sub">Routines prêtes à l’emploi ou personnalisées</div></div>
+          </button>
+          <button class="sport-explore-card exercises" onclick="openExerciseLibrary()">
+            <span class="card-icon">💪</span><div class="visual-content"><div class="visual-title">Exercices</div><div class="visual-sub">Bibliothèque, filtres et favoris</div></div>
+          </button>
+          <button class="sport-explore-card coach" onclick="openSportCoach()">
+            <span class="card-icon">🤖</span><div class="visual-content"><div class="visual-title">Coach Sport</div><div class="visual-sub">Analyse tes séances et adapte tes prochains entraînements</div></div>
+          </button>
+        </div>
+      </div>`;
+
+    // Fill the existing weekly tracker without changing its underlying logic.
+    const week=document.getElementById('sportVisualWeek');
+    if(week){
+      const done=new Set(((DATA.sport&&DATA.sport.sessionHistory)||[]).map(x=>x.completedDate||x.date).filter(Boolean));
+      const now=new Date(), mon=new Date(now);
+      mon.setDate(now.getDate()-(now.getDay()+6)%7);
+      const labs=['L','M','M','J','V','S','D'];
+      week.innerHTML=labs.map((lab,i)=>{
+        const dt=new Date(mon);dt.setDate(mon.getDate()+i);
+        const k=dt.toISOString().slice(0,10);
+        return `<div class="sport-day ${done.has(k)?'done ':''}${k===TODAY?'today':''}"><b>${lab}</b><strong>${dt.getDate()}</strong><i></i></div>`;
+      }).join('');
+    }
+  }
+
+  // The external app.js exposes renderSport; override only the main screen.
+  window.renderSport = sportVisualMain;
+
+  // If Sport is already the visible screen when this script executes, redraw it.
+  if(document.getElementById('screen-sport')?.classList.contains('active')) sportVisualMain();
+})();
+
+function updateCalorieExcessRing(totalKcal, calorieGoal){
+  const over=document.querySelector('.ring-progress-over');
+  if(!over)return;
+  const goal=Number(calorieGoal)||0;
+  const total=Number(totalKcal)||0;
+  const pct=goal>0?(total/goal)*100:0;
+  const excess=Math.max(0,Math.min(100,pct-100));
+  const circumference=314.16;
+  over.style.strokeDasharray=circumference;
+  over.style.strokeDashoffset=(circumference*(1-excess/100)).toFixed(2);
+}
+function updateCalorieExcessRing(totalKcal, calorieGoal){
+  const over=document.querySelector('.ring-progress-over');
+  if(!over)return;
+  const goal=Number(calorieGoal)||0;
+  const total=Number(totalKcal)||0;
+  const pct=goal>0?(total/goal)*100:0;
+  const excess=pct>100?Math.min(100,pct-100):0;
+  const circumference=314.16;
+  over.style.strokeDasharray=`${(circumference*excess/100).toFixed(2)} ${circumference}`;
+  over.style.strokeDashoffset='0';
+  over.style.opacity=excess>0?'1':'0';
+}
+window.updateCalorieExcessRing=updateCalorieExcessRing;</script>
+
+<script id="sport-challenges-v1">
+(function(){
+  const CHALLENGES=[
+    {id:"pompes-100",icon:"💪",title:"Objectif 100 pompes",exerciseId:"pompes",category:"Force",duration:30,unit:"répétitions",finalTarget:100,description:"Atteindre 100 pompes dans la journée, réparties en plusieurs séries avec de courtes récupérations.",stages:[
+      {day:1,total:15,sets:[5,5,5]},{day:4,total:20,sets:[5,5,5,5]},{day:8,total:30,sets:[8,8,7,7]},{day:12,total:40,sets:[10,10,10,10]},{day:16,total:50,sets:[10,10,10,10,10]},{day:20,total:65,sets:[13,13,13,13,13]},{day:24,total:80,sets:[20,20,20,20]},{day:27,total:90,sets:[20,20,20,15,15]},{day:30,total:100,sets:[20,20,20,20,20]}]},
+    {id:"squats-100",icon:"🦵",title:"Objectif 100 squats",exerciseId:"squat",category:"Jambes",duration:30,unit:"répétitions",finalTarget:100,description:"Construire progressivement l'endurance des jambes jusqu'à cumuler 100 squats.",stages:[
+      {day:1,total:20,sets:[10,10]},{day:7,total:35,sets:[12,12,11]},{day:14,total:50,sets:[10,10,10,10,10]},{day:21,total:70,sets:[14,14,14,14,14]},{day:30,total:100,sets:[20,20,20,20,20]}]},
+    {id:"gainage-5",icon:"🧱",title:"5 minutes de gainage",exerciseId:"planche",category:"Tronc",duration:30,unit:"secondes",finalTarget:300,description:"Cumuler 5 minutes de gainage avec des séries courtes et un repos maîtrisé.",stages:[
+      {day:1,total:60,sets:[30,30]},{day:7,total:90,sets:[30,30,30]},{day:14,total:120,sets:[40,40,40]},{day:21,total:180,sets:[60,60,60]},{day:30,total:300,sets:[60,60,60,60,60]}]},
+    {id:"dips-50",icon:"🤸",title:"Objectif 50 dips",exerciseId:"dips",category:"Haut du corps",duration:30,unit:"répétitions",finalTarget:50,description:"Progresser jusqu'à cumuler 50 dips dans une séance courte.",stages:[
+      {day:1,total:10,sets:[5,5]},{day:7,total:15,sets:[5,5,5]},{day:14,total:25,sets:[5,5,5,5,5]},{day:21,total:35,sets:[7,7,7,7,7]},{day:30,total:50,sets:[10,10,10,10,10]}]},
+    {id:"tractions-30",icon:"🏋️",title:"Objectif 30 tractions",exerciseId:"tractions",category:"Dos",duration:30,unit:"répétitions",finalTarget:30,description:"Accumuler 30 tractions en plusieurs séries, avec une progression adaptée au niveau.",stages:[
+      {day:1,total:6,sets:[2,2,2]},{day:7,total:9,sets:[3,3,3]},{day:14,total:15,sets:[3,3,3,3,3]},{day:21,total:22,sets:[5,5,4,4,4]},{day:30,total:30,sets:[6,6,6,6,6]}]},
+    {id:"course-5km",icon:"🏃",title:"Courir 5 km",exerciseId:"activity-course",category:"Cardio",duration:30,unit:"km",finalTarget:5,description:"Passer progressivement de blocs course/marche à 5 km continus.",stages:[
+      {day:1,total:1,sets:["1 km"]},{day:7,total:2,sets:["2 km"]},{day:14,total:3,sets:["3 km"]},{day:21,total:4,sets:["4 km"]},{day:30,total:5,sets:["5 km"]}]}
+  ];
+
+  const stateKey="vitatrack_challenges_v1";
+  let state=JSON.parse(localStorage.getItem(stateKey)||"{}");
+
+  function save(){localStorage.setItem(stateKey,JSON.stringify(state))}
+  function getProgress(id){return state[id]||{start:null,done:[]}}
+  function currentDay(id){
+    const st=getProgress(id);
+    if(!st.start)return 1;
+    return Math.min(30,Math.max(1,Math.floor((Date.now()-new Date(st.start).getTime())/86400000)+1));
+  }
+  function stageFor(ch,day){
+    let result=ch.stages[0];
+    ch.stages.forEach(x=>{if(x.day<=day)result=x});
+    return result;
+  }
+  function exercise(ch){
+    const cat=window.EXERCISES_CATALOG;
+    return cat?.exercises?.find(x=>x.id===ch.exerciseId)||null;
+  }
+  function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+
+  function openLibrary(){
+    let el=document.getElementById("challengeScreen");
+    if(!el){el=document.createElement("div");el.id="challengeScreen";el.className="challenge-screen";document.body.appendChild(el)}
+    const active=CHALLENGES.find(ch=>getProgress(ch.id).start&&!getProgress(ch.id).done.includes("finished"));
+    el.innerHTML=`
+      <div class="challenge-header">
+        <button class="challenge-back" onclick="closeChallengeLibrary()">←</button>
+        <h2>Défis</h2><div></div>
+      </div>
+      <div class="challenge-content">
+        <p class="challenge-intro">Les défis sont des objectifs ciblés sur plusieurs jours. Ils utilisent directement les exercices de ta bibliothèque et font progresser progressivement le volume ou la performance.</p>
+        ${active?`<div class="challenge-section-title">Mon défi en cours</div>${card(active,true)}`:""}
+        <div class="challenge-section-title">Défis disponibles</div>
+        ${CHALLENGES.filter(ch=>!active||ch.id!==active.id).map(ch=>card(ch,false)).join("")}
+      </div>`;
+    el.classList.add("open");document.body.style.overflow="hidden";
+  }
+
+  function card(ch,active){
+    const st=getProgress(ch.id),day=currentDay(ch.id),stage=stageFor(ch,day);
+    const pct=Math.round((stage.total/ch.finalTarget)*100);
+    return `<button class="challenge-card ${active?'active':''}" onclick="openChallengeDetail('${ch.id}')">
+      <div class="challenge-card-top"><div class="challenge-icon">${ch.icon}</div><div class="challenge-main">
+        <strong>${esc(ch.title)}</strong><small>${esc(ch.description)}</small><span class="challenge-tag">${esc(ch.category)} · ${ch.duration} jours · lié à ${esc(exercise(ch)?.name||ch.exerciseId)}</span>
+      </div></div>
+      <div class="challenge-progress"><span style="width:${pct}%"></span></div>
+      <div class="challenge-card-bottom"><span>${active?`Jour ${day}/30`:`Objectif : ${ch.finalTarget} ${ch.unit}`}</span><b>${active?pct+"% de progression": "Voir le défi →"}</b></div>
+    </button>`
+  }
+
+  function openDetail(id){
+    const ch=CHALLENGES.find(x=>x.id===id);if(!ch)return;
+    let el=document.getElementById("challengeScreen");
+    if(!el){el=document.createElement("div");el.id="challengeScreen";el.className="challenge-screen";document.body.appendChild(el)}
+    const st=getProgress(id),started=!!st.start,day=currentDay(id),stage=stageFor(ch,day),ex=exercise(ch);
+    const done=st.done||[],pct=Math.round((done.length/ch.duration)*100);
+    el.innerHTML=`
+      <div class="challenge-header">
+        <button class="challenge-back" onclick="openChallengeLibrary()">←</button>
+        <h2>Défi</h2><div></div>
+      </div>
+      <div class="challenge-content">
+        <div class="challenge-detail-hero">
+          <div style="font-size:24px">${ch.icon}</div>
+          <h1>${esc(ch.title)}</h1>
+          <p>${esc(ch.description)}</p>
+          <div class="challenge-exercise-link">💪 ${esc(ex?.name||ch.exerciseId)} <span style="margin-left:auto;color:var(--ink-soft);font-size:9px">Bibliothèque d'exercices</span></div>
+          <div class="challenge-progress"><span style="width:${started?pct:0}%"></span></div>
+          <div class="challenge-card-bottom"><span>${started?`${done.length}/${ch.duration} jours`:"Pas encore commencé"}</span><b>${started?pct+"%":""}</b></div>
+        </div>
+
+        <div class="challenge-today">
+          <div class="challenge-today-title">${started?`Aujourd'hui · Jour ${day}`:"Le principe du défi"}</div>
+          <div class="challenge-today-target">${started?stage.total+" "+ch.unit:"Progression sur 30 jours"}</div>
+          <div class="challenge-today-meta">${started?"Objectif du jour · en plusieurs séries avec repos court":"Le volume augmente progressivement jusqu'à l'objectif final."}</div>
+          ${started?`<div class="challenge-sets">${stage.sets.map(x=>`<span class="challenge-set">${esc(x)}${typeof x==="number"?" reps":""}</span>`).join("")}</div>
+          <button class="challenge-primary" onclick="completeChallengeDay('${ch.id}')">${done.includes(day)?'✓ Journée validée':'Valider le défi du jour'}</button>`
+          :`<button class="challenge-primary" onclick="startChallenge('${ch.id}')">Commencer ce défi</button>`}
+        </div>
+
+        <div class="challenge-section-title">Progression</div>
+        <div class="challenge-days">${Array.from({length:30},(_,i)=>`<div class="challenge-day ${done.includes(i+1)?'done':''} ${started&&day===i+1?'current':''}">${i+1}</div>`).join("")}</div>
+
+        <button class="challenge-secondary" onclick="openChallengeLibrary()">Voir les autres défis</button>
+      </div>`;
+    el.classList.add("open");document.body.style.overflow="hidden";
+  }
+
+  window.openChallengeLibrary=openLibrary;
+  window.openChallengeDetail=openDetail;
+  window.closeChallengeLibrary=()=>{const el=document.getElementById("challengeScreen");if(el)el.classList.remove("open");document.body.style.overflow=""};
+  window.startChallenge=id=>{
+    const st=getProgress(id);if(!st.start){st.start=new Date().toISOString();st.done=[];state[id]=st;save()}openDetail(id);
+  };
+  window.completeChallengeDay=id=>{
+    const st=getProgress(id),day=currentDay(id);
+    if(!st.done.includes(day)){st.done.push(day);save()}
+    openDetail(id);
+  };
+})();
+</script>
+
+<script src="sport-workouts-data.js"></script>
+<script src="sport-exercises-ui.js"></script>
+<script src="sport-workouts-ui.js"></script>
+<script src="sport-history.js"></script>
+<script src="sport-execution.js"></script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+}
+</script>
+
+<script>
+function openSportCoach(){
+  let o=document.getElementById('sportCoachOverlay');
+  if(!o){
+    o=document.createElement('div'); o.id='sportCoachOverlay'; o.className='sheet-overlay';
+    o.innerHTML=`<div class="sheet" style="max-height:88vh;overflow:auto"><div class="sheet-handle"></div><div style="display:flex;justify-content:space-between;align-items:center"><div><div class="eyebrow">Coach IA</div><h2 style="margin:4px 0 0">🤖 Coach Sport</h2></div><button class="sport-close" onclick="closeSportCoach()">×</button></div><div class="card" style="margin-top:14px"><p>Je regarde tes dernières séances pour t'aider à progresser.</p><div class="mini-stats"><span>🎯 Objectif : ${DATA.sport.objectives?.primary||'condition physique'}</span><span>🧘 ${typeof estimateRecovery==='function'?estimateRecovery().label:'Récupération'}</span></div><div class="coach-note"><strong>💡 Ma recommandation</strong><p>${typeof estimateRecovery==='function' && estimateRecovery().label==='Bonne'?'Tu peux continuer à progresser progressivement.':'Privilégie une séance adaptée à ta récupération aujourd’hui.'}</p></div><button class="btn btn-primary btn-block" style="margin-top:14px" onclick="openSportOnboarding()">Modifier mes objectifs</button></div></div>`;
+    document.body.appendChild(o);
+  } else {
+    const rec=typeof estimateRecovery==='function'?estimateRecovery():{label:'—'};
+    o.querySelector('.mini-stats').innerHTML=`<span>🎯 Objectif : ${DATA.sport.objectives?.primary||'condition physique'}</span><span>🧘 ${rec.label}</span>`;
+  }
+  o.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeSportCoach(){
+  document.getElementById('sportCoachOverlay')?.classList.remove('open');
+  document.body.style.overflow='';
+  document.documentElement.style.overflow='';
+}
+</script>
+</body></html><style>
+.history-item{width:100%;border:0;text-align:left;cursor:pointer;display:flex;align-items:center;gap:10px;background:transparent;color:inherit;padding:10px 0}.history-item>span{font-size:24px;color:var(--ink-soft)}
+.detail-content{padding:14px}.detail-summary{display:flex;justify-content:space-between;align-items:center;gap:14px}.detail-summary>div{display:flex;flex-direction:column;gap:3px}.detail-summary small,.detail-stats small{color:var(--ink-soft);font-size:11px}.detail-big{font-size:26px;font-weight:800}.detail-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}.detail-stats>div{display:flex;flex-direction:column;gap:3px}.detail-ex-row{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}.detail-ex-row:last-child{border-bottom:0}.sport-back{border:0;background:transparent;font-size:30px;line-height:1;cursor:pointer;color:var(--ink)}
+</style>
+<style>
+.history-list{display:flex;flex-direction:column;gap:8px;padding-bottom:20px}
+.history-activity-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:9px 11px;box-shadow:0 2px 8px rgba(0,0,0,.03)}
+.history-activity-title{font-weight:900;font-size:14px;line-height:1.25}.history-type{font-weight:600;color:var(--muted);font-size:12px}
+.history-activity-line{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.35;white-space:normal}
+.history-detail-row{padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}.history-detail-row:last-of-type{border-bottom:0}.history-detail-row span{font-weight:700}.history-detail-row b{font-weight:900}
+.history-detail-meta{display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--muted);margin-top:8px}
+</style>
