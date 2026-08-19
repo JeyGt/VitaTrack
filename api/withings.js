@@ -273,13 +273,21 @@ module.exports=async(req,res)=>{
       return json(res,400,{error:'Invalid Withings authorization state'});
     }
 
-    try{
-      const session=await exchangeCode(c,code);
-      await saveConnection(c,session);
-    }catch(e){
-      console.error('Withings callback save error:',e);
-      return json(res,500,{error:'Unable to save Withings connection',details:e.message});
-    }
+  try {
+  const saved = await saveConnection(c, session);
+
+  return json(res, 200, {
+    ok: true,
+    saved
+  });
+} catch (e) {
+  console.error('Saving Withings connection failed:', e);
+
+  return json(res, 500, {
+    error: 'Unable to save Withings connection',
+    details: e.message
+  });
+}
 
     res.statusCode=302;
     res.setHeader('Location','/');
