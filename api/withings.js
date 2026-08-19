@@ -1,5 +1,6 @@
 // VitaTrack / Withings connector
 // Persistent Withings authorization in Supabase + per-device lastupdate cookie.
+const crypto = require('crypto');
 
 const API = 'https://wbsapi.withings.net';
 const AUTH = 'https://account.withings.com/oauth2_user/authorize2';
