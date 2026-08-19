@@ -106,10 +106,16 @@ async function supabaseRequest(c, path, options = {}) {
     data = text;
   }
 
-  if (!r.ok) {
-    console.error('Supabase error:', r.status, data);
-    throw new Error(`Supabase request failed (${r.status})`);
-  }
+ if (!r.ok) {
+  console.error('Supabase error:', r.status, data);
+  throw new Error(
+    `Supabase request failed (${r.status}): ${
+      typeof data === 'string'
+        ? data
+        : JSON.stringify(data)
+    }`
+  );
+}
 
   return data;
 }
@@ -331,12 +337,13 @@ if (
 
     try {
       await saveConnection(c, session);
-    } catch (e) {
-      console.error('Saving Withings connection failed:', e);
-      return json(res, 500, {
-        error: 'Unable to save Withings connection'
-      });
-    }
+   } catch (e) {
+  console.error('Saving Withings connection failed:', e);
+  return json(res, 500, {
+    error: 'Unable to save Withings connection',
+    details: e.message
+  });
+}
 
     setCookie(res, STATE, '', 0);
 
