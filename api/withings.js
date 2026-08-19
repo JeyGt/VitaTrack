@@ -1,5 +1,5 @@
 // VitaTrack / Withings Public API connector
-// Persistent Withings session via Supabase + Vercel serverless function
+// Persistent Withings session via Supabase + Vercel serverless functions
 
 const crypto = require('crypto');
 
