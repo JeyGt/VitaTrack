@@ -1,8 +1,6 @@
-// VitaTrack / Withings Public API connector (Vercel serverless function)
 const crypto = require('crypto');
 
 const COOKIE = 'vt_withings';
-const STATE = 'vt_withings_state';
 const API = 'https://wbsapi.withings.net';
 const AUTH = 'https://account.withings.com/oauth2_user/authorize2';
 const SCOPES = 'user.metrics,user.info';
@@ -10,7 +8,9 @@ const SCOPES = 'user.metrics,user.info';
 function cfg() {
   return {
     clientId: process.env.WITHINGS_CLIENT_ID,
-    clientSecret: process.env.WITHINGS_CLIENT_SECRET,
+    clientSecret: process.env.WITHINGS_SESSION_SECRET
+      ? process.env.WITHINGS_CLIENT_SECRET
+      : process.env.WITHINGS_CLIENT_SECRET,
     redirectUri: process.env.WITHINGS_REDIRECT_URI || '',
     secret: process.env.WITHINGS_SESSION_SECRET || 'CHANGE_ME'
   };
@@ -24,7 +24,10 @@ function sign(value, secret) {
 }
 
 function encode(obj, secret) {
-  const body = Buffer.from(JSON.stringify(obj)).toString('base64url');
+  const body = Buffer
+    .from(JSON.stringify(obj))
+    .toString('base64url');
+
   return body + '.' + sign(body, secret);
 }
 
@@ -56,26 +59,34 @@ function setCookie(res, name, value, maxAge) {
 }
 
 function getCookie(req, name) {
-  const h = req.headers.cookie || '';
+  const cookies = req.headers.cookie || '';
 
-  const m = h.match(
+  const match = cookies.match(
     new RegExp(
       '(?:^|; )' +
-        name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') +
-        '=([^;]*)'
+      name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') +
+      '=([^;]*)'
     )
   );
 
-  return m ? decodeURIComponent(m[1]) : null;
+  return match
+    ? decodeURIComponent(match[1])
+    : null;
 }
 
 function json(res, status, data) {
   res.statusCode = status;
+
   res.setHeader(
     'Content-Type',
     'application/json; charset=utf-8'
   );
-  res.setHeader('Cache-Control', 'no-store');
+
+  res.setHeader(
+    'Cache-Control',
+    'no-store'
+  );
+
   res.end(JSON.stringify(data));
 }
 
@@ -85,7 +96,7 @@ module.exports = async (req, res) => {
   const action =
     (req.query && req.query.action) || 'status';
 
-  // Vérification de la configuration
+  // STATUS
   if (action === 'status') {
     return json(res, 200, {
       configured: !!(
@@ -101,6 +112,7 @@ module.exports = async (req, res) => {
     });
   }
 
+  // CONFIGURATION
   if (
     !c.clientId ||
     !c.clientSecret ||
@@ -111,62 +123,65 @@ module.exports = async (req, res) => {
     });
   }
 
-  // Début de la connexion Withings
+  // CONNEXION
   if (action === 'connect') {
     const nonce = crypto
       .randomBytes(24)
       .toString('hex');
 
-    setCookie(
-      res,
-      STATE,
-      encode(
-        {
-          nonce,
-          iat: Date.now()
-        },
-        c.secret
-      ),
-      600
+    /*
+     * Le state est signé et envoyé directement
+     * à Withings.
+     *
+     * Il n'est donc plus nécessaire de dépendre
+     * d'un cookie pour valider le retour OAuth.
+     */
+    const state = encode(
+      {
+        nonce,
+        iat: Date.now()
+      },
+      c.secret
     );
 
-    const u = new URL(AUTH);
+    const url = new URL(AUTH);
 
-    u.searchParams.set(
+    url.searchParams.set(
       'response_type',
       'code'
     );
 
-    u.searchParams.set(
+    url.searchParams.set(
       'client_id',
       c.clientId
     );
 
-    u.searchParams.set(
+    url.searchParams.set(
       'scope',
       SCOPES
     );
 
-    u.searchParams.set(
+    url.searchParams.set(
       'redirect_uri',
       c.redirectUri
     );
 
-    u.searchParams.set(
+    url.searchParams.set(
       'state',
-      nonce
+      state
     );
 
     res.statusCode = 302;
+
     res.setHeader(
       'Location',
-      u.toString()
+      url.toString()
     );
 
     return res.end();
   }
 
-  // Retour depuis Withings
+  // CALLBACK WITHINGS
   if (action === 'callback') {
     const state = String(
       req.query.state || ''
@@ -176,9 +191,10 @@ module.exports = async (req, res) => {
       req.query.code || ''
     );
 
-    // IMPORTANT :
-    // Withings teste l'URL avant de l'accepter.
-    // Ce test arrive sans code ni state.
+    /*
+     * Withings appelle parfois l'URL seule
+     * pour vérifier qu'elle est accessible.
+     */
     if (!state && !code) {
       return json(res, 200, {
         ok: true,
@@ -186,14 +202,23 @@ module.exports = async (req, res) => {
       });
     }
 
+    /*
+     * IMPORTANT :
+     * on valide maintenant le state directement
+     * depuis celui renvoyé par Withings.
+     */
     const saved = decode(
-      getCookie(req, STATE),
+      state,
       c.secret
     );
 
     if (
       !saved ||
-      saved.nonce !== state ||
+      !saved.nonce ||
+      !saved.iat ||
+      Date.now() -
+        Number(saved.iat) >
+        10 * 60 * 1000 ||
       !code
     ) {
       return json(res, 400, {
@@ -202,16 +227,21 @@ module.exports = async (req, res) => {
       });
     }
 
+    // Échange du code contre les tokens
     const form = new URLSearchParams({
       action: 'requesttoken',
-      grant_type: 'authorization_code',
-      client_id: c.clientId,
-      client_secret: c.clientSecret,
+      grant_type:
+        'authorization_code',
+      client_id:
+        c.clientId,
+      client_secret:
+        c.clientSecret,
       code,
-      redirect_uri: c.redirectUri
+      redirect_uri:
+        c.redirectUri
     });
 
-    const r = await fetch(
+    const response = await fetch(
       API + '/v2/oauth2',
       {
         method: 'POST',
@@ -223,11 +253,12 @@ module.exports = async (req, res) => {
       }
     );
 
-    const d = await r.json();
+    const data =
+      await response.json();
 
     if (
-      d.status !== 0 ||
-      !d.body?.refresh_token
+      data.status !== 0 ||
+      !data.body?.refresh_token
     ) {
       return json(res, 502, {
         error:
@@ -235,15 +266,23 @@ module.exports = async (req, res) => {
       });
     }
 
+    // Création de la session
     const session = encode(
       {
-        userid: d.body.userid,
-        access_token: d.body.access_token,
-        refresh_token: d.body.refresh_token,
+        userid:
+          data.body.userid,
+
+        access_token:
+          data.body.access_token,
+
+        refresh_token:
+          data.body.refresh_token,
+
         expires_at:
           Date.now() +
           Number(
-            d.body.expires_in || 10800
+            data.body.expires_in ||
+            10800
           ) *
             1000
       },
@@ -257,14 +296,9 @@ module.exports = async (req, res) => {
       60 * 60 * 24 * 365
     );
 
-    setCookie(
-      res,
-      STATE,
-      '',
-      0
-    );
-
+    // Retour dans VitaTrack
     res.statusCode = 302;
+
     res.setHeader(
       'Location',
       '/'
@@ -273,12 +307,13 @@ module.exports = async (req, res) => {
     return res.end();
   }
 
+  // SESSION
   const session = decode(
     getCookie(req, COOKIE),
     c.secret
   );
 
-  // Déconnexion
+  // DÉCONNEXION
   if (action === 'disconnect') {
     setCookie(
       res,
@@ -298,7 +333,7 @@ module.exports = async (req, res) => {
     });
   }
 
-  // Renouvellement du token
+  // RAFRAÎCHISSEMENT DU TOKEN
   async function refresh() {
     if (
       session.expires_at >
@@ -308,44 +343,56 @@ module.exports = async (req, res) => {
     }
 
     const form = new URLSearchParams({
-      action: 'requesttoken',
-      grant_type: 'refresh_token',
-      client_id: c.clientId,
-      client_secret: c.clientSecret,
+      action:
+        'requesttoken',
+
+      grant_type:
+        'refresh_token',
+
+      client_id:
+        c.clientId,
+
+      client_secret:
+        c.clientSecret,
+
       refresh_token:
         session.refresh_token
     });
 
-    const r = await fetch(
+    const response = await fetch(
       API + '/v2/oauth2',
       {
         method: 'POST',
+
         headers: {
           'Content-Type':
             'application/x-www-form-urlencoded'
         },
+
         body: form
       }
     );
 
-    const d = await r.json();
+    const data =
+      await response.json();
 
-    if (d.status !== 0) {
+    if (data.status !== 0) {
       throw new Error(
         'Withings refresh failed'
       );
     }
 
     session.access_token =
-      d.body.access_token;
+      data.body.access_token;
 
     session.refresh_token =
-      d.body.refresh_token;
+      data.body.refresh_token;
 
     session.expires_at =
       Date.now() +
       Number(
-        d.body.expires_in || 10800
+        data.body.expires_in ||
+        10800
       ) *
         1000;
 
@@ -362,9 +409,10 @@ module.exports = async (req, res) => {
     return session;
   }
 
-  // Récupération des mesures
+  // MESURES
   if (action === 'measurements') {
-    const s = await refresh();
+    const s =
+      await refresh();
 
     const end =
       Math.floor(
@@ -375,32 +423,44 @@ module.exports = async (req, res) => {
       end -
       60 * 60 * 24 * 180;
 
-    const form = new URLSearchParams({
-      action: 'getmeas',
-      meastype:
-        '1,6,8,76,77,88',
-      category: '1',
-      startdate: String(start),
-      enddate: String(end)
-    });
+    const form =
+      new URLSearchParams({
+        action: 'getmeas',
 
-    const r = await fetch(
-      API + '/measure',
-      {
-        method: 'POST',
-        headers: {
-          Authorization:
-            `Bearer ${s.access_token}`,
-          'Content-Type':
-            'application/x-www-form-urlencoded'
-        },
-        body: form
-      }
-    );
+        meastype:
+          '1,6,8,76,77,88',
 
-    const d = await r.json();
+        category: '1',
 
-    if (d.status !== 0) {
+        startdate:
+          String(start),
+
+        enddate:
+          String(end)
+      });
+
+    const response =
+      await fetch(
+        API + '/measure',
+        {
+          method: 'POST',
+
+          headers: {
+            Authorization:
+              `Bearer ${s.access_token}`,
+
+            'Content-Type':
+              'application/x-www-form-urlencoded'
+          },
+
+          body: form
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (data.status !== 0) {
       return json(res, 502, {
         error:
           'Withings measurement request failed'
@@ -408,55 +468,87 @@ module.exports = async (req, res) => {
     }
 
     const groups =
-      d.body?.measuregrps || [];
+      data.body?.measuregrps || [];
 
     const measurements =
       groups
-        .map((g) => {
-          const out = {
-            id: g.grpid,
+        .map((group) => {
+          const result = {
+            id:
+              group.grpid,
+
             date:
               new Date(
-                Number(g.date) * 1000
+                Number(group.date) *
+                  1000
               )
                 .toISOString()
                 .slice(0, 10)
           };
 
           for (
-            const m of
-            g.measures || []
+            const measure
+            of group.measures || []
           ) {
-            const v =
-              Number(m.value) *
+            const value =
+              Number(
+                measure.value
+              ) *
               Math.pow(
                 10,
-                Number(m.unit || 0)
+                Number(
+                  measure.unit || 0
+                )
               );
 
-            if (m.type === 1)
-              out.weight = v;
+            if (
+              measure.type === 1
+            ) {
+              result.weight =
+                value;
+            }
 
-            if (m.type === 6)
-              out.bodyFat = v;
+            if (
+              measure.type === 6
+            ) {
+              result.bodyFat =
+                value;
+            }
 
-            if (m.type === 8)
-              out.fatMass = v;
+            if (
+              measure.type === 8
+            ) {
+              result.fatMass =
+                value;
+            }
 
-            if (m.type === 76)
-              out.muscleMass = v;
+            if (
+              measure.type === 76
+            ) {
+              result.muscleMass =
+                value;
+            }
 
-            if (m.type === 77)
-              out.hydration = v;
+            if (
+              measure.type === 77
+            ) {
+              result.hydration =
+                value;
+            }
 
-            if (m.type === 88)
-              out.visceralFat = v;
+            if (
+              measure.type === 88
+            ) {
+              result.visceralFat =
+                value;
+            }
           }
 
-          return out;
+          return result;
         })
         .filter(
-          (x) => x.weight > 0
+          (item) =>
+            item.weight > 0
         );
 
     return json(res, 200, {
