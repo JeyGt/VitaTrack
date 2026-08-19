@@ -844,24 +844,115 @@ async function refreshWithingsUI(){
 }
 
 async function syncWithings(){
-  const d=await WITHINGS_CONNECTOR.sync();
-  const measures=d.measurements||[];
+  // 1. Récupération des données Withings
+  let d;
+
+  try{
+    d=await WITHINGS_CONNECTOR.sync();
+  }catch(e){
+    console.error('Withings API error:',e);
+    throw new Error('Impossible de récupérer les données Withings');
+  }
+
+  const measures=Array.isArray(d.measurements)
+    ? d.measurements
+    : [];
+
   let added=0;
+
+  // 2. Import des pesées
   for(const m of measures){
-    if(!(m.weight>0)) continue;
+    if(!(Number(m.weight)>0)) continue;
+
     const date=m.date||TODAY;
-    const exists=DATA.weights.some(x=>x.withingsId===m.id || (x.date===date && Math.abs(Number(x.weight)-Number(m.weight))<0.01 && x.source==='withings'));
+
+    const exists=DATA.weights.some(x=>
+      x.withingsId===m.id ||
+      (
+        x.date===date &&
+        Math.abs(
+          Number(x.weight)-Number(m.weight)
+        )<0.01 &&
+        x.source==='withings'
+      )
+    );
+
     if(exists) continue;
-    DATA.weights.push({date,weight:m.weight,source:'withings',withingsId:m.id||null,bodyFat:m.bodyFat??null,muscleMass:m.muscleMass??null,hydration:m.hydration??null,visceralFat:m.visceralFat??null});
+
+    DATA.weights.push({
+      date,
+      weight:Number(m.weight),
+      source:'withings',
+      withingsId:m.id||null,
+      bodyFat:m.bodyFat??null,
+      muscleMass:m.muscleMass??null,
+      hydration:m.hydration??null,
+      visceralFat:m.visceralFat??null
+    });
+
     added++;
   }
+
+  // 3. Mise à jour des données locales
   if(added){
-    DATA.weights.sort((a,b)=>String(a.date).localeCompare(String(b.date)));
-    const last=DATA.weights[DATA.weights.length-1];
-    if(last?.weight){DATA.profile.weightCurrent=Number(last.weight);if(!DATA.profile.startingWeight)DATA.profile.startingWeight=Number(last.weight);}
-    saveState(); renderAll();
+    DATA.weights.sort((a,b)=>
+      String(a.date).localeCompare(
+        String(b.date)
+      )
+    );
+
+    const last=
+      DATA.weights[
+        DATA.weights.length-1
+      ];
+
+    if(last?.weight){
+      DATA.profile.weightCurrent=
+        Number(last.weight);
+
+      if(!DATA.profile.startingWeight){
+        DATA.profile.startingWeight=
+          Number(last.weight);
+      }
+    }
+
+    // Si l'enregistrement échoue,
+    // on le signale séparément.
+    try{
+      saveState();
+    }catch(e){
+      console.error(
+        'Withings saveState error:',
+        e
+      );
+    }
+
+    // Même chose pour l'affichage.
+    try{
+      renderAll();
+    }catch(e){
+      console.error(
+        'Withings renderAll error:',
+        e
+      );
+    }
   }
-  toast(added?`${added} nouvelle${added>1?'s':''} pesée${added>1?'s':''} importée${added>1?'s':''}`:'Aucune nouvelle pesée');
+
+  // 4. Message de résultat
+  try{
+    toast(
+      added
+        ? `${added} nouvelle${added>1?'s':''} pesée${added>1?'s':''} importée${added>1?'s':''}`
+        : 'Aucune nouvelle pesée'
+    );
+  }catch(e){
+    console.log(
+      added
+        ? `${added} pesée(s) importée(s)`
+        : 'Aucune nouvelle pesée'
+    );
+  }
+
   return d;
 }
 
