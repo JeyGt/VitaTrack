@@ -209,16 +209,23 @@ module.exports = async (req, res) => {
     });
   }
 
-  if (
-    !c.clientId ||
-    !c.clientSecret ||
-    !c.redirectUri ||
-    !supabaseConfigured(c)
-  ) {
-    return json(res, 503, {
-      error: 'Withings connector not configured'
-    });
-  }
+if (
+  !c.clientId ||
+  !c.clientSecret ||
+  !c.redirectUri ||
+  !supabaseConfigured(c)
+) {
+  return json(res, 503, {
+    error: 'Withings connector not configured',
+    debug: {
+      clientId: !!c.clientId,
+      clientSecret: !!c.clientSecret,
+      redirectUri: !!c.redirectUri,
+      supabaseUrl: !!c.supabaseUrl,
+      supabaseKey: !!c.supabaseKey
+    }
+  });
+}
 
   // Begin Withings OAuth connection.
   if (action === 'connect') {
