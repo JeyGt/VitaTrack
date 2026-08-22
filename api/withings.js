@@ -177,19 +177,71 @@ function parseIntSafe(v){
   return Number.isFinite(n)&&n>0?Math.floor(n):0;
 }
 
-async function exchangeCode(c,code){
-  const form=new URLSearchParams({
-    action:'requesttoken',grant_type:'authorization_code',
-    client_id:c.clientId,client_secret:c.clientSecret,
-    code,redirect_uri:c.redirectUri
-  });
-  const r=await fetch(API+'/v2/oauth2',{
-    method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:form
+function signWithingsParams(c,params){
+  const paramsToSign={
+    action:params.action,
+    client_id:params.client_id
+  };
+  if(params.timestamp!==undefined)paramsToSign.timestamp=params.timestamp;
+  if(params.nonce!==undefined)paramsToSign.nonce=params.nonce;
+  const payload=Object.keys(paramsToSign)
+    .sort()
+    .map(key=>String(paramsToSign[key]))
+    .join(',');
+  return crypto.createHmac('sha256',String(c.clientSecret)).update(payload).digest('hex');
+}
+
+async function getWithingsNonce(c){
+  const timestamp=Math.floor(Date.now()/1000);
+  const params={
+    action:'getnonce',
+    client_id:c.clientId,
+    timestamp:String(timestamp)
+  };
+  params.signature=signWithingsParams(c,params);
+  const form=new URLSearchParams(params);
+  const r=await fetch(API+'/v2/signature',{
+    method:'POST',
+    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:form
   });
   const d=await r.json();
+  if(d.status!==0||!d.body?.nonce){
+    console.error('Withings nonce request:',d);
+    const status=d?.status!==undefined?` (status ${d.status})`:'';
+    throw new Error(`Withings nonce request failed${status}`);
+  }
+  return d.body.nonce;
+}
+
+async function postSignedTokenRequest(c,params,label){
+  const nonce=await getWithingsNonce(c);
+  const signedParams={...params,nonce};
+  signedParams.signature=signWithingsParams(c,signedParams);
+  const form=new URLSearchParams(signedParams);
+  const r=await fetch(API+'/v2/oauth2',{
+    method:'POST',
+    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:form
+  });
+  const d=await r.json();
+  if(d.status!==0){
+    console.error(`Withings ${label}:`,d);
+  }
+  return d;
+}
+
+async function exchangeCode(c,code){
+  const d=await postSignedTokenRequest(c,{
+    action:'requesttoken',
+    grant_type:'authorization_code',
+    client_id:c.clientId,
+    code,
+    redirect_uri:c.redirectUri
+  },'token exchange');
   if(d.status!==0||!d.body?.refresh_token||!d.body?.access_token){
-    console.error('Withings token exchange:',d);
-    throw new Error('Withings token exchange failed');
+    const status=d?.status!==undefined?` (status ${d.status})`:'';
+    throw new Error(`Withings token exchange failed${status}`);
   }
   return {
     userid:d.body.userid,
@@ -205,18 +257,15 @@ async function refreshSession(c,conn){
     return {...conn,expires_at:expiresAt};
   }
 
-  const form=new URLSearchParams({
-    action:'requesttoken',grant_type:'refresh_token',
-    client_id:c.clientId,client_secret:c.clientSecret,
+  const d=await postSignedTokenRequest(c,{
+    action:'requesttoken',
+    grant_type:'refresh_token',
+    client_id:c.clientId,
     refresh_token:conn.refresh_token
-  });
-  const r=await fetch(API+'/v2/oauth2',{
-    method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:form
-  });
-  const d=await r.json();
+  },'refresh');
   if(d.status!==0||!d.body?.access_token||!d.body?.refresh_token){
-    console.error('Withings refresh:',d);
-    throw new Error('Withings refresh failed');
+    const status=d?.status!==undefined?` (status ${d.status})`:'';
+    throw new Error(`Withings refresh failed${status}`);
   }
 
   const next={
