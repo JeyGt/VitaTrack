@@ -226,9 +226,18 @@ a.linklike{color:var(--primary); font-weight:700; text-decoration:none; font-siz
 }
 .level-bar-wrap{margin-top:10px;}
 input[type="range"]{width:100%;}
+
+.weigh-history{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.weigh-history-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.weigh-history-head strong{font-size:13.5px}
+.weigh-history-list .item-row{padding:10px 0;border-bottom:1px solid var(--border)}
+.weigh-history-list .item-row:last-child{border-bottom:0}
+.weigh-history-list .item-ico{width:34px;height:34px;border-radius:10px;background:var(--surface-alt);display:flex;align-items:center;justify-content:center}
+.weight-source{display:inline-flex;align-items:center;margin-left:5px;padding:2px 6px;border-radius:999px;background:var(--surface-alt);font-size:10px;font-weight:750;color:var(--ink-soft)}
 </style>
 <style>
 .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);font-weight:800}.hero-card{padding:22px}.hero-kcal{font-family:Fraunces,serif;font-size:42px;line-height:1}.hero-kcal span{font-family:Manrope,sans-serif;font-size:14px;color:var(--ink-soft)}.metric-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}.metric{background:var(--surface-alt);border-radius:14px;padding:12px}.metric strong{font-size:21px}.metric span{display:block;font-size:11px;color:var(--ink-soft);margin-top:2px}.mini-stats{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.mini-stats span{background:var(--surface-alt);padding:7px 9px;border-radius:10px;font-size:12px;font-weight:700}.coach-note{background:var(--primary-tint);border-radius:14px;padding:13px;margin-top:12px}.coach-note p{margin:6px 0 0;line-height:1.5;font-size:13px}.guide-row{width:100%;border:0;border-bottom:1px solid var(--border);background:transparent;padding:13px 2px;display:flex;justify-content:space-between;text-align:left;color:var(--ink)}.guide-row:last-child{border-bottom:0}.guide-hero{background:var(--surface-alt);border-radius:16px;padding:18px;text-align:center}.guide-hero .num{font-size:34px}.guide-hero span{display:block;color:var(--ink-soft);font-size:12px}.guide-gi{padding:14px 0;border-bottom:1px solid var(--border);line-height:1.5}.report-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.report-grid>div{background:var(--surface-alt);padding:12px;border-radius:12px}.report-grid strong{display:block;font-family:Fraunces,serif;font-size:21px}.report-grid span{font-size:11px;color:var(--ink-soft)}.setup-intro{font-size:13px;color:var(--ink-soft);line-height:1.5;margin-top:-7px}.scanner{display:flex;gap:8px}.scanner button{flex:1}.barcode-video{width:100%;border-radius:14px;margin-top:10px;display:none;background:#111}.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.quick-actions .btn{width:100%}.goal-pill{display:inline-flex;align-items:center;padding:6px 10px;border-radius:99px;background:var(--primary-tint);color:var(--primary);font-size:11px;font-weight:800}.small-link{color:var(--primary);font-weight:800;font-size:12px;border:0;background:none;padding:0}.warning{background:var(--accent-tint);border-radius:14px;padding:12px;font-size:12.5px;line-height:1.45}.subtabs{margin-top:2px}.screen .card h2{margin:4px 0 6px;font-size:23px}.muted strong{color:var(--ink)}
+</style>
 
 <style>
 
@@ -250,7 +259,6 @@ input[type="range"]{width:100%;}
 @media(max-width:360px){.nutrition-tools{grid-template-columns:1fr 1fr}.nutrition-tools .nutrition-tool:last-child{grid-column:1/-1}}
 /* VitaTrack unified navigation */
 .nutrition-block{margin-top:18px}.nutrition-section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.nutrition-section-head h2{margin:0;font-size:19px}.inline-link{border:0;background:none;color:var(--primary);font-weight:800;font-size:12px;padding:4px}.timeline-item{display:flex;gap:10px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border)}.timeline-item:last-child{border-bottom:0}.timeline-time{font-size:11px;color:var(--ink-soft);min-width:42px}.timeline-dot{width:8px;height:8px;border-radius:50%;background:var(--primary);margin-top:6px;flex:none}.timeline-main{flex:1;min-width:0}.timeline-title{font-weight:800;font-size:13px}.timeline-meta{font-size:11px;color:var(--ink-soft);margin-top:3px}progress-summary{display:grid;grid-template-columns:1fr 1fr;gap:9px}.progress-summary .metric{padding:12px}.section-divider{height:1px;background:var(--border);margin:18px 0}.coming-card{padding:28px 18px;text-align:center}.coming-card .big{font-size:42px;margin-bottom:8px}.legacy-hidden{display:none!important}.bottomnav{grid-template-columns:repeat(4,1fr)}
-</style>
 </style>
 
 <style>
@@ -417,6 +425,7 @@ input[type="range"]{width:100%;}
 .drink-history-toggle{width:100%;border:0;border-top:1px solid var(--border);background:transparent;padding:9px 13px;display:flex;justify-content:space-between;align-items:center;color:var(--ink-soft);font-size:11px;font-weight:650;cursor:pointer}
 .drink-history-toggle span:last-child{font-size:16px;line-height:1;transition:transform .15s ease}
 .drink-history-toggle.open span:last-child{transform:rotate(180deg)}
+</style>
 
 <style>
 /* Menu principal + : 5 icônes rondes alignées */
@@ -488,6 +497,12 @@ input[type="range"]{width:100%;}
 .page-food .nutrition-block{margin-bottom:9px}
  .drink-card-click{cursor:pointer}
 .drink-card-click:active{opacity:.96}
+.weigh-action{cursor:pointer;border-radius:12px;padding:7px 5px;transition:background .15s ease,transform .08s ease}
+.weigh-action:hover{background:var(--surface-alt)}
+.weigh-action:active{transform:scale(.98)}
+.weigh-action:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.drink-card-click .drink-summary{border-radius:14px}
+
 .drink-card .drink-picker,
 .drink-card .drink-today-list{cursor:default}
 </style>
@@ -642,26 +657,32 @@ input[type="range"]{width:100%;}
 .sport-divider{height:1px;background:var(--border);margin:14px 0}
 .sport-explore-title{font-family:'Fraunces',serif;font-size:20px;margin:18px 2px 10px}
 .sport-card-stack{display:flex;flex-direction:column;gap:12px}
+.sport-catalog-shell{position:relative;margin-top:4px}
+.sport-catalog-rail{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x proximity;padding:2px 10px 12px;scrollbar-width:none;-ms-overflow-style:none;touch-action:pan-x;-webkit-overflow-scrolling:touch}
+.sport-catalog-rail::-webkit-scrollbar{display:none}
 .sport-explore-card{
-  position:relative;min-height:150px;width:100%;border:0;border-radius:20px;overflow:hidden;
+  position:relative;min-height:218px;aspect-ratio:.9/1;border:0;border-radius:22px;overflow:hidden;
   padding:20px;text-align:left;color:#fff;display:flex;align-items:flex-end;
-  box-shadow:0 7px 20px rgba(0,0,0,.12);background:#17211c;
+  box-shadow:0 7px 20px rgba(0,0,0,.12);background:#17211c;flex:0 0 52%;scroll-snap-align:center;
 }
 .sport-explore-card:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,12,10,.9),rgba(8,12,10,.28));z-index:1}
-.sport-explore-card .visual-content{position:relative;z-index:2;max-width:75%}
+.sport-explore-card .visual-content{position:relative;z-index:2;max-width:78%}
 .sport-explore-card .visual-title{font-size:24px;line-height:1;font-weight:900;text-transform:uppercase;margin:0}
 .sport-explore-card .visual-sub{font-size:11px;color:rgba(255,255,255,.78);margin-top:6px}
 .sport-explore-card.challenges{background:url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1000&q=82') center/cover}
 .sport-explore-card.workouts{background:url('https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=1000&q=82') center/cover}
-.sport-explore-card.exercises{background:url('https://images.unsplash.com/photo-1517964603305-11c0f6f66012?auto=format&fit=crop&w=1000&q=82') center/cover}
-.sport-explore-card .card-icon{
-  position:absolute;right:18px;top:16px;z-index:2;width:44px;height:44px;border-radius:50%;
-  background:rgba(255,255,255,.14);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;font-size:22px;
-}
+.sport-explore-card.exercises{background:url('https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=1000&q=82') center/cover}
+.sport-explore-card.coach{background:url('https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=1000&q=82') center/cover}
+.sport-catalog-dots{display:flex;justify-content:center;gap:6px;margin-top:6px}
+.sport-catalog-dot{width:7px;height:7px;border-radius:50%;background:var(--border);transition:transform .2s ease,background .2s ease}
+.sport-catalog-dot.active{background:var(--primary);transform:scale(1.15)}
+.sport-coach-inline{margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:12px 14px;box-shadow:var(--shadow)}
+.sport-coach-inline strong{display:block;font-size:13px}
+.sport-coach-inline small{display:block;font-size:10px;color:var(--ink-soft);margin-top:2px}
 @media(max-width:380px){
   .sport-visual-card{min-height:164px;padding:17px}
   .sport-visual-card .visual-title{font-size:19px}
-  .sport-explore-card{min-height:138px;padding:17px}
+  .sport-explore-card{min-height:198px;padding:17px;flex-basis:58%}
   .sport-explore-card .visual-title{font-size:21px}
 }
 </style>
@@ -1668,6 +1689,68 @@ input[type="range"]{width:100%;}
 .sport-progress-bar{height:6px;background:var(--surface-alt);border-radius:99px;overflow:hidden;margin-top:6px}
 .sport-progress-bar i{display:block;height:100%;background:var(--primary);border-radius:99px}
 </style>
+
+<!-- Consolidated late CSS: moved from after </html> to valid document head -->
+<style>
+.history-item{width:100%;border:0;text-align:left;cursor:pointer;display:flex;align-items:center;gap:10px;background:transparent;color:inherit;padding:10px 0}.history-item>span{font-size:24px;color:var(--ink-soft)}
+.detail-content{padding:14px}.detail-summary{display:flex;justify-content:space-between;align-items:center;gap:14px}.detail-summary>div{display:flex;flex-direction:column;gap:3px}.detail-summary small,.detail-stats small{color:var(--ink-soft);font-size:11px}.detail-big{font-size:26px;font-weight:800}.detail-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}.detail-stats>div{display:flex;flex-direction:column;gap:3px}.detail-ex-row{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}.detail-ex-row:last-child{border-bottom:0}.sport-back{border:0;background:transparent;font-size:30px;line-height:1;cursor:pointer;color:var(--ink)}
+</style>
+<style>
+.history-list{display:flex;flex-direction:column;gap:8px;padding-bottom:20px}
+.history-activity-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:9px 11px;box-shadow:0 2px 8px rgba(0,0,0,.03)}
+.history-activity-title{font-weight:900;font-size:14px;line-height:1.25}.history-type{font-weight:600;color:var(--muted);font-size:12px}
+.history-activity-line{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.35;white-space:normal}
+.history-detail-row{padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}.history-detail-row:last-of-type{border-bottom:0}.history-detail-row span{font-weight:700}.history-detail-row b{font-weight:900}
+.history-detail-meta{display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--muted);margin-top:8px}
+</style>
+
+<style>
+.daily-summary-card{padding:18px}.daily-summary-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.daily-summary-head h2{margin:4px 0 0;font-size:22px}.daily-summary-status{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;background:var(--surface-alt);font-size:11px;font-weight:800;color:var(--ink-soft);white-space:nowrap}.daily-summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}.daily-summary-item{background:var(--surface-alt);border-radius:14px;padding:12px;min-height:82px}.daily-summary-item strong{display:block;font-size:15px;line-height:1.25}.daily-summary-item span{display:block;color:var(--ink-soft);font-size:11px;line-height:1.4;margin-top:5px}.daily-summary-message{margin-top:12px;padding:12px 13px;border-radius:14px;background:var(--primary-tint);font-size:12.5px;line-height:1.5}.daily-summary-energy{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.daily-summary-energy span{background:var(--surface-alt);border-radius:999px;padding:6px 9px;font-size:11px;font-weight:700;color:var(--ink-soft)}.daily-coach{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}.daily-coach-head{display:flex;gap:8px;align-items:center;margin-bottom:8px}.daily-coach-head strong{font-size:14px}.daily-coach-actions{display:grid;gap:8px}.daily-coach-action{display:flex;gap:10px;align-items:flex-start;background:var(--surface-alt);border-radius:14px;padding:11px 12px}.daily-coach-icon{font-size:18px;line-height:1.2}.daily-coach-action strong{display:block;font-size:13px;line-height:1.3}.daily-coach-action span:not(.daily-coach-icon){display:block;margin-top:3px;color:var(--ink-soft);font-size:11.5px;line-height:1.45}.daily-coach-empty{color:var(--ink-soft);font-size:12px}@media(max-width:390px){.daily-summary-grid{grid-template-columns:1fr}}
+</style>
+
+<style id="profile-center-v12">
+.profile-sheet{padding-bottom:calc(30px + env(safe-area-inset-bottom))!important}
+.profile-sheet-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.profile-avatar{width:52px;height:52px;border-radius:50%;background:var(--primary-tint);color:var(--primary);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:20px;font-weight:700;border:1px solid var(--border);flex:none}
+.profile-sheet-head h3{margin:0 0 3px!important}.profile-sheet-head p{margin:0}
+.profile-group{margin-top:18px}.profile-group-title{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft);font-weight:800;margin:0 4px 8px}
+.profile-card{padding:0!important;overflow:hidden}
+.profile-setting-row{display:flex;align-items:center;gap:12px;padding:14px 15px;border-bottom:1px solid var(--border);min-height:58px}
+.profile-setting-row:last-child{border-bottom:0}
+.profile-setting-icon{width:36px;height:36px;border-radius:11px;background:var(--surface-alt);display:flex;align-items:center;justify-content:center;flex:none;font-size:17px}
+.profile-setting-main{flex:1;min-width:0}.profile-setting-main strong{display:block;font-size:13.5px}.profile-setting-main span{display:block;font-size:11.5px;color:var(--ink-soft);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.profile-chevron{border:0;background:none;color:var(--ink-soft);font-size:20px;padding:5px}
+.profile-edit-block{padding:15px;border-bottom:1px solid var(--border)}
+.profile-edit-block:last-child{border-bottom:0}
+.switch{position:relative;width:46px;height:27px;display:inline-block;flex:none}.switch input{opacity:0;width:0;height:0}.switch-track{position:absolute;inset:0;border-radius:99px;background:var(--surface-alt);border:1px solid var(--border);transition:.2s}.switch-track:before{content:"";position:absolute;width:21px;height:21px;left:2px;top:2px;border-radius:50%;background:var(--surface);box-shadow:0 1px 4px rgba(0,0,0,.18);transition:.2s}.switch input:checked + .switch-track{background:var(--primary);border-color:var(--primary)}.switch input:checked + .switch-track:before{transform:translateX(19px);background:#fff}
+.profile-theme-options{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.theme-option{padding:9px 6px;border:1px solid var(--border);background:var(--surface-alt);color:var(--ink);border-radius:11px;font-size:12px;font-weight:750}.theme-option.active{background:var(--primary-tint);border-color:var(--primary);color:var(--primary)}
+.profile-inline-actions{display:flex;gap:8px;flex-wrap:wrap}.profile-inline-actions .btn{flex:1;min-width:120px}
+.profile-connection-state{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;color:var(--ink-soft)}.profile-connection-state.connected{color:var(--primary)}
+.profile-subpanel{display:none;padding:14px 15px;border-top:1px solid var(--border);background:var(--surface-alt)}.profile-subpanel.open{display:block}
+.profile-entry{border-color:var(--primary)!important;background:var(--primary-tint)!important;color:var(--primary)!important}
+.profile-access-icon{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.home-steps-overview{display:block;width:100%;text-align:left;color:var(--ink);cursor:pointer}
+.sport-steps-card{margin-bottom:14px}.sport-steps-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.sport-steps-value{font-size:28px;font-weight:950;line-height:1}.sport-steps-value span{font-size:12px;color:var(--ink-soft);font-weight:800}.sport-steps-meta{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}.sport-steps-meta>div{background:var(--surface-alt);border-radius:13px;padding:10px}.sport-steps-meta strong{display:block;font-size:14px}.sport-steps-meta span{font-size:9px;color:var(--ink-soft)}
+.sport-steps-history{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;margin-top:14px}.sport-step-day{text-align:center;min-width:0}.sport-step-bar{height:56px;border-radius:8px;background:var(--surface-alt);position:relative;overflow:hidden}.sport-step-bar i{position:absolute;left:0;right:0;bottom:0;background:var(--primary);border-radius:8px;min-height:2px}.sport-step-day b{display:block;font-size:9px;margin-top:5px}.sport-step-day small{display:block;font-size:7px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.sport-today-head-right{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}
+.sport-today-overall{display:inline-flex;align-items:center;justify-content:center;min-width:52px;height:30px;padding:0 10px;border-radius:999px;background:var(--primary-tint);color:var(--primary);font-size:13px;font-weight:900}
+.sport-today-streak{font-size:10px;color:var(--ink-soft);font-weight:800;white-space:nowrap}
+.sport-today-quick-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:13px}
+.sport-today-quick{min-width:0;min-height:154px;border:1px solid var(--border);background:var(--surface-alt);border-radius:18px;padding:12px 9px 10px;display:flex;flex-direction:column;align-items:center;text-align:center;color:var(--ink);cursor:pointer;font:inherit;box-shadow:none;position:relative;overflow:hidden}
+.sport-today-quick:active{transform:scale(.985);background:color-mix(in srgb,var(--surface) 72%, var(--primary-tint))}
+.sport-today-quick:disabled{opacity:.65;cursor:default}
+.sport-today-quick-score{font-family:Fraunces,serif;font-size:34px;line-height:1;font-weight:700;letter-spacing:-.045em;color:var(--primary);margin:8px 0 10px}
+.sport-today-quick-score span{font-family:Manrope,sans-serif;font-size:16px;font-weight:900;margin-left:1px}
+.sport-today-quick-copy{min-width:0;width:100%;display:flex;flex-direction:column;align-items:center}
+.sport-today-quick-label{display:block;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.045em;color:var(--ink-soft);margin-bottom:4px;line-height:1.2}
+.sport-today-quick-copy strong{display:-webkit-box;font-size:10.5px;line-height:1.25;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;width:100%}
+.sport-today-quick-copy small{display:block;font-size:8px;color:var(--ink-soft);margin-top:4px;line-height:1.25;white-space:normal}
+.sport-today-quick-side{position:absolute;right:8px;bottom:6px;font-size:10px;font-weight:900;color:var(--primary)}
+.sport-today-quick-side b{font-size:16px;line-height:1;color:var(--ink-soft)}
+@media(max-width:360px){.sport-today-quick-list{gap:6px}.sport-today-quick{padding:10px 7px 9px;min-height:146px}.sport-today-quick-score{font-size:29px}.sport-today-quick-score span{font-size:14px}.sport-today-quick-copy strong{font-size:10px}.sport-today-quick-label{font-size:7.5px}}
+</style>
+
 </head>
 <body data-theme="light">
 <div id="welcomeScreen" aria-label="Bienvenue dans VitaTrack">
@@ -1687,8 +1770,14 @@ input[type="range"]{width:100%;}
   </div>
   <div class="topbar-actions" aria-label="Raccourcis">
     <button class="topbar-icon" type="button" onclick="openSportPanel('calendar')" aria-label="Calendrier">📅</button>
-    <button class="topbar-icon" type="button" onclick="openSportPanel('profile')" aria-label="Profil">👤</button>
-    <button class="topbar-icon" type="button" onclick="openProfileSheet()" aria-label="Objectifs">🎯</button>
+    <button class="topbar-icon profile-entry" type="button" onclick="openProfileSheet()" aria-label="Profil et réglages" title="Profil et réglages">
+      <svg class="profile-access-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="10" cy="8" r="3"></circle>
+        <path d="M4.8 18.2c.6-3.2 2.5-5 5.2-5s4.6 1.8 5.2 5"></path>
+        <circle cx="18" cy="17" r="3.2"></circle>
+        <path d="M18 12.8v1.1M18 20.1v1.1M13.8 17h1.1M21.1 17h1.1M15 14l.8.8M20.2 19.2l.8.8M21 14l-.8.8M15.8 19.2l-.8.8"></path>
+      </svg>
+    </button>
   </div>
 </div>
 
@@ -1700,10 +1789,23 @@ input[type="range"]{width:100%;}
     <div class="metric-row"><div class="metric"><strong id="homeProtein">0 g</strong><span>protéines / <b id="homeProteinGoal">—</b></span></div><div class="metric"><strong id="homeWeight">—</strong><span>poids actuel</span></div></div>
   </div>
   <div class="section-title">Activité</div>
-  <div class="card" id="homeStepsCard">
-    <div class="row"><div><strong>👟 <span id="homeSteps">0</span> pas</strong><div class="muted small" style="margin-top:3px">Objectif <span id="homeStepsGoal">10 000</span></div></div><button class="btn btn-ghost btn-sm" onclick="editSteps()">Modifier</button></div>
+  <button class="card home-steps-overview" id="homeStepsCard" type="button" onclick="go('sport')" aria-label="Voir le détail des pas dans Sport">
+    <div class="row"><div><strong>👟 <span id="homeSteps">0</span> pas</strong><div class="muted small" style="margin-top:3px">sur <span id="homeStepsGoal">10 000</span> aujourd’hui</div></div><span class="profile-chevron">›</span></div>
     <div class="pbar" style="margin-top:10px"><div id="homeStepsBar" style="background:var(--primary);width:0%"></div></div>
-    <div class="muted small" style="margin-top:7px" id="homeStepsSource">Saisie locale · connexion Santé à venir</div>
+    <div style="display:none"><span id="homeStepsCalories">—</span><span id="homeStepsDistance">—</span><span id="homeStepsSource"></span><span id="homeStepsGoalType"></span></div>
+  </button>
+  <div class="section-title">Bilan du jour</div>
+  <div class="card daily-summary-card" id="dailySummaryCard">
+    <div class="daily-summary-head"><div><div class="eyebrow">Vue d’ensemble</div><h2 id="dailySummaryTitle">Journée en cours</h2></div><span class="daily-summary-status" id="dailySummaryStatus">À compléter</span></div>
+    <div class="daily-summary-grid">
+      <div class="daily-summary-item"><strong id="dailyNutritionStatus">Nutrition · —</strong><span id="dailyNutritionDetail">Ajoute tes repas pour commencer.</span></div>
+      <div class="daily-summary-item"><strong id="dailyActivityStatus">Activité · —</strong><span id="dailyActivityDetail">Aucun pas renseigné.</span></div>
+      <div class="daily-summary-item"><strong id="dailySportStatus">Sport · —</strong><span id="dailySportDetail">Aucune séance enregistrée aujourd’hui.</span></div>
+      <div class="daily-summary-item"><strong id="dailyWeightStatus">Poids · —</strong><span id="dailyWeightDetail">Ajoute des pesées pour suivre la tendance.</span></div>
+    </div>
+    <div class="daily-summary-energy"><span id="dailyEnergyIn">Apports : —</span><span id="dailyEnergyOut">Activité estimée : —</span></div>
+    <div class="daily-summary-message" id="dailySummaryMessage">VitaTrack résumera ici les informations utiles de ta journée.</div>
+    <div class="daily-coach"><div class="daily-coach-head"><span>🧭</span><strong id="dailyCoachTitle">Coach VitaTrack</strong></div><div class="daily-coach-actions" id="dailyCoachActions"><div class="daily-coach-empty">Ajoute quelques données pour obtenir tes priorités du jour.</div></div></div>
   </div>
   <div class="section-title">Bilan nutrition</div>
   <div id="weeklyReportHome"></div>
@@ -1758,8 +1860,8 @@ input[type="range"]{width:100%;}
       </div>
     </div>
     <div class="nutrition-block">
-      <div class="nutrition-section-head"><h2><svg class="nutrition-line-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10l-1 15H8L7 4Z"/><path d="M6 4h12M9 8h6M10 19v2M14 19v2"/></svg> Boissons & alcool</h2><button class="inline-link" onclick="openDrinkPicker()">+ Ajouter</button></div>
-      <div class="card drink-card drink-card-click" onclick="if(Number(document.getElementById('drinkCountToday')?.textContent||0)>0) toggleDrinkHistory()">
+      <div class="nutrition-section-head"><h2><svg class="nutrition-line-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10l-1 15H8L7 4Z"/><path d="M6 4h12M9 8h6M10 19v2M14 19v2"/></svg> Boissons & alcool</h2></div>
+      <div class="card drink-card drink-card-click" onclick="toggleDrinkPicker(event)">
         <div class="drink-summary">
           <div class="drink-stat">
             <span class="drink-label">Aujourd’hui</span>
@@ -1796,20 +1898,20 @@ input[type="range"]{width:100%;}
     <div class="nutrition-block">
 
  
-      <div class="nutrition-section-head"><h2><svg class="nutrition-line-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v15M7 7h10M5 20h14"/><path d="m7 7-4 7a4 4 0 0 0 8 0L7 7ZM17 7l-4 7a4 4 0 0 0 8 0l-4-7Z"/></svg> Mes pesées</h2><button class="inline-add" onclick="openWeightEntry()">+ Ajouter</button></div>
+      <div class="nutrition-section-head"><h2><svg class="nutrition-line-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v15M7 7h10M5 20h14"/><path d="m7 7-4 7a4 4 0 0 0 8 0L7 7ZM17 7l-4 7a4 4 0 0 0 8 0l-4-7Z"/></svg> Mes pesées</h2></div>
       <div class="card weigh-card">
         <div class="weigh-values">
-          <div class="weigh-stat">
+          <div class="weigh-stat weigh-action" role="button" tabindex="0" onclick="toggleWeightHistory(event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleWeightHistory(event)}">
             <span class="weigh-label">Précédente</span>
             <strong id="nutritionPreviousWeight">—</strong>
           </div>
           <div class="weigh-divider"></div>
-          <div class="weigh-stat weigh-current">
+          <div class="weigh-stat weigh-current weigh-action" role="button" tabindex="0" onclick="toggleWeightEntry(event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleWeightEntry(event)}">
             <span class="weigh-label">Poids actuel</span>
             <strong id="nutritionCurrentWeight">—</strong>
           </div>
           <div class="weigh-divider"></div>
-          <div class="weigh-stat">
+          <div class="weigh-stat weigh-action" role="button" tabindex="0" onclick="openWeightGoal(event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openWeightGoal(event)}">
             <span class="weigh-label">Objectif</span>
             <strong id="nutritionWeightGoal">—</strong>
           </div>
@@ -1826,6 +1928,10 @@ input[type="range"]{width:100%;}
             <div class="field"><label>Graisse viscérale</label><div class="input-with-unit"><input type="number" step="0.1" id="newVisceralFat" placeholder="8"><span></span></div></div>
           </div>
           <button class="btn btn-primary btn-block weigh-save-btn" onclick="logWeight()">Enregistrer</button>
+        </div>
+        <div class="weigh-history" id="nutritionWeightHistory" style="display:none">
+          <div class="weigh-history-head"><strong>Historique des pesées</strong><span class="muted small" id="nutritionWeightHistoryCount">0 pesée</span></div>
+          <div id="weightListCard" class="weigh-history-list"></div>
         </div>
       </div>
     </div>
@@ -1850,7 +1956,7 @@ input[type="range"]{width:100%;}
 <section class="screen legacy-hidden" id="screen-profile"></section>
 
 <div class="bottomnav" aria-label="Navigation principale"><button class="navbtn active" data-screen="home" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg><span>Accueil</span></button><button class="navbtn" data-screen="food" onclick="go('food')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 2v8M5 4v4a2 2 0 0 0 4 0V4M17 2c-2 1-2 5-2 7s0 4 2 4V22"/></svg><span>Nutrition</span></button><button class="navbtn" data-screen="sport" onclick="go('sport')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 5h4v14H6zM14 5h4v14h-4zM10 9h4M10 15h4"/></svg><span>Sport</span></button><button class="navbtn" data-screen="game" onclick="go('game')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 8h10a4 4 0 0 1 4 4v2.5a3.5 3.5 0 0 1-6.1 2.3L13 15h-2l-1.9 1.8A3.5 3.5 0 0 1 3 14.5V12a4 4 0 0 1 4-4z"/><path d="M7 12v3M5.5 13.5h3M16.5 13.5h.01M18.5 12h.01"/></svg><span>Monde</span></button></div>
-<button class="fab" id="globalFab" onclick="openFoodSheet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+<button class="fab" id="globalFab" onclick="openAddMenu()" aria-label="Ajouter une donnée"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
 
 <div class="sheet-overlay" id="addMenuOverlay" onclick="closeSheetIfBg(event,'addMenuOverlay')"><div class="sheet"><div class="sheet-handle"></div><h3>Ajouter</h3><p class="muted small">Que veux-tu enregistrer ?</p><div class="add-menu-grid quick-add-grid">
 <button class="add-choice quick-add-choice" onclick="openTraining()"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9v6M4.5 10.5v3M2.5 11.5v1M17 9v6M19.5 10.5v3M21.5 11.5v1M7 12h10"/></svg></span><strong>Entraînement</strong><small id="quickAddTraining">0 kcal à brûler</small></button>
@@ -1882,18 +1988,133 @@ input[type="range"]{width:100%;}
 <div class="field"><label>Objectif principal</label><select id="sport_goal"><option value="condition_physique">Condition physique</option><option value="force">Force</option><option value="musculation" selected>Musculation</option><option value="endurance">Endurance</option><option value="perte_poids">Perte de poids</option><option value="mobilite">Mobilité</option></select></div>
 <button class="btn btn-primary btn-block" onclick="saveSportSetup()">Créer mon programme</button></div></div>
 
-<div class="sheet-overlay" id="profileSheetOverlay" onclick="closeSheetIfBg(event,'profileSheetOverlay')"><div class="sheet"><div class="sheet-handle"></div><h3>Mon objectif et mes réglages</h3><div class="card" style="padding:12px;margin-bottom:12px"><div class="row small"><span class="muted">Calories de départ</span><strong id="profileCalorieTarget">À calculer</strong></div><div class="row small" style="margin-top:8px"><span class="muted">Protéines</span><strong id="profileProteinTarget">À calculer</strong></div></div><div class="field"><label>Prénom (facultatif)</label><input id="pf_name"></div><div class="field-row"><div class="field"><label>Âge</label><input type="number" id="pf_age"></div><div class="field"><label>Sexe</label><select id="pf_sex"><option value="homme">Homme</option><option value="femme">Femme</option></select></div></div><div class="field-row"><div class="field"><label>Taille (cm)</label><input type="number" id="pf_height"></div><div class="field"><label>Poids actuel (kg)</label><input type="number" step="0.1" id="pf_weight"></div></div><button class="btn btn-primary btn-block" onclick="saveProfile();closeSheet('profileSheetOverlay')">Enregistrer mon profil</button><div class="divider"></div><div class="field"><label>Objectif principal</label><select id="pf_goal"><option value="fat_loss">🔥 Perdre du gras</option><option value="recomposition">🔄 Recomposition</option><option value="muscle_gain">💪 Construire du muscle</option><option value="maintain">⚖️ Maintenir</option><option value="weight_target">🎯 Atteindre un poids</option></select></div><div class="field"><label>Activité quotidienne</label><select id="pf_activity"><option value="sedentary">Peu actif</option><option value="light">Légèrement actif</option><option value="moderate">Actif</option><option value="active">Très actif</option><option value="very_active">Très actif +</option></select></div><div class="field"><label>Poids cible (facultatif)</label><input type="number" step="0.1" id="pf_target"></div><div class="field-row"><div class="field"><label>% masse grasse cible</label><input type="number" step="0.1" id="pf_bodyfat_target"></div><div class="field"><label>Tour de taille cible</label><input type="number" step="0.5" id="pf_waist_target"></div></div><button class="btn btn-primary btn-block" onclick="saveGoals();closeSheet('profileSheetOverlay')">Enregistrer l'objectif</button><div class="divider"></div><div class="row"><strong>Thème sombre</strong><button class="chip" id="themeToggle" onclick="toggleTheme()">Activer</button></div><div style="height:8px"></div><button class="btn btn-ghost btn-block" onclick="exportData()">⤓ Exporter mes données</button><div style="height:8px"></div><button class="btn btn-ghost btn-block" onclick="document.getElementById('importFile').click()">⤒ Importer mes données</button><input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)"></div></div>
+<div class="sheet-overlay" id="profileSheetOverlay" onclick="closeSheetIfBg(event,'profileSheetOverlay')">
+  <div class="sheet profile-sheet">
+    <div class="sheet-handle"></div>
+    <div class="profile-sheet-head">
+      <div class="profile-avatar" id="profileAvatar">VT</div>
+      <div><h3 id="profileDisplayName">Mon profil</h3><p class="muted small" id="profileDisplayGoal">Configure ton objectif</p></div>
+    </div>
+
+    <div class="profile-group">
+      <div class="profile-group-title">Profil & objectif</div>
+      <div class="card profile-card">
+        <div class="profile-setting-row" onclick="toggleProfilePanel('profileEditPanel')">
+          <div class="profile-setting-icon">👤</div><div class="profile-setting-main"><strong>Modifier le profil</strong><span id="profileSummary">Âge, taille, poids</span></div><button class="profile-chevron" type="button">›</button>
+        </div>
+        <div class="profile-subpanel" id="profileEditPanel">
+          <div class="field"><label>Prénom (facultatif)</label><input id="pf_name"></div>
+          <div class="field-row"><div class="field"><label>Âge</label><input type="number" id="pf_age"></div><div class="field"><label>Sexe</label><select id="pf_sex"><option value="homme">Homme</option><option value="femme">Femme</option></select></div></div>
+          <div class="field-row"><div class="field"><label>Taille (cm)</label><input type="number" id="pf_height"></div><div class="field"><label>Poids actuel (kg)</label><input type="number" step="0.1" id="pf_weight"></div></div>
+          <button class="btn btn-primary btn-block" onclick="saveProfile()">Enregistrer mon profil</button>
+        </div>
+        <div class="profile-setting-row" onclick="toggleProfilePanel('goalEditPanel')">
+          <div class="profile-setting-icon">🎯</div><div class="profile-setting-main"><strong>Mon objectif</strong><span id="profileGoalSummary">—</span></div><button class="profile-chevron" type="button">›</button>
+        </div>
+        <div class="profile-subpanel" id="goalEditPanel">
+          <div class="card" style="padding:12px;margin-bottom:12px"><div class="row small"><span class="muted">Calories de départ</span><strong id="profileCalorieTarget">À calculer</strong></div><div class="row small" style="margin-top:8px"><span class="muted">Protéines</span><strong id="profileProteinTarget">À calculer</strong></div></div>
+          <div class="field"><label>Objectif principal</label><select id="pf_goal"><option value="fat_loss">🔥 Perdre du gras</option><option value="recomposition">🔄 Recomposition</option><option value="muscle_gain">💪 Construire du muscle</option><option value="maintain">⚖️ Maintenir</option><option value="weight_target">🎯 Atteindre un poids</option></select></div>
+          <div class="field"><label>Activité quotidienne</label><select id="pf_activity"><option value="sedentary">Peu actif</option><option value="light">Légèrement actif</option><option value="moderate">Actif</option><option value="active">Très actif</option><option value="very_active">Très actif +</option></select></div>
+          <div class="field"><label>Poids cible (facultatif)</label><input type="number" step="0.1" id="pf_target"></div>
+          <div class="field-row"><div class="field"><label>% masse grasse cible</label><input type="number" step="0.1" id="pf_bodyfat_target"></div><div class="field"><label>Tour de taille cible</label><input type="number" step="0.5" id="pf_waist_target"></div></div>
+          <div class="field"><label>Objectif de pas quotidien</label><div class="input-with-unit"><input type="number" step="500" min="1000" max="50000" id="pf_steps_goal" placeholder="Objectif adaptatif"><span>pas</span></div><div class="muted small" style="margin-top:6px">Laisse vide pour laisser VitaTrack adapter l’objectif à ton profil et à ton activité récente.</div></div>
+          <button class="btn btn-primary btn-block" onclick="saveGoals()">Enregistrer l'objectif</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-group">
+      <div class="profile-group-title">Préférences</div>
+      <div class="card profile-card">
+        <div class="profile-setting-row" onclick="toggleProfilePanel('notificationsPanel')">
+          <div class="profile-setting-icon">🔔</div><div class="profile-setting-main"><strong>Notifications</strong><span id="notificationSummary">Rappels et suivi</span></div><button class="profile-chevron" type="button">›</button>
+        </div>
+        <div class="profile-subpanel" id="notificationsPanel">
+          <div class="profile-setting-row" style="padding:9px 0"><div class="profile-setting-main"><strong>Activer les notifications</strong><span>Autorise les rappels VitaTrack</span></div><label class="switch"><input id="notif_enabled" type="checkbox" onchange="saveNotificationSettings()"><span class="switch-track"></span></label></div>
+          <div class="profile-setting-row" style="padding:9px 0"><div class="profile-setting-main"><strong>Hydratation</strong><span>Rappels pour boire de l’eau</span></div><label class="switch"><input id="notif_water" type="checkbox" onchange="saveNotificationSettings()"><span class="switch-track"></span></label></div>
+          <div class="profile-setting-row" style="padding:9px 0"><div class="profile-setting-main"><strong>Repas</strong><span>Ne pas oublier de renseigner les repas</span></div><label class="switch"><input id="notif_meals" type="checkbox" onchange="saveNotificationSettings()"><span class="switch-track"></span></label></div>
+          <div class="profile-setting-row" style="padding:9px 0"><div class="profile-setting-main"><strong>Sport</strong><span>Rappels des séances prévues</span></div><label class="switch"><input id="notif_sport" type="checkbox" onchange="saveNotificationSettings()"><span class="switch-track"></span></label></div>
+          <div class="profile-setting-row" style="padding:9px 0"><div class="profile-setting-main"><strong>Pesée</strong><span>Rappel de suivi du poids</span></div><label class="switch"><input id="notif_weight" type="checkbox" onchange="saveNotificationSettings()"><span class="switch-track"></span></label></div>
+        </div>
+        <div class="profile-setting-row" onclick="toggleProfilePanel('themePanel')">
+          <div class="profile-setting-icon">◐</div><div class="profile-setting-main"><strong>Apparence</strong><span id="themeSummary">Clair</span></div><button class="profile-chevron" type="button">›</button>
+        </div>
+        <div class="profile-subpanel" id="themePanel"><div class="profile-theme-options"><button class="theme-option" data-theme-choice="light" onclick="setThemePreference('light')">☀️ Clair</button><button class="theme-option" data-theme-choice="dark" onclick="setThemePreference('dark')">🌙 Sombre</button><button class="theme-option" data-theme-choice="system" onclick="setThemePreference('system')">⚙️ Système</button></div></div>
+      </div>
+    </div>
+
+    <div class="profile-group">
+      <div class="profile-group-title">Apps & appareils</div>
+      <div class="card profile-card">
+        <div class="profile-setting-row" onclick="toggleProfilePanel('connectionsPanel');refreshProfileWithingsUI()">
+          <div class="profile-setting-icon">⌚</div><div class="profile-setting-main"><strong>Connexions externes</strong><span id="connectionsSummary">Withings et futurs services</span></div><button class="profile-chevron" type="button">›</button>
+        </div>
+        <div class="profile-subpanel" id="connectionsPanel">
+          <div class="profile-setting-row" style="padding:6px 0 12px"><div class="profile-setting-icon">⚖️</div><div class="profile-setting-main"><strong>Withings</strong><span id="profileWithingsStatus">Vérification de la connexion…</span></div><button id="profileWithingsAction" class="btn btn-ghost btn-sm" type="button" onclick="event.stopPropagation()">…</button></div>
+          <div id="profileWithingsExtra" style="display:none" class="profile-inline-actions"><button class="btn btn-ghost btn-sm" id="profileWithingsDisconnect" type="button">Déconnecter</button></div>
+          <div class="profile-setting-row" style="padding:12px 0 2px;opacity:.7"><div class="profile-setting-icon">＋</div><div class="profile-setting-main"><strong>Autres connexions</strong><span>Apple Santé, Health Connect, Garmin… à ajouter plus tard</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-group">
+      <div class="profile-group-title">Compte & données</div>
+      <div class="card profile-card">
+        <div class="profile-edit-block"><div id="cloudAccountBox"><div class="muted small">Chargement du compte VitaTrack…</div></div></div>
+        <div class="profile-edit-block"><div class="profile-inline-actions"><button class="btn btn-ghost btn-sm" onclick="exportData()">⤓ Exporter</button><button class="btn btn-ghost btn-sm" onclick="document.getElementById('importFile').click()">⤒ Importer</button></div><input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)"></div>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="sheet-overlay" id="setupSheetOverlay"><div class="sheet"><div class="sheet-handle"></div><h3>Bienvenue dans VitaTrack</h3><p class="setup-intro">On commence simplement. Donne-moi quelques informations pour estimer tes besoins. Ensuite, tu enregistres normalement tes repas et je regarderai ta progression avant de modifier quoi que ce soit.</p><div class="field"><label>Prénom (facultatif)</label><input id="setup_name"></div><div class="field-row"><div class="field"><label>Âge</label><input type="number" id="setup_age"></div><div class="field"><label>Sexe</label><select id="setup_sex"><option value="homme">Homme</option><option value="femme">Femme</option></select></div></div><div class="field-row"><div class="field"><label>Taille (cm)</label><input type="number" id="setup_height"></div><div class="field"><label>Poids (kg)</label><input type="number" step="0.1" id="setup_weight"></div></div><div class="field"><label>Objectif principal</label><select id="setup_goal"><option value="fat_loss">🔥 Perdre du gras</option><option value="recomposition">🔄 Recomposition</option><option value="muscle_gain">💪 Construire du muscle</option><option value="maintain">⚖️ Maintenir</option><option value="weight_target">🎯 Atteindre un poids</option></select></div><div class="field"><label>Activité quotidienne</label><select id="setup_activity"><option value="sedentary">Peu actif</option><option value="light">Légèrement actif</option><option value="moderate">Actif</option><option value="active">Très actif</option><option value="very_active">Très actif +</option></select></div><div class="field"><label>Poids cible (facultatif)</label><input type="number" step="0.1" id="setup_target"></div><button class="btn btn-primary btn-block" onclick="saveSetup()">Créer mon point de départ</button></div></div>
 <div class="toast" id="toast"></div>
-<script src="data.js"></script><script src="sport-data.js"></script><script src="sport-engine.js"></script><script src="app.js"></script>
+<script src="data.js"></script><script src="sport-data.js"></script><script src="sport-engine.js"></script><script src="app.js"></script><script src="nutrition.js"></script><script src="cloud-sync.js"></script>
 <script>
-/* Boissons : la carte entière ouvre/ferme la liste du jour. */
-window.toggleDrinkHistory = function(){
-  const list = document.getElementById('drinkTodayList');
-  if(!list) return;
-  const isHidden = getComputedStyle(list).display === 'none';
-  list.style.display = isHidden ? 'block' : 'none';
+/* Interactions compactes : boissons et pesées s’ouvrent directement depuis leurs cartes. */
+window.toggleDrinkPicker = function(ev){
+  if(ev && ev.target.closest('#drinkPicker,#drinkTodayList')) return;
+  const p=document.getElementById('drinkPicker');
+  if(!p)return;
+  const open=getComputedStyle(p).display!=='none';
+  if(open) closeDrinkPicker(); else openDrinkPicker();
 };
+window.toggleWeightHistory = function(ev){
+  if(ev) ev.stopPropagation();
+  const h=document.getElementById('nutritionWeightHistory');
+  const f=document.getElementById('weightEntryForm');
+  if(!h)return;
+  const open=getComputedStyle(h).display!=='none';
+  if(f)f.style.display='none';
+  h.style.display=open?'none':'block';
+};
+window.toggleWeightEntry = function(ev){
+  if(ev) ev.stopPropagation();
+  const h=document.getElementById('nutritionWeightHistory');
+  if(h)h.style.display='none';
+  openWeightEntry();
+};
+window.openWeightGoal = function(ev){
+  if(ev) ev.stopPropagation();
+  const h=document.getElementById('nutritionWeightHistory');
+  const f=document.getElementById('weightEntryForm');
+  if(h)h.style.display='none';
+  if(f)f.style.display='none';
+  openProfileSheet();
+  setTimeout(()=>{const panel=document.getElementById('goalEditPanel');if(panel&&!panel.classList.contains('open'))panel.classList.add('open');document.getElementById('pf_goal')?.focus();},50);
+};
+document.addEventListener('click',function(ev){
+  const drinkCard=document.querySelector('.drink-card-click');
+  const picker=document.getElementById('drinkPicker');
+  if(picker&&getComputedStyle(picker).display!=='none'&&drinkCard&&!drinkCard.contains(ev.target))closeDrinkPicker();
+
+  const weighCard=document.querySelector('.weigh-card');
+  if(weighCard&&!weighCard.contains(ev.target)){
+    const h=document.getElementById('nutritionWeightHistory');
+    const f=document.getElementById('weightEntryForm');
+    if(h)h.style.display='none';
+    if(f)f.style.display='none';
+  }
+});
 </script>
 
 <script>
@@ -1903,7 +2124,7 @@ window.renderQuickAddSummary = function(){
     const t=currentTargets(), d=dayTotals();
     const drinkEl=document.getElementById('drinkCaloriesToday');
     const drinkKcal=drinkEl ? Math.max(0, Number(String(drinkEl.textContent||'0').replace(/[^0-9.,-]/g,'').replace(',','.'))||0) : 0;
-    const totalKcal=Math.round((d.kcal||0)+drinkKcal);
+    const totalKcal=Math.round(d.kcal||0);
     const remaining=t.calories ? Math.max(0, Math.round(t.calories-totalKcal)) : 0;
     const water=Math.round(waterTotal()||0);
     const weight=DATA.profile && DATA.profile.weightCurrent ? DATA.profile.weightCurrent : null;
@@ -1922,7 +2143,7 @@ window.renderQuickAddSummary = function(){
     const t=currentTargets(), d=dayTotals(),
           drinkKcalEl=document.getElementById('drinkCaloriesToday'),
           drinkKcal=drinkKcalEl?Math.max(0,Number(String(drinkKcalEl.textContent||'0').replace(/[^0-9.,-]/g,'').replace(',','.'))||0):0,
-          totalKcal=Math.round(d.kcal+drinkKcal),
+          totalKcal=Math.round(d.kcal),
           list=(DATA.foodLog[TODAY]||[]).slice().sort((a,b)=>(a.time||'').localeCompare(b.time||'')),
           rem=t.calories?Math.max(0,Math.round(t.calories-totalKcal)):null,
           mt=macroTargets(t.calories||2100);
@@ -2029,55 +2250,85 @@ setTimeout(function(){ window.renderQuickAddSummary && window.renderQuickAddSumm
     const duration=s?.targetDuration||0;
     const exos=s?.exercises?.length||0;
     const muscles=typeof sportMuscles==='function'&&s?sportMuscles(s):'Corps complet';
+    const todaySteps=typeof stepsForDate==='function'?stepsForDate():0;
+    const stepGoal=typeof stepsGoal==='function'?stepsGoal():8000;
+    const stepPct=Math.min(100,Math.round(todaySteps/Math.max(1,stepGoal)*100));
+    const todayHistory=(DATA.sport.sessionHistory||[]).filter(x=>String(x.completedDate||x.date||'').slice(0,10)===TODAY);
+    const sessionDone=!!todayHistory.find(x=>x.id===s?.id || x.sessionId===s?.id || x.name===s?.name);
+    const completedExercises=s?.exercises?.filter(e=>(Array.isArray(e.repsCompleted)&&e.repsCompleted.length)||(Array.isArray(e.durationsSeconds)&&e.durationsSeconds.length)).length||0;
+    const totalExercises=s?.exercises?.length||0;
+    const programPct=s?Math.min(100,Math.round(sessionDone?100:(totalExercises?completedExercises/Math.max(1,totalExercises)*100:0))):0;
+    const todayPct=Math.round((programPct + cp + stepPct) / 3);
+    const stepEstimate=typeof estimateStepCalories==='function'?estimateStepCalories(todaySteps):null;
+    const stepDays=Array.from({length:7},(_,idx)=>{const back=6-idx;const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-back);const key=d.toISOString().slice(0,10);const value=typeof stepsForDate==='function'?stepsForDate(key):0;return {key,value,label:['D','L','M','M','J','V','S'][d.getDay()]};});
+    const stepMax=Math.max(stepGoal,...stepDays.map(x=>x.value),1);
 
     root.innerHTML=`
       <div class="sport-shell">
-        
-
         <div class="sport-today-card card">
           <div class="sport-section-head">
             <h3>Aujourd’hui</h3>
-            <span class="sport-chip green">🔥 ${st} ${st>1?'jours':'jour'}</span>
+            <div class="sport-today-head-right">
+              <span class="sport-today-overall">${todayPct}%</span>
+              <span class="sport-today-streak">🔥 ${st} ${st>1?'jours':'jour'}</span>
+            </div>
           </div>
 
-          <div class="sport-visual-card program">
-            <div class="visual-content">
-              <div class="visual-level">${level} ♡♡☆</div>
-              <div class="visual-title">${pname}</div>
-              <div class="visual-sub">${muscles} · ${duration} min · ${exos} exercices</div>
-            </div>
-            ${s?`<button class="visual-action" onclick="openSession('${s.id}')">Démarrer →</button>`:''}
-          </div>
+          <div class="sport-today-quick-list" aria-label="Résumé du jour">
+            <button class="sport-today-quick program" type="button" ${s?`onclick="openSession('${s.id}')"`:'disabled'}>
+              <div class="sport-today-quick-score">${programPct}<span>%</span></div>
+              <span class="sport-today-quick-copy">
+                <span class="sport-today-quick-label">Programme du jour</span>
+                <strong>${pname}</strong>
+                <small>${s?`${duration} min · ${exos} exercices`:'Aucune séance prévue'}</small>
+              </span>
+              <span class="sport-today-quick-side"><b>›</b></span>
+            </button>
 
-          <div class="sport-divider"></div>
+            <button class="sport-today-quick challenge" type="button" onclick="openChallengeDetail('pompes-100')">
+              <div class="sport-today-quick-score">${cp}<span>%</span></div>
+              <span class="sport-today-quick-copy">
+                <span class="sport-today-quick-label">Défi du jour</span>
+                <strong>${c.label||'Défi du jour'}</strong>
+                <small>${c.progress||0}/${c.target||0} réalisés</small>
+              </span>
+              <span class="sport-today-quick-side"><b>›</b></span>
+            </button>
 
-          <div class="sport-visual-card challenge">
-            <div class="visual-content">
-              <div class="visual-level">DÉFI DU JOUR · ${cp}%</div>
-              <div class="visual-title">${c.label||'Défi du jour'}</div>
-              <div class="visual-sub">${c.progress||0}/${c.target||0} réalisés</div>
-            </div>
-            <button class="visual-action" onclick="openChallengeDetail('pompes-100')">Lancer →</button>
+            <button class="sport-today-quick steps" type="button" onclick="editSteps()">
+              <div class="sport-today-quick-score">${stepPct}<span>%</span></div>
+              <span class="sport-today-quick-copy">
+                <span class="sport-today-quick-label">Pas</span>
+                <strong>${todaySteps.toLocaleString('fr-FR')} / ${stepGoal.toLocaleString('fr-FR')}</strong>
+                <small>objectif de pas aujourd’hui</small>
+              </span>
+              <span class="sport-today-quick-side"><b>›</b></span>
+            </button>
           </div>
         </div>
 
         <div class="sport-section-head" style="margin-top:16px"><h3 style="margin:0">Mon activité</h3><button class="btn btn-ghost btn-sm" onclick="openSportHistory()">📊 Historique</button></div>
         <div class="sport-explore-title">Explorer</div>
-        <div class="sport-card-stack">
-          <button class="sport-explore-card challenges" onclick="openChallengeLibrary()">
-            <span class="card-icon">🏆</span><div class="visual-content"><div class="visual-title">Défis</div><div class="visual-sub">Challenges du mois et objectifs à relever</div></div>
-          </button>
-          <button class="sport-explore-card workouts" onclick="openWorkoutLibrary()">
-            <span class="card-icon">🏋️</span><div class="visual-content"><div class="visual-title">Entraînements</div><div class="visual-sub">Routines prêtes à l’emploi ou personnalisées</div></div>
-          </button>
-          <button class="sport-explore-card exercises" onclick="openExerciseLibrary()">
-            <span class="card-icon">💪</span><div class="visual-content"><div class="visual-title">Exercices</div><div class="visual-sub">Bibliothèque, filtres et favoris</div></div>
-          </button>
-          <button class="sport-explore-card coach" onclick="openSportCoach()">
-            <span class="card-icon">🤖</span><div class="visual-content"><div class="visual-title">Coach Sport</div><div class="visual-sub">Analyse tes séances et adapte tes prochains entraînements</div></div>
-          </button>
+        <div class="sport-catalog-shell">
+          <div class="sport-catalog-rail" id="sportCatalogRail" onscroll="handleSportCatalogScroll()">
+            <button class="sport-explore-card challenges" type="button" onclick="openChallengeLibrary()">
+              <div class="visual-content"><div class="visual-title">Défis</div><div class="visual-sub">Challenges du mois et objectifs à relever</div></div>
+            </button>
+            <button class="sport-explore-card workouts" type="button" onclick="openWorkoutLibrary()">
+              <div class="visual-content"><div class="visual-title">Entraînements</div><div class="visual-sub">Routines prêtes à l’emploi ou personnalisées</div></div>
+            </button>
+            <button class="sport-explore-card exercises" type="button" onclick="openExerciseLibrary()">
+              <div class="visual-content"><div class="visual-title">Exercices</div><div class="visual-sub">Bibliothèque, filtres et favoris</div></div>
+            </button>
+          </div>
+          <div class="sport-catalog-dots" id="sportCatalogDots"><span class="sport-catalog-dot active"></span><span class="sport-catalog-dot"></span><span class="sport-catalog-dot"></span></div>
+          <button class="sport-coach-inline" type="button" onclick="openSportCoach()"><span><strong>Coach Sport</strong><small>Analyse tes séances et adapte tes prochains entraînements</small></span><span class="profile-chevron">›</span></button>
         </div>
       </div>`;
+
+    if(typeof initSportCatalogLoop==='function'){
+      setTimeout(initSportCatalogLoop,0);
+    }
 
     // Fill the existing weekly tracker without changing its underlying logic.
     const week=document.getElementById('sportVisualWeek');
@@ -2202,7 +2453,7 @@ window.updateCalorieExcessRing=updateCalorieExcessRing;</script>
     const done=st.done||[],pct=Math.round((done.length/ch.duration)*100);
     el.innerHTML=`
       <div class="challenge-header">
-        <button class="challenge-back" onclick="openChallengeLibrary()">←</button>
+        <button class="challenge-back" onclick="closeChallengeToSport()">←</button>
         <h2>Défi</h2><div></div>
       </div>
       <div class="challenge-content">
@@ -2232,6 +2483,7 @@ window.updateCalorieExcessRing=updateCalorieExcessRing;</script>
     el.classList.add("open");document.body.style.overflow="hidden";
   }
 
+  window.closeChallengeToSport=()=>{const el=document.getElementById("challengeScreen");if(el)el.classList.remove("open");document.body.style.overflow="";if(typeof go==="function")go("sport");if(typeof renderSport==="function")renderSport();};
   window.openChallengeLibrary=openLibrary;
   window.openChallengeDetail=openDetail;
   window.closeChallengeLibrary=()=>{const el=document.getElementById("challengeScreen");if(el)el.classList.remove("open");document.body.style.overflow=""};
@@ -2246,11 +2498,6 @@ window.updateCalorieExcessRing=updateCalorieExcessRing;</script>
 })();
 </script>
 
-<script src="sport-workouts-data.js"></script>
-<script src="sport-exercises-ui.js"></script>
-<script src="sport-workouts-ui.js"></script>
-<script src="sport-history.js"></script>
-<script src="sport-execution.js"></script>
 <script>
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
@@ -2277,15 +2524,5 @@ function closeSportCoach(){
   document.documentElement.style.overflow='';
 }
 </script>
-</body></html><style>
-.history-item{width:100%;border:0;text-align:left;cursor:pointer;display:flex;align-items:center;gap:10px;background:transparent;color:inherit;padding:10px 0}.history-item>span{font-size:24px;color:var(--ink-soft)}
-.detail-content{padding:14px}.detail-summary{display:flex;justify-content:space-between;align-items:center;gap:14px}.detail-summary>div{display:flex;flex-direction:column;gap:3px}.detail-summary small,.detail-stats small{color:var(--ink-soft);font-size:11px}.detail-big{font-size:26px;font-weight:800}.detail-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}.detail-stats>div{display:flex;flex-direction:column;gap:3px}.detail-ex-row{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}.detail-ex-row:last-child{border-bottom:0}.sport-back{border:0;background:transparent;font-size:30px;line-height:1;cursor:pointer;color:var(--ink)}
-</style>
-<style>
-.history-list{display:flex;flex-direction:column;gap:8px;padding-bottom:20px}
-.history-activity-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:9px 11px;box-shadow:0 2px 8px rgba(0,0,0,.03)}
-.history-activity-title{font-weight:900;font-size:14px;line-height:1.25}.history-type{font-weight:600;color:var(--muted);font-size:12px}
-.history-activity-line{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.35;white-space:normal}
-.history-detail-row{padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}.history-detail-row:last-of-type{border-bottom:0}.history-detail-row span{font-weight:700}.history-detail-row b{font-weight:900}
-.history-detail-meta{display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--muted);margin-top:8px}
-</style>
+<script src="sport-ui.js"></script>
+</body></html>

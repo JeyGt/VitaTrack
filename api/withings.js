@@ -1,11 +1,12 @@
 // VitaTrack / Withings connector
-// Persistent Withings authorization in Supabase + per-device lastupdate cookie.
 const crypto = require('crypto');
+// Persistent Withings authorization in Supabase + per-device lastupdate cookie.
 
 const API = 'https://wbsapi.withings.net';
 const AUTH = 'https://account.withings.com/oauth2_user/authorize2';
 const SCOPES = 'user.metrics,user.info';
 const SYNC_COOKIE = 'vt_withings_sync';
+const USER_COOKIE = 'vt_user_session';
 
 function cfg(){
   return {
@@ -13,8 +14,41 @@ function cfg(){
     clientSecret: process.env.WITHINGS_CLIENT_SECRET,
     redirectUri: process.env.WITHINGS_REDIRECT_URI || '',
     supabaseUrl: process.env.SUPABASE_URL,
-    supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY
+    supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    sessionSecret: process.env.WITHINGS_SESSION_SECRET,
+    tokenSecret: process.env.WITHINGS_TOKEN_ENCRYPTION_KEY || process.env.WITHINGS_SESSION_SECRET
   };
+}
+
+
+function tokenKey(c){
+  return crypto.createHash('sha256').update(String(c.tokenSecret||'')).digest();
+}
+
+function encryptToken(c,value){
+  if(!value)return value;
+  const iv=crypto.randomBytes(12);
+  const cipher=crypto.createCipheriv('aes-256-gcm',tokenKey(c),iv);
+  const encrypted=Buffer.concat([cipher.update(String(value),'utf8'),cipher.final()]);
+  const tag=cipher.getAuthTag();
+  return `enc:v1:${iv.toString('base64url')}:${tag.toString('base64url')}:${encrypted.toString('base64url')}`;
+}
+
+function decryptToken(c,value){
+  if(!value||!String(value).startsWith('enc:v1:'))return value;
+  const parts=String(value).split(':');
+  if(parts.length!==5)throw new Error('Invalid encrypted Withings token');
+  const iv=Buffer.from(parts[2],'base64url');
+  const tag=Buffer.from(parts[3],'base64url');
+  const encrypted=Buffer.from(parts[4],'base64url');
+  const decipher=crypto.createDecipheriv('aes-256-gcm',tokenKey(c),iv);
+  decipher.setAuthTag(tag);
+  return Buffer.concat([decipher.update(encrypted),decipher.final()]).toString('utf8');
+}
+
+function decodeConnection(c,row){
+  if(!row)return row;
+  return {...row,access_token:decryptToken(c,row.access_token),refresh_token:decryptToken(c,row.refresh_token)};
 }
 
 function json(res,status,data){
@@ -48,26 +82,29 @@ async function supabaseRequest(c,path,options={}){
   return data;
 }
 
-async function getConnection(c){
+async function getConnection(c,appUserId){
+  if(!appUserId)return null;
   const rows=await supabaseRequest(c,
-    'withings_connection?select=id,userid,access_token,refresh_token,expires_at,updated_at,last_sync_at&order=id.desc&limit=1',
+    `withings_connection?select=id,app_user_id,userid,access_token,refresh_token,expires_at,updated_at,last_sync_at&app_user_id=eq.${encodeURIComponent(appUserId)}&order=id.desc&limit=1`,
     {method:'GET'}
   );
-  return Array.isArray(rows)&&rows.length?rows[0]:null;
+  return Array.isArray(rows)&&rows.length?decodeConnection(c,rows[0]):null;
 }
 
-async function saveConnection(c,s){
-  // This app has one Withings account. Replace the single stored row atomically.
-  await supabaseRequest(c,'withings_connection?id=not.is.null',{
+async function saveConnection(c,appUserId,s){
+  if(!appUserId)throw new Error('Missing VitaTrack user session');
+  // Replace only this VitaTrack user's Withings authorization.
+  await supabaseRequest(c,`withings_connection?app_user_id=eq.${encodeURIComponent(appUserId)}`,{
     method:'DELETE',headers:{Prefer:'return=minimal'}
   });
 
   await supabaseRequest(c,'withings_connection',{
     method:'POST',headers:{Prefer:'return=minimal'},
     body:JSON.stringify({
+      app_user_id:appUserId,
       userid:String(s.userid),
-      access_token:s.access_token,
-      refresh_token:s.refresh_token,
+      access_token:encryptToken(c,s.access_token),
+      refresh_token:encryptToken(c,s.refresh_token),
       expires_at:new Date(s.expires_at).toISOString(),
       updated_at:new Date().toISOString(),
       last_sync_at:null
@@ -76,24 +113,63 @@ async function saveConnection(c,s){
 }
 
 async function updateConnection(c,id,patch){
+  const safePatch={...patch};
+  if(Object.prototype.hasOwnProperty.call(safePatch,'access_token'))safePatch.access_token=encryptToken(c,safePatch.access_token);
+  if(Object.prototype.hasOwnProperty.call(safePatch,'refresh_token'))safePatch.refresh_token=encryptToken(c,safePatch.refresh_token);
   await supabaseRequest(c,`withings_connection?id=eq.${encodeURIComponent(String(id))}`,{
     method:'PATCH',headers:{Prefer:'return=minimal'},
-    body:JSON.stringify({...patch,updated_at:new Date().toISOString()})
+    body:JSON.stringify({...safePatch,updated_at:new Date().toISOString()})
   });
 }
 
 function getCookie(req,name){
   const h=req.headers.cookie||'';
-  const m=h.match(new RegExp('(?:^|; )'+name.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&')+'=([^;]*)'));
-  return m?decodeURIComponent(m[1]):null;
+  const parts=h.split(';').map(x=>x.trim());
+  const hit=parts.find(x=>x.startsWith(name+'='));
+  return hit?decodeURIComponent(hit.slice(name.length+1)):null;
+}
+
+function appendSetCookie(res,value){
+  const current=res.getHeader('Set-Cookie');
+  if(!current)res.setHeader('Set-Cookie',value);
+  else if(Array.isArray(current))res.setHeader('Set-Cookie',[...current,value]);
+  else res.setHeader('Set-Cookie',[current,value]);
 }
 
 function setCookie(res,name,value,maxAge){
-  res.setHeader('Set-Cookie',`${name}=${encodeURIComponent(value)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`);
+  appendSetCookie(res,`${name}=${encodeURIComponent(value)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`);
 }
 
 function clearCookie(res,name){
-  res.setHeader('Set-Cookie',`${name}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`);
+  appendSetCookie(res,`${name}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`);
+}
+
+function signValue(secret,value){
+  return crypto.createHmac('sha256',secret).update(value).digest('base64url');
+}
+
+function readAppUserId(req,c){
+  if(!c.sessionSecret)return null;
+  const raw=getCookie(req,USER_COOKIE);
+  if(!raw)return null;
+  const i=raw.lastIndexOf('.');
+  if(i<1)return null;
+  const value=raw.slice(0,i),sig=raw.slice(i+1);
+  const expected=signValue(c.sessionSecret,value);
+  try{
+    const a=Buffer.from(sig),b=Buffer.from(expected);
+    if(a.length!==b.length||!crypto.timingSafeEqual(a,b))return null;
+  }catch{return null;}
+  return /^[a-f0-9-]{36}$/.test(value)?value:null;
+}
+
+function ensureAppUserId(req,res,c){
+  let id=readAppUserId(req,c);
+  if(id)return id;
+  if(!c.sessionSecret)return null;
+  id=crypto.randomUUID();
+  setCookie(res,USER_COOKIE,`${id}.${signValue(c.sessionSecret,id)}`,60*60*24*365*2);
+  return id;
 }
 
 function parseIntSafe(v){
@@ -214,6 +290,7 @@ async function fetchMeasurements(c,conn,lastupdate){
 module.exports=async(req,res)=>{
   const c=cfg();
   const action=(req.query&&req.query.action)||'status';
+  const appUserId=ensureAppUserId(req,res,c);
 
   if(action==='notify' && req.method==='HEAD'){
     res.statusCode=204;
@@ -225,25 +302,25 @@ module.exports=async(req,res)=>{
     let lastSync=null;
     if(supabaseConfigured(c)){
       try{
-        const conn=await getConnection(c);
+        const conn=await getConnection(c,appUserId);
         connected=!!conn?.refresh_token;
         lastSync=conn?.last_sync_at||null;
       }catch(e){console.error('Withings status:',e);}
     }
     return json(res,200,{
-      configured:!!(c.clientId&&c.clientSecret&&c.redirectUri&&supabaseConfigured(c)),
+      configured:!!(c.clientId&&c.clientSecret&&c.redirectUri&&c.sessionSecret&&c.tokenSecret&&supabaseConfigured(c)),
       connected,lastSync
     });
   }
 
-  if(!c.clientId||!c.clientSecret||!c.redirectUri||!supabaseConfigured(c)){
+  if(!c.clientId||!c.clientSecret||!c.redirectUri||!c.sessionSecret||!c.tokenSecret||!appUserId||!supabaseConfigured(c)){
     return json(res,503,{error:'Withings connector not configured'});
   }
 
   if(action==='connect'){
     const nonce=crypto.randomBytes(24).toString('hex');
-    const state=Buffer.from(JSON.stringify({nonce,iat:Date.now()})).toString('base64url');
-    const sig=crypto.createHmac('sha256',process.env.WITHINGS_SESSION_SECRET||'CHANGE_ME').update(state).digest('base64url');
+    const state=Buffer.from(JSON.stringify({nonce,iat:Date.now(),appUserId})).toString('base64url');
+    const sig=crypto.createHmac('sha256',c.sessionSecret).update(state).digest('base64url');
     const signedState=`${state}.${sig}`;
     const u=new URL(AUTH);
     u.searchParams.set('response_type','code');
@@ -264,30 +341,22 @@ module.exports=async(req,res)=>{
     let payload=null;
     try{
       const [body,sig]=state.split('.');
-      const secret=process.env.WITHINGS_SESSION_SECRET||'CHANGE_ME';
+      const secret=c.sessionSecret;
       const good=crypto.createHmac('sha256',secret).update(body).digest('base64url')===sig;
       if(good)payload=JSON.parse(Buffer.from(body,'base64url').toString());
     }catch{}
 
-    if(!payload||!payload.nonce||!payload.iat||Date.now()-Number(payload.iat)>10*60*1000||!code){
+    if(!payload||!payload.nonce||!payload.iat||payload.appUserId!==appUserId||Date.now()-Number(payload.iat)>10*60*1000||!code){
       return json(res,400,{error:'Invalid Withings authorization state'});
     }
 
-  try {
-  const saved = await saveConnection(c, session);
-
-  return json(res, 200, {
-    ok: true,
-    saved
-  });
-} catch (e) {
-  console.error('Saving Withings connection failed:', e);
-
-  return json(res, 500, {
-    error: 'Unable to save Withings connection',
-    details: e.message
-  });
-}
+    try{
+      const session=await exchangeCode(c,code);
+      await saveConnection(c,appUserId,session);
+    }catch(e){
+      console.error('Withings callback save error:',e);
+      return json(res,500,{error:'Unable to save Withings connection',details:e.message});
+    }
 
     res.statusCode=302;
     res.setHeader('Location','/');
@@ -296,7 +365,7 @@ module.exports=async(req,res)=>{
 
   if(action==='disconnect'){
     try{
-      await supabaseRequest(c,'withings_connection?id=not.is.null',{
+      await supabaseRequest(c,`withings_connection?app_user_id=eq.${encodeURIComponent(appUserId)}`,{
         method:'DELETE',headers:{Prefer:'return=minimal'}
       });
     }catch(e){
@@ -315,7 +384,7 @@ module.exports=async(req,res)=>{
   }
 
   let conn;
-  try{conn=await getConnection(c);}catch(e){
+  try{conn=await getConnection(c,appUserId);}catch(e){
     console.error('Loading Withings connection:',e);
     return json(res,500,{error:'Unable to load Withings connection'});
   }
