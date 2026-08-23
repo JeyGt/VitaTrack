@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'vitatrack-';
-const CACHE_VERSION = 'v24';
+const CACHE_VERSION = 'v29';
 const CORE_CACHE = `${CACHE_PREFIX}core-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}runtime-${CACHE_VERSION}`;
 

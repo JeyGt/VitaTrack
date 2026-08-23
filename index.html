@@ -495,6 +495,24 @@ input[type="range"]{width:100%;}
 .page-food .drink-history-toggle{display:none!important}
 .page-food .drink-today-list{padding-top:0}
 .page-food .nutrition-block{margin-bottom:9px}
+.nutri-panel{position:fixed;inset:0;z-index:56;background:var(--bg);display:none;overflow:auto;padding:18px 18px calc(35px + env(safe-area-inset-bottom))}
+.nutri-panel.open{display:block}
+.nutri-panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}
+.nutri-panel-head h2{margin:0;font-size:23px}
+.nutri-summary-top{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.nutri-hero-metric{border:1px solid var(--border);background:var(--surface);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+.nutri-hero-metric strong{display:block;font-family:Fraunces,serif;font-size:26px;line-height:1.05}
+.nutri-hero-metric span{display:block;margin-top:4px;font-size:11px;color:var(--ink-soft)}
+.nutri-section{margin-top:12px}
+.nutri-section .eyebrow{margin-bottom:8px}
+.nutri-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.nutri-metric{border:1px solid var(--border);background:var(--surface);border-radius:14px;padding:12px;box-shadow:var(--shadow)}
+.nutri-metric strong{display:block;font-size:16px}
+.nutri-metric small{display:block;color:var(--ink-soft);font-size:10px;margin-top:4px}
+.nutri-pill-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.nutri-pill{padding:8px 10px;border-radius:999px;background:var(--surface-alt);font-size:11px;font-weight:800;color:var(--ink-soft)}
+.nutri-note{margin-top:10px;font-size:11px;color:var(--ink-soft);line-height:1.45}
+@media(max-width:370px){.nutri-summary-top,.nutri-grid{grid-template-columns:1fr}.nutri-hero-metric strong{font-size:23px}}
  .drink-card-click{cursor:pointer}
 .drink-card-click:active{opacity:.96}
 .weigh-action{cursor:pointer;border-radius:12px;padding:7px 5px;transition:background .15s ease,transform .08s ease}
@@ -642,7 +660,7 @@ input[type="range"]{width:100%;}
 }
 .sport-visual-card.program{background:
   linear-gradient(90deg,rgba(8,12,10,.94) 0%,rgba(8,12,10,.72) 48%,rgba(8,12,10,.25) 100%),
-  url('https://images.unsplash.com/photo-1581009146145-b5ef050c2e1a?auto=format&fit=crop&w=1000&q=82') center/cover;}
+  url('https://images.unsplash.com/photo-1598971639058-a67dd5c59452?auto=format&fit=crop&w=1000&q=82') center/cover;}
 .sport-visual-card.challenge{min-height:132px;background:
   linear-gradient(90deg,rgba(8,12,10,.94) 0%,rgba(8,12,10,.62) 58%,rgba(8,12,10,.18) 100%),
   url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1000&q=82') center/cover;}
@@ -670,7 +688,7 @@ input[type="range"]{width:100%;}
 .sport-explore-card .visual-title{font-size:24px;line-height:1;font-weight:900;text-transform:uppercase;margin:0}
 .sport-explore-card .visual-sub{font-size:11px;color:rgba(255,255,255,.78);margin-top:6px}
 .sport-explore-card.challenges{background:url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1000&q=82') center/cover}
-.sport-explore-card.workouts{background:url('https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=1000&q=82') center/cover}
+.sport-explore-card.workouts{background:url('https://images.unsplash.com/photo-1598971639058-a67dd5c59452?auto=format&fit=crop&w=1000&q=82') center/cover}
 .sport-explore-card.exercises{background:url('https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=1000&q=82') center/cover}
 .sport-explore-card.coach{background:url('https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=1000&q=82') center/cover}
 .sport-catalog-dots{display:flex;justify-content:center;gap:6px;margin-top:6px}
@@ -1751,7 +1769,30 @@ input[type="range"]{width:100%;}
 @media(max-width:360px){.sport-today-quick-list{gap:6px}.sport-today-quick{padding:10px 7px 9px;min-height:146px}.sport-today-quick-score{font-size:29px}.sport-today-quick-score span{font-size:14px}.sport-today-quick-copy strong{font-size:10px}.sport-today-quick-label{font-size:7.5px}}
 </style>
 
-</head>
+
+<style id="nutrition-simplified-v2">
+#screen-food .macro-card-wrap{display:none!important}
+#screen-food .nutrition-day-head .chip{display:inline-flex;align-items:center;gap:6px}
+</style>
+<style id="notification-schedule-style">
+.notif-reminder{border-top:1px solid var(--border);padding:12px 0}
+.notif-reminder:first-of-type{border-top:0}
+.notif-reminder-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.notif-reminder-copy strong{display:block;font-size:13px}
+.notif-reminder-copy span{display:block;font-size:10px;color:var(--ink-soft);margin-top:2px}
+.notif-reminder-options{display:none;margin-top:11px;padding:11px;border-radius:13px;background:var(--surface-alt)}
+.notif-reminder.active .notif-reminder-options{display:block}
+.notif-time-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.notif-time-grid.two{grid-template-columns:repeat(2,1fr)}
+.notif-time-field label{display:block;font-size:9px;font-weight:800;color:var(--ink-soft);margin-bottom:4px}
+.notif-time-field input[type=time]{width:100%;border:1px solid var(--border);background:var(--surface);color:var(--ink);border-radius:10px;padding:9px 7px;font:inherit;font-size:11px}
+.notif-days{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
+.notif-day{position:relative}
+.notif-day input{position:absolute;opacity:0;pointer-events:none}
+.notif-day span{width:31px;height:31px;border:1px solid var(--border);background:var(--surface);border-radius:50%;display:grid;place-items:center;font-size:9px;font-weight:900;color:var(--ink-soft)}
+.notif-day input:checked + span{background:var(--primary);border-color:var(--primary);color:#fff}
+.notif-caption{font-size:9px;color:var(--ink-soft);margin-top:8px;line-height:1.4}
+</style></head>
 <body data-theme="light">
 <div id="welcomeScreen" aria-label="Bienvenue dans VitaTrack">
   <div class="welcome-inner">
@@ -1770,6 +1811,7 @@ input[type="range"]{width:100%;}
   </div>
   <div class="topbar-actions" aria-label="Raccourcis">
     <button class="topbar-icon" type="button" onclick="openSportPanel('calendar')" aria-label="Calendrier">📅</button>
+    <button class="topbar-icon" type="button" onclick="openNutritionAnalytics()" aria-label="Analyse nutritionnelle" title="Analyse nutritionnelle">📊</button>
     <button class="topbar-icon profile-entry" type="button" onclick="openProfileSheet()" aria-label="Profil et réglages" title="Profil et réglages">
       <svg class="profile-access-icon" viewBox="0 0 24 24" aria-hidden="true">
         <circle cx="10" cy="8" r="3"></circle>
@@ -1826,7 +1868,7 @@ input[type="range"]{width:100%;}
   <div class="nutrition-dashboard">
     <div class="nutrition-day-head">
       <div><h2 style="margin:2px 0 0;font-size:24px">Nutrition</h2></div>
-      <button class="chip" onclick="openProfileSheet()">⚙️ Objectif</button>
+      <button class="inline-link" type="button" onclick="openNutritionAnalytics()">Détails</button>
     </div>
     <div class="card nutrition-summary-card">
       <div class="calorie-hero">
@@ -1973,7 +2015,7 @@ input[type="range"]{width:100%;}
 <video id="plateVideo" class="barcode-video" playsinline muted></video><div id="plateStatus" class="muted small" style="margin-top:6px"></div>
 <div class="divider"></div><label class="search-label">Recherche automatique</label><input id="foodSearch" oninput="renderFoodSearch()" placeholder="Rechercher poulet, riz, pomme…" style="width:100%;padding:11px 13px;border-radius:12px;border:1px solid var(--border);background:var(--surface-alt);color:var(--ink);font-size:14.5px"><div class="search-results" id="foodSearchResults"></div>
 <div id="foodPickedBox" style="display:none"><div class="row" style="margin-bottom:8px"><strong id="foodPickedName"></strong><span class="muted small" id="foodPickedKcal"></span></div><div id="foodPickedInfo"></div><div class="field"><label>Quantité (g / ml)</label><input type="number" id="foodQty" value="100"></div><button class="btn btn-primary btn-block" onclick="confirmAddFood()">Ajouter au repas</button></div>
-<button class="small-link" onclick="toggleCustomFoodForm()">+ Créer un aliment personnalisé</button><div id="customFoodForm" style="display:none;margin-top:12px"><div class="field"><label>Nom</label><input id="cf_name"></div><div class="field-row"><div class="field"><label>kcal / 100g</label><input type="number" id="cf_kcal"></div><div class="field"><label>Protéines / 100g</label><input type="number" id="cf_protein"></div></div><div class="field-row"><div class="field"><label>Glucides / 100g</label><input type="number" id="cf_carbs"></div><div class="field"><label>Sucres / 100g</label><input type="number" id="cf_sugar"></div></div><div class="field-row"><div class="field"><label>Fibres / 100g</label><input type="number" id="cf_fiber"></div><div class="field"><label>Lipides / 100g</label><input type="number" id="cf_fat"></div></div><div class="field"><label>Glycémie (optionnel)</label><select id="cf_gi"><option value="">Non renseignée</option><option value="faible">Faible</option><option value="moyen">Moyen</option><option value="élevé">Élevé</option></select></div><button class="btn btn-ghost btn-block" onclick="saveCustomFood()">Enregistrer</button></div></div></div>
+<button class="small-link" onclick="toggleCustomFoodForm()">+ Créer un aliment personnalisé</button><div id="customFoodForm" style="display:none;margin-top:12px"><div class="field"><label>Nom</label><input id="cf_name"></div><div class="field-row"><div class="field"><label>kcal / 100g</label><input type="number" id="cf_kcal"></div><div class="field"><label>Protéines / 100g</label><input type="number" id="cf_protein"></div></div><div class="field-row"><div class="field"><label>Glucides / 100g</label><input type="number" id="cf_carbs"></div><div class="field"><label>Sucres / 100g</label><input type="number" id="cf_sugar"></div></div><div class="field-row"><div class="field"><label>Fibres / 100g</label><input type="number" id="cf_fiber"></div><div class="field"><label>Lipides / 100g</label><input type="number" id="cf_fat"></div></div><div class="field-row"><div class="field"><label>Graisses saturées / 100g</label><input type="number" id="cf_satfat"></div><div class="field"><label>Sel / 100g</label><input type="number" id="cf_salt"></div></div><div class="field"><label>Glycémie (optionnel)</label><select id="cf_gi"><option value="">Non renseignée</option><option value="faible">Faible</option><option value="moyen">Moyen</option><option value="élevé">Élevé</option></select></div><button class="btn btn-ghost btn-block" onclick="saveCustomFood()">Enregistrer</button></div></div></div>
 
 <div class="sheet-overlay" id="mealDetailsOverlay" onclick="closeSheetIfBg(event,'mealDetailsOverlay')"><div class="sheet"><div class="sheet-handle"></div><h3 id="mealDetailsTitle">Repas</h3><div id="mealDetailsBody"></div></div></div>
 <div class="sheet-overlay" id="waterSheetOverlay" onclick="closeSheetIfBg(event,'waterSheetOverlay')"><div class="sheet"><div class="sheet-handle"></div><h3>Ajouter de l’eau</h3><div class="water-quick"><button type="button" class="chip" onclick="setVal('waterQty',200)">200 ml</button><button type="button" class="chip" onclick="setVal('waterQty',250)">250 ml</button><button type="button" class="chip" onclick="setVal('waterQty',330)">330 ml</button><button type="button" class="chip" onclick="setVal('waterQty',500)">500 ml</button></div><div class="field"><label>Quantité (ml)</label><input type="number" id="waterQty" value="250" min="1"></div><button class="btn btn-primary btn-block" onclick="addWater()">Ajouter</button></div></div>
@@ -2030,11 +2072,48 @@ input[type="range"]{width:100%;}
           <div class="profile-setting-icon">🔔</div><div class="profile-setting-main"><strong>Notifications</strong><span id="notificationSummary">Rappels et suivi</span></div><button class="profile-chevron" type="button">›</button>
         </div>
         <div class="profile-subpanel" id="notificationsPanel">
-          <div class="profile-setting-row" style="padding:9px 0"><div class="profile-setting-main"><strong>Activer les notifications</strong><span>Autorise les rappels VitaTrack</span></div><label class="switch"><input id="notif_enabled" type="checkbox" onchange="saveNotificationSettings()"><span class="switch-track"></span></label></div>
-          <div class="profile-setting-row" style="padding:9px 0"><div class="profile-setting-main"><strong>Hydratation</strong><span>Rappels pour boire de l’eau</span></div><label class="switch"><input id="notif_water" type="checkbox" onchange="saveNotificationSettings()"><span class="switch-track"></span></label></div>
-          <div class="profile-setting-row" style="padding:9px 0"><div class="profile-setting-main"><strong>Repas</strong><span>Ne pas oublier de renseigner les repas</span></div><label class="switch"><input id="notif_meals" type="checkbox" onchange="saveNotificationSettings()"><span class="switch-track"></span></label></div>
-          <div class="profile-setting-row" style="padding:9px 0"><div class="profile-setting-main"><strong>Sport</strong><span>Rappels des séances prévues</span></div><label class="switch"><input id="notif_sport" type="checkbox" onchange="saveNotificationSettings()"><span class="switch-track"></span></label></div>
-          <div class="profile-setting-row" style="padding:9px 0"><div class="profile-setting-main"><strong>Pesée</strong><span>Rappel de suivi du poids</span></div><label class="switch"><input id="notif_weight" type="checkbox" onchange="saveNotificationSettings()"><span class="switch-track"></span></label></div>
+          <div class="profile-setting-row" style="padding:9px 0 12px"><div class="profile-setting-main"><strong>Activer les notifications</strong><span>Autorise les rappels VitaTrack</span></div><label class="switch"><input id="notif_enabled" type="checkbox" onchange="saveNotificationSettings()"><span class="switch-track"></span></label></div>
+
+          <div class="notif-reminder" id="notifWaterBlock">
+            <div class="notif-reminder-head"><div class="notif-reminder-copy"><strong>Hydratation</strong><span>Jusqu’à 3 rappels dans la journée</span></div><label class="switch"><input id="notif_water" type="checkbox" onchange="saveNotificationSettings()"><span class="switch-track"></span></label></div>
+            <div class="notif-reminder-options">
+              <div class="notif-time-grid">
+                <div class="notif-time-field"><label>Matin</label><input id="notif_water_t1" type="time" onchange="saveNotificationSettings()"></div>
+                <div class="notif-time-field"><label>Après-midi</label><input id="notif_water_t2" type="time" onchange="saveNotificationSettings()"></div>
+                <div class="notif-time-field"><label>Soir</label><input id="notif_water_t3" type="time" onchange="saveNotificationSettings()"></div>
+              </div>
+              <div class="notif-caption">Laisse une heure vide si tu ne veux pas ce rappel.</div>
+            </div>
+          </div>
+
+          <div class="notif-reminder" id="notifMealsBlock">
+            <div class="notif-reminder-head"><div class="notif-reminder-copy"><strong>Repas</strong><span>Petit-déjeuner, déjeuner et dîner</span></div><label class="switch"><input id="notif_meals" type="checkbox" onchange="saveNotificationSettings()"><span class="switch-track"></span></label></div>
+            <div class="notif-reminder-options">
+              <div class="notif-time-grid">
+                <div class="notif-time-field"><label>Matin</label><input id="notif_meals_t1" type="time" onchange="saveNotificationSettings()"></div>
+                <div class="notif-time-field"><label>Midi</label><input id="notif_meals_t2" type="time" onchange="saveNotificationSettings()"></div>
+                <div class="notif-time-field"><label>Soir</label><input id="notif_meals_t3" type="time" onchange="saveNotificationSettings()"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="notif-reminder" id="notifSportBlock">
+            <div class="notif-reminder-head"><div class="notif-reminder-copy"><strong>Sport</strong><span>Une heure et les jours souhaités</span></div><label class="switch"><input id="notif_sport" type="checkbox" onchange="saveNotificationSettings()"><span class="switch-track"></span></label></div>
+            <div class="notif-reminder-options">
+              <div class="notif-time-grid two"><div class="notif-time-field"><label>Heure</label><input id="notif_sport_time" type="time" onchange="saveNotificationSettings()"></div></div>
+              <div class="notif-days"><label class="notif-day"><input id="notif_sport_mon" type="checkbox" onchange="saveNotificationSettings()"><span>L</span></label><label class="notif-day"><input id="notif_sport_tue" type="checkbox" onchange="saveNotificationSettings()"><span>M</span></label><label class="notif-day"><input id="notif_sport_wed" type="checkbox" onchange="saveNotificationSettings()"><span>M</span></label><label class="notif-day"><input id="notif_sport_thu" type="checkbox" onchange="saveNotificationSettings()"><span>J</span></label><label class="notif-day"><input id="notif_sport_fri" type="checkbox" onchange="saveNotificationSettings()"><span>V</span></label><label class="notif-day"><input id="notif_sport_sat" type="checkbox" onchange="saveNotificationSettings()"><span>S</span></label><label class="notif-day"><input id="notif_sport_sun" type="checkbox" onchange="saveNotificationSettings()"><span>D</span></label></div>
+            </div>
+          </div>
+
+          <div class="notif-reminder" id="notifWeightBlock">
+            <div class="notif-reminder-head"><div class="notif-reminder-copy"><strong>Pesée</strong><span>Choisis l’heure et les jours</span></div><label class="switch"><input id="notif_weight" type="checkbox" onchange="saveNotificationSettings()"><span class="switch-track"></span></label></div>
+            <div class="notif-reminder-options">
+              <div class="notif-time-grid two"><div class="notif-time-field"><label>Heure</label><input id="notif_weight_time" type="time" onchange="saveNotificationSettings()"></div></div>
+              <div class="notif-days"><label class="notif-day"><input id="notif_weight_mon" type="checkbox" onchange="saveNotificationSettings()"><span>L</span></label><label class="notif-day"><input id="notif_weight_tue" type="checkbox" onchange="saveNotificationSettings()"><span>M</span></label><label class="notif-day"><input id="notif_weight_wed" type="checkbox" onchange="saveNotificationSettings()"><span>M</span></label><label class="notif-day"><input id="notif_weight_thu" type="checkbox" onchange="saveNotificationSettings()"><span>J</span></label><label class="notif-day"><input id="notif_weight_fri" type="checkbox" onchange="saveNotificationSettings()"><span>V</span></label><label class="notif-day"><input id="notif_weight_sat" type="checkbox" onchange="saveNotificationSettings()"><span>S</span></label><label class="notif-day"><input id="notif_weight_sun" type="checkbox" onchange="saveNotificationSettings()"><span>D</span></label></div>
+            </div>
+          </div>
+
+          <div class="notif-caption" style="margin-top:12px">Les horaires sont enregistrés dans VitaTrack. L’envoi réel des notifications système sera branché ensuite via Web Push.</div>
         </div>
         <div class="profile-setting-row" onclick="toggleProfilePanel('themePanel')">
           <div class="profile-setting-icon">◐</div><div class="profile-setting-main"><strong>Apparence</strong><span id="themeSummary">Clair</span></div><button class="profile-chevron" type="button">›</button>
@@ -2243,6 +2322,8 @@ setTimeout(function(){ window.renderQuickAddSummary && window.renderQuickAddSumm
     if(!root) return;
     const s=typeof sportTodaySession==='function'?sportTodaySession():null;
     const c=(window.DATA&&DATA.sport&&DATA.sport.monthlyChallenge)||{label:'Défi du jour',progress:0,target:1};
+    const challengeCardId='pompes-100';
+    const challengeCardTitle=((c.label||'').trim() && (c.label||'').trim()!=='Défi du jour') ? (c.label||'').trim() : 'Objectif 100 pompes';
     const st=typeof sportStreak==='function'?sportStreak():0;
     const level=(window.DATA&&DATA.sport&&DATA.sport.profile&&DATA.sport.profile.level)||'Facile';
     const cp=Math.min(100,Math.round((Number(c.progress)||0)/Math.max(1,Number(c.target)||1)*100));
@@ -2285,11 +2366,11 @@ setTimeout(function(){ window.renderQuickAddSummary && window.renderQuickAddSumm
               <span class="sport-today-quick-side"><b>›</b></span>
             </button>
 
-            <button class="sport-today-quick challenge" type="button" onclick="openChallengeDetail('pompes-100')">
+            <button class="sport-today-quick challenge" type="button" onclick="openChallengeDetail('${challengeCardId}')">
               <div class="sport-today-quick-score">${cp}<span>%</span></div>
               <span class="sport-today-quick-copy">
                 <span class="sport-today-quick-label">Défi du jour</span>
-                <strong>${c.label||'Défi du jour'}</strong>
+                <strong>${challengeCardTitle}</strong>
                 <small>${c.progress||0}/${c.target||0} réalisés</small>
               </span>
               <span class="sport-today-quick-side"><b>›</b></span>

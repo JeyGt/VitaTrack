@@ -47,8 +47,19 @@ function renderProfile(){
   const initials=(p.name||'VT').trim().split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase()||'VT';setText('profileAvatar',initials);
   const summary=[p.age?`${p.age} ans`:null,p.height?`${p.height} cm`:null,p.weightCurrent?`${p.weightCurrent} kg`:null].filter(Boolean).join(' · ')||'Âge, taille, poids';setText('profileSummary',summary);
   let goalSummary=goal;if(DATA.objective.targetWeight)goalSummary+=` · cible ${DATA.objective.targetWeight} kg`;setText('profileGoalSummary',goalSummary);
-  const n=DATA.settings.notifications;['enabled','water','meals','sport','weight'].forEach(k=>{const e=document.getElementById('notif_'+k);if(e)e.checked=!!n[k]});
-  setText('notificationSummary',n.enabled?'Rappels activés':'Rappels désactivés');
+  const n=DATA.settings.notifications;
+  ['enabled','water','meals','sport','weight'].forEach(k=>{const e=document.getElementById('notif_'+k);if(e)e.checked=!!n[k]});
+  const wt=n.waterTimes||[], mt=n.mealTimes||[];
+  ['t1','t2','t3'].forEach((k,i)=>{const e=document.getElementById('notif_water_'+k);if(e)e.value=wt[i]||'';});
+  ['t1','t2','t3'].forEach((k,i)=>{const e=document.getElementById('notif_meals_'+k);if(e)e.value=mt[i]||'';});
+  setVal('notif_sport_time',n.sportTime||'18:00');setVal('notif_weight_time',n.weightTime||'08:00');
+  ['mon','tue','wed','thu','fri','sat','sun'].forEach(day=>{
+    const se=document.getElementById('notif_sport_'+day);if(se)se.checked=(n.sportDays||[]).includes(day);
+    const we=document.getElementById('notif_weight_'+day);if(we)we.checked=(n.weightDays||[]).includes(day);
+  });
+  ['water','meals','sport','weight'].forEach(k=>document.getElementById('notif'+k.charAt(0).toUpperCase()+k.slice(1)+'Block')?.classList.toggle('active',!!n[k]));
+  const activeCount=['water','meals','sport','weight'].filter(k=>n[k]).length;
+  setText('notificationSummary',n.enabled?(activeCount?`${activeCount} rappel${activeCount>1?'s':''} configuré${activeCount>1?'s':''}`:'Rappels activés'):'Rappels désactivés');
   const pref=DATA.settings.theme||'light';setText('themeSummary',pref==='dark'?'Sombre':pref==='system'?'Selon le système':'Clair');document.querySelectorAll('[data-theme-choice]').forEach(b=>b.classList.toggle('active',b.dataset.themeChoice===pref));
 }
 function saveProfile(){const p=DATA.profile;p.name=document.getElementById('pf_name').value.trim();p.age=+document.getElementById('pf_age').value||0;p.sex=document.getElementById('pf_sex').value;p.height=+document.getElementById('pf_height').value||0;const w=+document.getElementById('pf_weight').value||0;if(w&&!p.startingWeight)p.startingWeight=w;p.weightCurrent=w;saveState();ensureTargets();saveState();toast('Profil enregistré');renderAll();}
@@ -57,13 +68,37 @@ function goalLabel(g){return{fat_loss:'Perte de gras',recomposition:'Recompositi
 function ensureProfileSettings(){
   DATA.settings=DATA.settings||{};
   if(!['light','dark','system'].includes(DATA.settings.theme))DATA.settings.theme='light';
-  DATA.settings.notifications=Object.assign({enabled:false,water:true,meals:false,sport:true,weight:false},DATA.settings.notifications||{});
+  DATA.settings.notifications=Object.assign({
+    enabled:false,water:true,meals:false,sport:true,weight:false,
+    waterTimes:['10:00','14:00','18:00'],
+    mealTimes:['08:00','12:30','19:30'],
+    sportTime:'18:00',
+    sportDays:['mon','wed','fri'],
+    weightTime:'08:00',
+    weightDays:['mon']
+  },DATA.settings.notifications||{});
+  if(!Array.isArray(DATA.settings.notifications.waterTimes))DATA.settings.notifications.waterTimes=['10:00','14:00','18:00'];
+  if(!Array.isArray(DATA.settings.notifications.mealTimes))DATA.settings.notifications.mealTimes=['08:00','12:30','19:30'];
+  if(!Array.isArray(DATA.settings.notifications.sportDays))DATA.settings.notifications.sportDays=['mon','wed','fri'];
+  if(!Array.isArray(DATA.settings.notifications.weightDays))DATA.settings.notifications.weightDays=['mon'];
 }
 function resolvedTheme(){ensureProfileSettings();return DATA.settings.theme==='system'?(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):DATA.settings.theme;}
 function applyTheme(){document.body.dataset.theme=resolvedTheme();}
 function setThemePreference(theme){ensureProfileSettings();if(!['light','dark','system'].includes(theme))return;DATA.settings.theme=theme;applyTheme();saveState();renderProfile();toast(theme==='dark'?'Thème sombre activé':theme==='system'?'Thème synchronisé au système':'Thème clair activé');}
 function toggleTheme(){setThemePreference(resolvedTheme()==='dark'?'light':'dark');}
-function saveNotificationSettings(){ensureProfileSettings();const n=DATA.settings.notifications;['enabled','water','meals','sport','weight'].forEach(k=>{const e=document.getElementById('notif_'+k);if(e)n[k]=e.checked});saveState();renderProfile();toast(n.enabled?'Notifications activées':'Préférences enregistrées');}
+function saveNotificationSettings(){
+  ensureProfileSettings();
+  const n=DATA.settings.notifications;
+  ['enabled','water','meals','sport','weight'].forEach(k=>{const e=document.getElementById('notif_'+k);if(e)n[k]=e.checked});
+  n.waterTimes=['t1','t2','t3'].map(k=>document.getElementById('notif_water_'+k)?.value||'');
+  n.mealTimes=['t1','t2','t3'].map(k=>document.getElementById('notif_meals_'+k)?.value||'');
+  n.sportTime=document.getElementById('notif_sport_time')?.value||'18:00';
+  n.weightTime=document.getElementById('notif_weight_time')?.value||'08:00';
+  n.sportDays=['mon','tue','wed','thu','fri','sat','sun'].filter(day=>document.getElementById('notif_sport_'+day)?.checked);
+  n.weightDays=['mon','tue','wed','thu','fri','sat','sun'].filter(day=>document.getElementById('notif_weight_'+day)?.checked);
+  saveState();
+  renderProfile();
+}
 function toggleProfilePanel(id){const el=document.getElementById(id);if(el)el.classList.toggle('open');}
 
 
