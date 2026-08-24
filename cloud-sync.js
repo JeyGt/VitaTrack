@@ -152,3 +152,70 @@
   window.addEventListener('beforeunload',()=>{if(account.authenticated&&meta().dirty){try{navigator.sendBeacon(`${API}?action=push`,new Blob([JSON.stringify({state:cloudSafeState()})],{type:'application/json'}));}catch{}}});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
+
+/* VitaTrack nutrition history/deletion compatibility patch */
+(function(){
+  function esc(v){
+    if(typeof window.escapeHtml==='function')return window.escapeHtml(String(v??''));
+    return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  }
+
+  window.renderDrinkLog=function(){
+    const source=Array.isArray(DATA.drinkLog)?DATA.drinkLog:[];
+    const items=source.map((x,i)=>({...x,idx:i})).filter(x=>x.date===TODAY);
+    const kcal=items.reduce((s,x)=>s+(Number(x.kcal)||0),0);
+    if(typeof setText==='function'){
+      setText('drinkCountToday',items.length);
+      setText('drinkCaloriesToday',Math.round(kcal));
+    }
+    const list=document.getElementById('drinkTodayList');
+    if(!list)return;
+    list.style.display=items.length?'block':'none';
+    list.innerHTML=items.length
+      ? `<div style="padding:9px 0 5px;border-top:1px solid var(--border);font-size:10px;font-weight:800;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em">Historique du jour</div>`+
+        items.map(x=>`<div class="drink-item"><div class="drink-item-main"><span>${esc(x.name)}</span><span class="drink-item-cal">${esc(x.portion||'')} · ${Math.round(Number(x.kcal)||0)} kcal</span></div><button type="button" class="drink-remove" aria-label="Supprimer ${esc(x.name)}" onclick="event.stopPropagation();removeDrink(${x.idx})">×</button></div>`).join('')
+      : '';
+  };
+
+  const originalRenderFood=window.renderFood;
+  if(typeof originalRenderFood==='function'){
+    window.renderFood=function(){
+      originalRenderFood.apply(this,arguments);
+      const card=document.getElementById('foodListCard');
+      if(!card)return;
+      const list=(DATA.foodLog?.[TODAY]||[]).slice().sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+      if(!list.length)return;
+      const rows=[...card.querySelectorAll('.meal-row')];
+      const groups=['Petit-déjeuner','Déjeuner','Dîner','En-cas'];
+      rows.forEach((row,index)=>{
+        const type=groups[index];
+        if(!type)return;
+        const items=list.filter(f=>(f.mealType||'Repas')===type);
+        if(!items.length)return;
+        const history=document.createElement('div');
+        history.className='meal-inline-history';
+        history.style.cssText='padding:0 12px 8px';
+        history.innerHTML=items.map(f=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 0;border-top:1px solid var(--border);font-size:12px"><div style="min-width:0"><strong style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(f.name)}</strong><span style="color:var(--ink-soft);font-size:11px">${Math.round(Number(f.qty)||0)} g · ${Math.round(Number(f.kcal)||0)} kcal${f.time?` · ${esc(f.time)}`:''}</span></div><button type="button" aria-label="Supprimer ${esc(f.name)}" style="width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;flex:none;border:0;background:transparent;color:var(--ink-soft);font-size:20px;line-height:1;border-radius:50%;cursor:pointer" onclick="event.preventDefault();event.stopPropagation();removeFood('${String(f.id).replace(/'/g,"\\'")}')">×</button></div>`).join('');
+        row.insertAdjacentElement('afterend',history);
+      });
+    };
+  }
+
+  if(typeof window.renderAll==='function'){
+    const originalRenderAll=window.renderAll;
+    window.renderAll=function(){
+      const out=originalRenderAll.apply(this,arguments);
+      try{window.renderDrinkLog();}catch(e){console.warn('VitaTrack drink history patch:',e);}
+      try{window.renderFood();}catch(e){console.warn('VitaTrack food history patch:',e);}
+      return out;
+    };
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>{
+      try{window.renderDrinkLog();window.renderFood();}catch(e){console.warn('VitaTrack nutrition patch init:',e);}
+    });
+  }else{
+    try{window.renderDrinkLog();window.renderFood();}catch(e){console.warn('VitaTrack nutrition patch init:',e);}
+  }
+})();
