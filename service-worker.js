@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'vitatrack-';
-const CACHE_VERSION = 'v29';
+const CACHE_VERSION = 'v39';
 const CORE_CACHE = `${CACHE_PREFIX}core-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}runtime-${CACHE_VERSION}`;
 
@@ -92,4 +92,17 @@ self.addEventListener('fetch', event => {
   // Same-origin static files use the newest network version when online.
   // If the network is unavailable, fall back to the pre-cached/runtime copy.
   event.respondWith(networkFirstAsset(request));
+});
+
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const target = event.notification?.data?.url || './index.html';
+  event.waitUntil((async()=>{
+    const all = await clients.matchAll({type:'window',includeUncontrolled:true});
+    for(const client of all){
+      if('focus' in client){await client.focus();return;}
+    }
+    if(clients.openWindow)return clients.openWindow(target);
+  })());
 });

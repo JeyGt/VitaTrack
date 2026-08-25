@@ -19,7 +19,7 @@ function normaliseDrinkLog(log){
 function migrate(d){const def=defaultData(); const p=Object.assign({},def.profile,d.profile||{}); const oldGoal=p.goal;
   const objective=Object.assign({},def.objective,d.objective||{});
   if(!d.objective){if(oldGoal==='lose')objective.type='fat_loss'; else if(oldGoal==='gain')objective.type='muscle_gain'; else if(oldGoal==='maintain')objective.type='maintain';}
-  p.visceralFat=p.visceralFat??null; return Object.assign({},def,d,{profile:p,objective,nutrition:Object.assign({},def.nutrition,d.nutrition||{}),waterLog:d.waterLog||{},drinkLog:normaliseDrinkLog(d.drinkLog),stepsLog:d.stepsLog||{},settings:Object.assign({},def.settings,d.settings||{}),foodLog:d.foodLog||{},weights:d.weights||[],customFoods:d.customFoods||[],coachDecisions:d.coachDecisions||[],reports:d.reports||{}});
+  p.visceralFat=p.visceralFat??null; return Object.assign({},def,d,{profile:p,objective,nutrition:Object.assign({},def.nutrition,d.nutrition||{}),waterLog:d.waterLog||{},drinkLog:normaliseDrinkLog(d.drinkLog),stepsLog:d.stepsLog||{},settings:Object.assign({},def.settings,d.settings||{}),foodLog:d.foodLog||{},weights:d.weights||[],customFoods:d.customFoods||[],foodFavorites:Array.isArray(d.foodFavorites)?d.foodFavorites:[],coachDecisions:d.coachDecisions||[],reports:d.reports||{}});
 }
 function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(DATA));}
 function toast(msg){const el=document.getElementById('toast'); if(!el)return; el.textContent=msg; el.classList.add('show'); clearTimeout(window.__toast); window.__toast=setTimeout(()=>el.classList.remove('show'),2200);}
@@ -86,7 +86,7 @@ function resolvedTheme(){ensureProfileSettings();return DATA.settings.theme==='s
 function applyTheme(){document.body.dataset.theme=resolvedTheme();}
 function setThemePreference(theme){ensureProfileSettings();if(!['light','dark','system'].includes(theme))return;DATA.settings.theme=theme;applyTheme();saveState();renderProfile();toast(theme==='dark'?'Thème sombre activé':theme==='system'?'Thème synchronisé au système':'Thème clair activé');}
 function toggleTheme(){setThemePreference(resolvedTheme()==='dark'?'light':'dark');}
-function saveNotificationSettings(){
+async function saveNotificationSettings(){
   ensureProfileSettings();
   const n=DATA.settings.notifications;
   ['enabled','water','meals','sport','weight'].forEach(k=>{const e=document.getElementById('notif_'+k);if(e)n[k]=e.checked});
@@ -96,9 +96,89 @@ function saveNotificationSettings(){
   n.weightTime=document.getElementById('notif_weight_time')?.value||'08:00';
   n.sportDays=['mon','tue','wed','thu','fri','sat','sun'].filter(day=>document.getElementById('notif_sport_'+day)?.checked);
   n.weightDays=['mon','tue','wed','thu','fri','sat','sun'].filter(day=>document.getElementById('notif_weight_'+day)?.checked);
+
+  if(n.enabled){
+    const permission=await ensureNotificationPermission(true);
+    if(permission!=='granted'){
+      n.enabled=false;
+      const enabled=document.getElementById('notif_enabled');if(enabled)enabled.checked=false;
+      toast(permission==='denied'?'Notifications refusées dans les réglages du navigateur':'Notifications non disponibles sur cet appareil');
+    }else{
+      startReminderScheduler();
+      checkScheduledReminders();
+    }
+  }
   saveState();
   renderProfile();
 }
+
+/* ---------- Local notification reminders ---------- */
+const VT_REMINDER_SENT_KEY='vitatrack_reminder_sent_v1';
+let vtReminderTimer=null;
+
+function notificationSupport(){
+  return typeof window!=='undefined' && 'Notification' in window;
+}
+async function ensureNotificationPermission(requestIfNeeded=false){
+  if(!notificationSupport())return'unsupported';
+  if(Notification.permission==='granted'||Notification.permission==='denied')return Notification.permission;
+  if(!requestIfNeeded)return Notification.permission;
+  try{return await Notification.requestPermission();}catch(e){console.warn('VitaTrack notification permission:',e);return'unsupported';}
+}
+function reminderSentMap(){try{return JSON.parse(localStorage.getItem(VT_REMINDER_SENT_KEY)||'{}')}catch{return{}}}
+function markReminderSent(key){
+  const sent=reminderSentMap();sent[key]=Date.now();
+  const cutoff=Date.now()-8*86400000;
+  Object.keys(sent).forEach(k=>{if(Number(sent[k])<cutoff)delete sent[k]});
+  localStorage.setItem(VT_REMINDER_SENT_KEY,JSON.stringify(sent));
+}
+function wasReminderSent(key){return !!reminderSentMap()[key];}
+function localDayCode(d=new Date()){return['sun','mon','tue','wed','thu','fri','sat'][d.getDay()]}
+function localHHMM(d=new Date()){return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+function scheduledRemindersForNow(d=new Date()){
+  ensureProfileSettings();
+  const n=DATA.settings.notifications;
+  if(!n.enabled)return[];
+  const hhmm=localHHMM(d),day=localDayCode(d),out=[];
+  if(n.water)(n.waterTimes||[]).forEach((time,i)=>{if(time&&time===hhmm)out.push({id:`water-${i}`,title:'💧 Hydratation',body:'Pense à boire un peu d’eau.'})});
+  if(n.meals)(n.mealTimes||[]).forEach((time,i)=>{if(time&&time===hhmm){const labels=['Petit-déjeuner','Déjeuner','Dîner'];out.push({id:`meal-${i}`,title:'🍽️ '+labels[i],body:'Pense à enregistrer ton repas dans VitaTrack.'})}});
+  if(n.sport && n.sportTime===hhmm && (n.sportDays||[]).includes(day))out.push({id:'sport',title:'🏋️ Sport',body:'Ton rappel d’entraînement VitaTrack.'});
+  if(n.weight && n.weightTime===hhmm && (n.weightDays||[]).includes(day))out.push({id:'weight',title:'⚖️ Pesée',body:'C’est le moment de noter ta pesée.'});
+  return out;
+}
+async function showVitaNotification(reminder){
+  if(await ensureNotificationPermission(false)!=='granted')return false;
+  const options={body:reminder.body,icon:'./icon-192.png',badge:'./icon-192.png',tag:'vitatrack-'+reminder.id,renotify:false,data:{url:'./index.html'}};
+  try{
+    if('serviceWorker' in navigator){
+      const reg=await navigator.serviceWorker.ready;
+      if(reg?.showNotification){await reg.showNotification(reminder.title,options);return true;}
+    }
+    new Notification(reminder.title,options);return true;
+  }catch(e){console.warn('VitaTrack notification:',e);return false;}
+}
+async function checkScheduledReminders(){
+  ensureProfileSettings();
+  if(!DATA.settings.notifications.enabled)return;
+  const d=new Date(),date=todayStr(d),hhmm=localHHMM(d);
+  for(const reminder of scheduledRemindersForNow(d)){
+    const key=`${date}|${hhmm}|${reminder.id}`;
+    if(wasReminderSent(key))continue;
+    if(await showVitaNotification(reminder))markReminderSent(key);
+  }
+}
+function startReminderScheduler(){
+  if(vtReminderTimer)return;
+  checkScheduledReminders();
+  vtReminderTimer=setInterval(checkScheduledReminders,20000);
+}
+function initReminderScheduler(){
+  ensureProfileSettings();
+  if(DATA.settings.notifications.enabled)startReminderScheduler();
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkScheduledReminders()});
+  window.addEventListener('focus',checkScheduledReminders);
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initReminderScheduler);else initReminderScheduler();
 function toggleProfilePanel(id){const el=document.getElementById(id);if(el)el.classList.toggle('open');}
 
 
@@ -112,7 +192,7 @@ function setVal(id,v){const e=document.getElementById(id);if(e)e.value=v;}
 function emptyState(icon,text){return`<div class="empty-state"><div style="font-size:30px">${icon}</div><p>${text}</p></div>`;}
 function escapeHtml(s){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
 function openSheet(id){document.getElementById(id).classList.add('open');}
-function closeSheet(id){document.getElementById(id).classList.remove('open');}
+function closeSheet(id){const el=document.getElementById(id);if(el)el.classList.remove('open');if(id==='foodSheetOverlay'&&typeof stopNutritionScanners==='function')stopNutritionScanners();}
 function closeSheetIfBg(ev,id){if(ev.target.id===id)closeSheet(id);}
 function exportData(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'}));a.download='vitatrack_'+TODAY+'.json';a.click();toast('Export terminé');}
 function importData(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{try{DATA=migrate(JSON.parse(e.target.result));saveState();applyTheme();renderAll();toast('Données importées');}catch(x){toast('Fichier invalide');}};r.readAsText(f);}
@@ -237,8 +317,44 @@ function openExerciseInfo(id){const x=EXERCISES.find(e=>e.id===id);if(x)alert(x.
 function launchSportChallenge(){toast('Défi du jour lancé')}
 function openSportPanel(type){let p=document.getElementById('sportPanel');if(!p){p=document.createElement('div');p.id='sportPanel';p.className='sport-panel';document.body.appendChild(p)}p.classList.add('open');type==='calendar'?renderSportCalendarPanel(p):renderSportProfilePanel(p)}
 function closeSportPanel(){document.getElementById('sportPanel')?.classList.remove('open')}
-function renderSportCalendarPanel(p){const n=new Date(),y=n.getFullYear(),m=n.getMonth(),first=new Date(y,m,1),last=new Date(y,m+1,0),off=(first.getDay()+6)%7,done=new Set((DATA.sport.sessionHistory||[]).map(s=>s.completedDate||s.date).filter(Boolean)),heads=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];let g=heads.map(x=>`<div class="cal-head">${x}</div>`).join('');for(let i=0;i<off;i++)g+='<div></div>';for(let d=1;d<=last.getDate();d++){const k=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');g+=`<button class="cal-day ${k===TODAY?'today ':''}${done.has(k)?'done':''}" onclick="showSportDay('${k}')">${d}${done.has(k)?'<span class="cal-dot"></span>':''}</button>`}p.innerHTML=`<div class="sport-panel-head"><h2>📅 Calendrier</h2><button class="sport-close" onclick="closeSportPanel()">×</button></div><div class="card"><div class="eyebrow">${first.toLocaleDateString('fr-FR',{month:'long',year:'numeric'})}</div><div class="sport-calendar">${g}</div></div><div id="sportDayDetail" class="card" style="margin-top:12px"><p class="muted">Sélectionne une journée.</p></div>`}
-function showSportDay(date){const h=(DATA.sport.sessionHistory||[]).filter(s=>(s.completedDate||s.date)===date),mins=h.reduce((a,s)=>a+Number(s.durationMinutes||s.targetDuration||0),0),k=h.reduce((a,s)=>a+sportKcalForSession(s),0),score=h.length?Math.round(h.reduce((a,s)=>a+(s.score||sportSessionScore(s)),0)/h.length):0;const e=document.getElementById('sportDayDetail');if(e)e.innerHTML=`<div class="eyebrow">${date}</div><h3>${h.length?'Activité réalisée':'Repos / aucune séance'}</h3><div class="sport-metrics"><div class="sport-metric"><strong>${h.length}</strong><small>séances</small></div><div class="sport-metric"><strong>${mins}</strong><small>minutes</small></div><div class="sport-metric"><strong>${k}</strong><small>kcal</small></div></div><p class="muted small">Score global : <strong>${score}%</strong></p>`}
+function nutritionCalendarDay(date,fallbackTarget){
+  const foods=Array.isArray(DATA.foodLog?.[date])?DATA.foodLog[date]:[];
+  const drinks=(Array.isArray(DATA.drinkLog)?DATA.drinkLog:[]).filter(x=>x.date===date);
+  const hasData=foods.length>0||drinks.length>0;
+  const kcal=hasData&&typeof dayTotals==='function'?Math.round(Number(dayTotals(date).kcal)||0):0;
+  const savedTarget=Number(DATA.nutrition?.calorieTargetHistory?.[date])||0;
+  const target=Math.round(savedTarget||Number(fallbackTarget)||0);
+  if(!hasData||!target)return{hasData,kcal,target,status:'neutral',label:hasData?'Objectif indisponible':'Aucune donnée'};
+  const pct=kcal/target*100;
+  if(pct>=50&&pct<=100)return{hasData,kcal,target,pct,status:'good',label:'✓ Réussi'};
+  if(pct<50)return{hasData,kcal,target,pct,status:'bad',label:'Trop bas'};
+  return{hasData,kcal,target,pct,status:'bad',label:'Dépassé'};
+}
+function renderSportCalendarPanel(p){
+  const n=new Date(),y=n.getFullYear(),m=n.getMonth(),first=new Date(y,m,1),last=new Date(y,m+1,0),off=(first.getDay()+6)%7;
+  const done=new Set((DATA.sport.sessionHistory||[]).map(s=>s.completedDate||s.date).filter(Boolean));
+  const heads=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  const fallbackTarget=typeof currentTargets==='function'?Number(currentTargets().calories)||0:Number(DATA.nutrition?.caloriesTarget)||0;
+  let g=heads.map(x=>`<div class="cal-head">${x}</div>`).join('');
+  for(let i=0;i<off;i++)g+='<div></div>';
+  for(let d=1;d<=last.getDate();d++){
+    const k=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const nutrition=nutritionCalendarDay(k,fallbackTarget);
+    const nutritionClass=nutrition.status==='good'?'nutrition-good':nutrition.status==='bad'?'nutrition-bad':'';
+    g+=`<button class="cal-day ${k===TODAY?'today ':''}${nutritionClass}" onclick="showSportDay('${k}')" aria-label="${k}${nutrition.hasData?' · '+nutrition.kcal+' sur '+nutrition.target+' kcal · '+nutrition.label:''}">${d}${done.has(k)?'<span class="cal-dot" title="Séance de sport"></span>':''}</button>`;
+  }
+  p.innerHTML=`<div class="sport-panel-head"><h2>📅 Calendrier</h2><button class="sport-close" onclick="closeSportPanel()">×</button></div><div class="card"><div class="eyebrow">${first.toLocaleDateString('fr-FR',{month:'long',year:'numeric'})}</div><div class="sport-calendar">${g}</div><div class="calendar-status-legend"><span><i class="good"></i> Réussi</span><span><i class="bad"></i> Non réussi</span><span><i class="sport"></i> Sport</span></div></div><div id="sportDayDetail" class="card" style="margin-top:12px"><p class="muted">Sélectionne une journée.</p></div>`;
+}
+function showSportDay(date){
+  const h=(DATA.sport.sessionHistory||[]).filter(s=>(s.completedDate||s.date)===date),mins=h.reduce((a,s)=>a+Number(s.durationMinutes||s.targetDuration||0),0),k=h.reduce((a,s)=>a+sportKcalForSession(s),0),score=h.length?Math.round(h.reduce((a,s)=>a+(s.score||sportSessionScore(s)),0)/h.length):0;
+  const fallbackTarget=typeof currentTargets==='function'?Number(currentTargets().calories)||0:Number(DATA.nutrition?.caloriesTarget)||0;
+  const nutrition=nutritionCalendarDay(date,fallbackTarget);
+  const nutritionDetail=nutrition.hasData&&nutrition.target
+    ? `<div class="calendar-nutrition-summary ${nutrition.status}"><div><div class="eyebrow">Nutrition</div><strong>${nutrition.kcal.toLocaleString('fr-FR')} / ${nutrition.target.toLocaleString('fr-FR')} kcal</strong></div><span>${nutrition.label}</span></div>`
+    : `<div class="calendar-nutrition-summary neutral"><div><div class="eyebrow">Nutrition</div><strong>${nutrition.hasData?nutrition.kcal.toLocaleString('fr-FR')+' kcal':'Aucune donnée'}</strong></div><span>${nutrition.hasData?'Objectif indisponible':'—'}</span></div>`;
+  const e=document.getElementById('sportDayDetail');
+  if(e)e.innerHTML=`<div class="eyebrow">${formatDate(date)}</div>${nutritionDetail}<div class="calendar-sport-detail"><h3>${h.length?'Activité réalisée':'Repos / aucune séance'}</h3><div class="sport-metrics"><div class="sport-metric"><strong>${h.length}</strong><small>séances</small></div><div class="sport-metric"><strong>${mins}</strong><small>minutes</small></div><div class="sport-metric"><strong>${k}</strong><small>kcal sport</small></div></div>${h.length?`<p class="muted small">Score global : <strong>${score}%</strong></p>`:''}</div>`;
+}
 function renderSportProfilePanel(p){
   const h=DATA.sport.sessionHistory||[],r=SPORT_PROFILE_RANGE;
   const cutoff=r===0?0:Date.now()-r*86400000;

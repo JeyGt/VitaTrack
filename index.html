@@ -202,6 +202,32 @@ input,select,textarea{font-family:inherit;}
 .sr-item{display:flex; justify-content:space-between; padding:9px 4px; border-bottom:1px solid var(--border); font-size:13.5px;}
 .sr-item:last-child{border-bottom:none;}
 
+/* Banque alimentaire : découverte, favoris et portions */
+.food-browse-categories{display:flex;gap:6px;overflow-x:auto;padding:8px 0 7px;scrollbar-width:none}.food-browse-categories::-webkit-scrollbar{display:none}
+.food-category-chip{white-space:nowrap;border:1px solid var(--border);background:var(--surface-alt);color:var(--ink-soft);border-radius:999px;padding:7px 10px;font-size:10.5px;font-weight:800;cursor:pointer}.food-category-chip.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.food-discovery-section{padding-top:4px}.food-discovery-title,.food-source-label{padding:8px 2px 4px!important;font-size:10px!important;font-weight:900!important;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft)}
+.food-discovery-heading{display:flex;align-items:center;justify-content:space-between;padding:8px 2px 5px}.food-discovery-heading strong{font-size:12px}.food-discovery-heading .small-link{margin:0;padding:3px 0}
+.food-library-row{align-items:center;gap:8px;cursor:pointer}.food-library-main{display:block;min-width:0;flex:1}.food-library-main strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.food-library-main small{display:block;color:var(--ink-soft);font-size:10.5px;margin-top:2px}.food-library-side{display:flex;align-items:center;gap:7px;flex:none}.food-library-side>.muted{font-size:11px;white-space:nowrap}
+.food-fav-btn{width:30px;height:30px;border:0;background:transparent;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:20px;line-height:1;cursor:pointer}.food-fav-btn.active{color:var(--primary)}.food-fav-btn:active{background:var(--surface-alt)}
+.food-portion-quick{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}.food-portion-quick::-webkit-scrollbar{display:none}.food-portion-chip{white-space:nowrap;border:1px solid var(--border);background:var(--surface-alt);border-radius:999px;padding:7px 10px;color:var(--ink-soft);font-size:10.5px;font-weight:800;cursor:pointer}.food-portion-chip.suggested{border-color:color-mix(in srgb,var(--primary) 35%,var(--border));color:var(--primary-dark);background:var(--primary-tint)}
+#foodPickedFavorite{flex:none}
+.search-results{max-height:290px}
+
+/* Description libre d’un repas */
+.meal-description-card{display:none;margin:10px 0 12px;padding:12px;border:1px solid var(--border);border-radius:14px;background:var(--surface-alt)}.meal-description-card.open{display:block}
+.meal-description-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}.meal-description-head strong{display:block;font-size:12.5px}.meal-description-head small{display:block;margin-top:2px;color:var(--ink-soft);font-size:10.5px;line-height:1.35}
+.meal-description-input{width:100%;min-height:72px;resize:vertical;padding:10px 11px;border-radius:11px;border:1px solid var(--border);background:var(--surface);color:var(--ink);font:inherit;font-size:13px;line-height:1.4}
+.meal-description-actions{display:flex;gap:7px;margin-top:8px}.meal-description-actions .btn{flex:1}.meal-dictate-btn.listening{background:var(--primary);color:#fff;border-color:var(--primary)}.meal-dictate-btn.listening::before{content:'● ';font-size:9px}.meal-dictation-status{display:none;margin-top:7px;font-size:10.5px;color:var(--primary);font-weight:700}.meal-dictation-status.active{display:block}
+.meal-description-review{display:none;margin-top:10px;padding-top:9px;border-top:1px solid var(--border)}.meal-description-review.open{display:block}
+.meal-description-note{font-size:10.5px;color:var(--ink-soft);line-height:1.35;margin-bottom:6px}
+.meal-desc-row{display:grid;grid-template-columns:minmax(0,1fr) 82px 28px;align-items:center;gap:7px;padding:8px 0;border-top:1px solid var(--border)}.meal-desc-row:first-of-type{border-top:0}
+.meal-desc-main{min-width:0}.meal-desc-main strong{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.meal-desc-main small{display:block;color:var(--ink-soft);font-size:10px;margin-top:2px}
+.meal-desc-choice{display:block;width:100%;max-width:180px;margin-top:5px;padding:6px 7px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:10.5px}
+.meal-desc-qty{display:flex;align-items:center;gap:4px}.meal-desc-qty input{width:58px;padding:7px 6px;border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--ink);font-size:12px;text-align:right}.meal-desc-qty span{font-size:10px;color:var(--ink-soft)}
+.meal-desc-remove{width:28px;height:28px;border:0;background:transparent;color:var(--ink-soft);font-size:18px;line-height:1;border-radius:50%;cursor:pointer}.meal-desc-remove:active{background:var(--surface)}
+.meal-description-summary{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:8px;font-size:11px}.meal-description-summary strong{font-size:12px}
+
+
 
 /* ----- toast ----- */
 .toast{
@@ -417,8 +443,13 @@ input[type="range"]{width:100%;}
 .drink-picker-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:14px}.drink-close{border:0;background:none;font-size:22px;color:var(--ink-soft);cursor:pointer}
 .drink-category-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.drink-category-grid button,.drink-choice{border:1px solid var(--border);background:var(--surface);border-radius:9px;padding:9px 8px;text-align:left;font-size:12px;font-weight:650;color:var(--ink);cursor:pointer}
 .drink-choices{margin-top:10px;display:grid;gap:6px}.drink-choice{display:flex;justify-content:space-between;align-items:center}.drink-choice small{color:var(--ink-soft);font-weight:500}
-.drink-today-list{padding:0 12px 12px}.drink-item{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-top:1px solid var(--border);font-size:12px}.drink-item-main{display:flex;gap:7px;align-items:center}.drink-item-cal{color:var(--ink-soft)}.drink-remove{border:0;background:none;color:var(--ink-soft);font-size:17px;cursor:pointer}
+.drink-choice-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;align-items:stretch}.drink-choice-main{width:100%;min-width:0}.drink-customize{border:1px solid var(--border);background:transparent;color:var(--primary-dark);border-radius:9px;padding:7px 8px;font-size:10px;font-weight:800;cursor:pointer}.drink-customize:active{transform:scale(.98)}
+.drink-custom-panel{border:1px solid var(--border);background:var(--surface);border-radius:11px;padding:11px}.drink-custom-head strong{display:block;font-size:13px}.drink-custom-head small{display:block;color:var(--ink-soft);font-size:10px;margin-top:3px}.drink-custom-field{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;font-size:11px;font-weight:700}.drink-custom-input-wrap{display:flex;align-items:center;gap:5px;border:1px solid var(--border);background:var(--surface-alt);border-radius:9px;padding:5px 8px}.drink-custom-input-wrap input{width:68px;border:0;outline:0;background:transparent;color:var(--ink);font:inherit;text-align:right}.drink-custom-input-wrap b{font-size:11px;color:var(--ink-soft)}.drink-custom-preview{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding:9px 10px;border-radius:9px;background:var(--surface-alt);font-size:11px}.drink-custom-preview strong{font-size:13px}.drink-custom-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}.drink-custom-actions button{border-radius:9px;padding:9px 8px;font-size:11px;font-weight:800;cursor:pointer}.drink-custom-back{border:1px solid var(--border);background:var(--surface);color:var(--ink)}.drink-custom-add{border:1px solid var(--primary);background:var(--primary);color:#fff}
+.drink-today-list{padding:0 12px 12px}.drink-item{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-top:1px solid var(--border);font-size:12px}.drink-item-main{display:flex;gap:7px;align-items:center;min-width:0;flex:1}.drink-item-cal{color:var(--ink-soft)}.drink-remove{border:0;background:none;color:var(--ink-soft);font-size:17px;cursor:pointer}
 @media(max-width:420px){.drink-category-grid{grid-template-columns:1fr 1fr}}
+.drink-remove{width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;flex:none;border-radius:50%;font-size:20px;line-height:1}
+.meal-food-delete{border:0;background:none;color:var(--ink-soft);font-size:20px;font-weight:400}
+.meal-food-delete:active{transform:none;opacity:.65}
 </style>
 
 <style>
@@ -886,329 +917,40 @@ input[type="range"]{width:100%;}
 .sport-explore-title{display:none!important;}
 </style>
 
-<style id="meal-grouped-history-v11">
-.meal-list-card{padding:0 14px!important;}
-.meal-group{padding:13px 0 4px;border-bottom:1px solid var(--border);}
-.meal-group:last-child{border-bottom:0;}
-.meal-group-head{display:flex;align-items:center;gap:10px;padding:2px 0 8px;}
-.meal-group-head .meal-main{flex:1;min-width:0;}
-.meal-group-head .meal-main strong{display:block;font-size:14px;}
-.meal-group-head .meal-main small{display:block;font-size:11px;color:var(--ink-soft);margin-top:3px;}
-.meal-food-list{padding-left:62px;}
-.meal-food-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--border);}
-.meal-food-main{min-width:0;flex:1;}
-.meal-food-main strong{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.meal-food-main small{display:block;color:var(--ink-soft);font-size:10px;margin-top:2px;}
-.meal-food-row>b{font-size:11px;white-space:nowrap;}
-.meal-empty{padding:4px 0 8px;color:var(--ink-soft);font-size:10.5px;font-style:italic;}
-@media(max-width:380px){
-  .meal-food-list{padding-left:58px;}
-}
-</style>
-<style id="food-meal-dropdown">
-.meal-list-card{padding:0;overflow:hidden}
-.meal-group{background:var(--surface);border:0;border-bottom:1px solid var(--border);margin:0;box-shadow:none;overflow:hidden}
+<style id="meal-history-stable-v34">
+/* Nutrition meal history — consolidated from the previous alignment patches. */
+.meal-list-card{padding:0 14px!important;overflow:hidden}
+.meal-group{padding:13px 0 4px;background:var(--surface);border:0;border-bottom:1px solid var(--border);margin:0;box-shadow:none;overflow:hidden}
 .meal-group:last-child{border-bottom:0}
 .meal-group .meal-group-head{
-  width:100%;display:flex;align-items:center;gap:10px;
-  padding:12px;border:0;background:transparent;color:var(--ink);
-  cursor:pointer;text-align:left;list-style:none;
+  width:100%;display:grid!important;grid-template-columns:48px minmax(0,1fr) auto!important;
+  column-gap:10px!important;align-items:center!important;padding:12px!important;
+  border:0;background:transparent;color:var(--ink);cursor:pointer;text-align:left;list-style:none
 }
 .meal-group .meal-group-head::-webkit-details-marker{display:none}
 .meal-group .meal-group-head::marker{display:none}
-.meal-chevron{font-size:22px;color:var(--ink-soft);line-height:1;transition:transform .18s ease;margin-left:2px}
+.meal-group .meal-group-head .meal-ring-wrap{grid-column:1!important;width:48px!important;height:48px!important;justify-self:center!important;margin:0!important}
+.meal-group .meal-group-head .meal-main{grid-column:2!important;min-width:0!important;margin:0!important;padding:0!important}
+.meal-group .meal-group-head .meal-main strong{display:block;font-size:14px}
+.meal-group .meal-group-head .meal-main small{display:block;font-size:11px;color:var(--ink-soft);margin-top:3px}
+.meal-group .meal-group-head .meal-chevron{grid-column:3!important;justify-self:end!important;margin:0!important;font-size:22px;color:var(--ink-soft);line-height:1;transition:transform .18s ease}
 .meal-group[open] .meal-chevron{transform:rotate(90deg)}
-.meal-group .meal-food-list{padding:0 12px 12px 74px}
-.meal-food-row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--border)}
-.meal-food-main{min-width:0;flex:1}
-.meal-food-main strong{display:block;font-size:12px}
-.meal-food-main small{display:block;color:var(--ink-soft);font-size:10px;margin-top:2px}
-.meal-food-row>b{font-size:11px;white-space:nowrap}
-.meal-empty{font-size:10.5px;color:var(--ink-soft);font-style:italic;padding:6px 0}
-</style>
-
-<style id="meal-food-time-left-v15">
-.meal-food-row{
-  display:grid!important;
-  grid-template-columns:42px minmax(0,1fr) auto;
-  align-items:center;
-  gap:8px;
-}
-.meal-food-time{
-  font-size:10px;
-  color:var(--ink-soft);
-  font-weight:700;
-  text-align:left;
-  white-space:nowrap;
-}
-.meal-food-main{min-width:0}
-</style>
-
-<style id="meal-food-alignment-v17">
-/* Les noms des plats sont alignés exactement sous le titre du repas.
-   L'heure reste à gauche, sans décaler le nom du plat. */
-.meal-food-list{
-  padding-left:62px!important;
-}
-.meal-food-row{
-  position:relative!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:space-between!important;
-  gap:10px!important;
-}
-.meal-food-time{
-  position:absolute!important;
-  left:-50px!important;
-  width:42px!important;
-  text-align:left!important;
-  font-size:10px!important;
-  color:var(--ink-soft)!important;
-  font-weight:700!important;
-  white-space:nowrap!important;
-}
-.meal-food-main{
-  min-width:0!important;
-  flex:1!important;
-}
-@media(max-width:380px){
-  .meal-food-list{padding-left:58px!important}
-  .meal-food-time{left:-48px!important}
-}
-</style>
-
-<style id="meal-alignment-v18">
-/* Alignement demandé :
-   - l'heure commence au même axe horizontal que le cercle de progression ;
-   - le nom de l'aliment commence exactement au même axe que le "D" de Dîner. */
-.meal-group-head{
-  display:flex!important;
-  align-items:center!important;
-  gap:10px!important;
-}
-.meal-food-list{
-  padding-left:62px!important; /* 52px cercle + 10px espace = début du titre du repas */
-}
-.meal-food-row{
-  display:grid!important;
-  grid-template-columns:52px minmax(0,1fr) auto!important;
-  align-items:center!important;
-  gap:10px!important;
-  position:relative!important;
-}
-.meal-food-time{
-  position:static!important;
-  width:auto!important;
-  text-align:left!important;
-  font-size:10px!important;
-  color:var(--ink-soft)!important;
-  font-weight:700!important;
-  white-space:nowrap!important;
-}
-.meal-food-main{
-  min-width:0!important;
-  flex:1!important;
-}
-@media(max-width:380px){
-  .meal-food-list{padding-left:48px!important}
-  .meal-food-row{
-    grid-template-columns:48px minmax(0,1fr) auto!important;
-    gap:8px!important;
-  }
-}
-</style>
-
-<style id="meal-alignment-v19">
-/* Alignement exact :
-   1. L'heure est centrée sous le cercle, exactement dans l'axe du chiffre %.
-   2. Le nom de l'aliment commence au même endroit que le début de
-      "Petit-déjeuner", "Déjeuner", "Dîner" ou "En-cas". */
-.meal-food-list{
-  padding-left:62px!important;
-}
-.meal-food-row{
-  display:grid!important;
-  grid-template-columns:52px minmax(0,1fr) auto!important;
-  align-items:center!important;
-  column-gap:10px!important;
-}
-.meal-food-time{
-  position:static!important;
-  width:52px!important;
-  margin:0!important;
-  padding:0!important;
-  text-align:center!important;
-  justify-self:stretch!important;
-  font-size:10px!important;
-  line-height:1.2!important;
-  color:var(--ink-soft)!important;
-  font-weight:700!important;
-  white-space:nowrap!important;
-}
-.meal-food-main{
-  min-width:0!important;
-  margin:0!important;
-  padding:0!important;
-  text-align:left!important;
-}
-@media(max-width:380px){
-  .meal-food-list{padding-left:58px!important}
-  .meal-food-row{
-    grid-template-columns:48px minmax(0,1fr) auto!important;
-    column-gap:10px!important;
-  }
-  .meal-food-time{width:48px!important}
-}
-</style>
-
-<style id="meal-alignment-v20">
-/* Même grille pour l'entête du repas et pour les aliments */
-.meal-group-head,
-.meal-food-row{
-  display:grid!important;
-  grid-template-columns:48px minmax(0,1fr) auto!important;
-  column-gap:10px!important;
-  align-items:center!important;
-}
-
-/* Le cercle occupe la première colonne */
-.meal-group-head .meal-ring-wrap{
-  grid-column:1!important;
-  justify-self:center!important;
-}
-
-/* Le titre du repas commence en colonne 2 */
-.meal-group-head .meal-main{
-  grid-column:2!important;
-  margin:0!important;
-  padding:0!important;
-  text-align:left!important;
-}
-
-/* Les aliments utilisent EXACTEMENT les mêmes colonnes */
-.meal-food-list{
-  padding-left:0!important;
-}
-.meal-food-time{
-  grid-column:1!important;
-  width:48px!important;
-  margin:0!important;
-  padding:0!important;
-  justify-self:center!important;
-  text-align:center!important;
-  position:static!important;
-  font-size:10px!important;
-  line-height:1.2!important;
-  color:var(--ink-soft)!important;
-  font-weight:700!important;
-  white-space:nowrap!important;
-}
-.meal-food-main{
-  grid-column:2!important;
-  min-width:0!important;
-  margin:0!important;
-  padding:0!important;
-  text-align:left!important;
-}
-.meal-food-row>b{
-  grid-column:3!important;
-  margin:0!important;
-  padding:0!important;
-  white-space:nowrap!important;
-}
-
-/* On conserve le chevron dans la troisième colonne de l'entête */
-.meal-group-head .meal-chevron{
-  grid-column:3!important;
-  justify-self:end!important;
-}
-
-@media(max-width:380px){
-  .meal-group-head,
-  .meal-food-row{
-    grid-template-columns:44px minmax(0,1fr) auto!important;
-    column-gap:8px!important;
-  }
-  .meal-food-time{
-    width:44px!important;
-  }
-}
-</style>
-
-<style id="meal-alignment-final-v21">
-/*
-  Référence exacte du header :
-  - le header commence à 12px du bord ;
-  - le cercle fait 48px ;
-  - il y a 10px entre le cercle et le titre.
-  Les lignes alimentaires reprennent exactement ces mêmes coordonnées.
-*/
-.meal-group .meal-group-head{
-  display:grid!important;
-  grid-template-columns:48px minmax(0,1fr) auto!important;
-  column-gap:10px!important;
-  align-items:center!important;
-  padding:12px!important;
-}
-.meal-group .meal-group-head .meal-ring-wrap{
-  grid-column:1!important;
-  width:48px!important;
-  height:48px!important;
-  justify-self:center!important;
-  margin:0!important;
-}
-.meal-group .meal-group-head .meal-main{
-  grid-column:2!important;
-  margin:0!important;
-  padding:0!important;
-  min-width:0!important;
-}
-.meal-group .meal-group-head .meal-chevron{
-  grid-column:3!important;
-  justify-self:end!important;
-  margin:0!important;
-}
-
-/* Important : pas de retrait supplémentaire ici.
-   La première colonne commence exactement sous le cercle. */
-.meal-group .meal-food-list{
-  padding:0 12px 12px 12px!important;
-}
+.meal-group .meal-food-list{padding:0 12px 12px 12px!important}
 .meal-group .meal-food-row{
-  display:grid!important;
-  grid-template-columns:48px minmax(0,1fr) auto!important;
-  column-gap:10px!important;
-  align-items:center!important;
-  padding:8px 0!important;
+  display:grid!important;grid-template-columns:48px minmax(0,1fr) auto!important;
+  column-gap:10px!important;align-items:center!important;padding:8px 0!important;
+  border-top:1px solid var(--border);font-size:12px
 }
 .meal-group .meal-food-time{
-  grid-column:1!important;
-  width:48px!important;
-  justify-self:center!important;
-  text-align:center!important;
-  margin:0!important;
-  padding:0!important;
-  position:static!important;
-  font-size:10px!important;
-  line-height:1.2!important;
-  color:var(--ink-soft)!important;
-  font-weight:700!important;
-  white-space:nowrap!important;
+  grid-column:1!important;width:48px!important;justify-self:center!important;text-align:center!important;
+  margin:0!important;padding:0!important;position:static!important;font-size:10px!important;line-height:1.2!important;
+  color:var(--ink-soft)!important;font-weight:700!important;white-space:nowrap!important
 }
-.meal-group .meal-food-main{
-  grid-column:2!important;
-  min-width:0!important;
-  margin:0!important;
-  padding:0!important;
-  text-align:left!important;
-}
-.meal-group .meal-food-row>b{
-  grid-column:3!important;
-  justify-self:end!important;
-  margin:0!important;
-  padding:0!important;
-  white-space:nowrap!important;
-}
+.meal-group .meal-food-main{grid-column:2!important;display:flex;align-items:center;gap:7px;min-width:0!important;margin:0!important;padding:0!important;text-align:left!important}
+.meal-group .meal-food-main strong{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meal-group .meal-food-main small{display:block;color:var(--ink-soft);font-size:10px;margin-top:2px;white-space:nowrap}
+.meal-group .meal-food-delete{grid-column:3!important;justify-self:end!important}
+.meal-empty{font-size:10.5px;color:var(--ink-soft);font-style:italic;padding:6px 0}
 </style>
 
 <style id="nutrition-icons-wire-v22">
@@ -1792,7 +1534,30 @@ input[type="range"]{width:100%;}
 .notif-day span{width:31px;height:31px;border:1px solid var(--border);background:var(--surface);border-radius:50%;display:grid;place-items:center;font-size:9px;font-weight:900;color:var(--ink-soft)}
 .notif-day input:checked + span{background:var(--primary);border-color:var(--primary);color:#fff}
 .notif-caption{font-size:9px;color:var(--ink-soft);margin-top:8px;line-height:1.4}
-</style></head>
+</style>
+<style id="nutrition-calendar-status-v1">
+.sport-calendar .cal-day.nutrition-good{background:var(--primary-tint);color:var(--primary);border-color:var(--primary)}
+.sport-calendar .cal-day.nutrition-bad{background:rgba(193,71,58,.11);color:var(--danger);border-color:var(--danger)}
+body[data-theme="dark"] .sport-calendar .cal-day.nutrition-bad{background:rgba(224,105,92,.15)}
+.sport-calendar .cal-day.today{box-shadow:0 0 0 2px var(--surface),0 0 0 3px currentColor}
+.sport-calendar .cal-dot{background:currentColor;width:6px;height:6px}
+.calendar-status-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:11px;color:var(--ink-soft);font-size:10px;font-weight:750}
+.calendar-status-legend span{display:inline-flex;align-items:center;gap:5px}
+.calendar-status-legend i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.calendar-status-legend i.good{background:var(--primary)}
+.calendar-status-legend i.bad{background:var(--danger)}
+.calendar-status-legend i.sport{width:5px;height:5px;background:var(--ink-soft)}
+.calendar-nutrition-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border-radius:13px;margin:8px 0 14px;background:var(--surface-alt)}
+.calendar-nutrition-summary strong{display:block;font-size:15px;margin-top:3px}
+.calendar-nutrition-summary>span{font-size:11px;font-weight:850;white-space:nowrap}
+.calendar-nutrition-summary.good{background:var(--primary-tint);color:var(--primary)}
+.calendar-nutrition-summary.bad{background:rgba(193,71,58,.11);color:var(--danger)}
+body[data-theme="dark"] .calendar-nutrition-summary.bad{background:rgba(224,105,92,.15)}
+.calendar-nutrition-summary.neutral{color:var(--ink)}
+.calendar-sport-detail{border-top:1px solid var(--border);padding-top:12px}
+.calendar-sport-detail h3{margin:0 0 10px}
+</style>
+</head>
 <body data-theme="light">
 <div id="welcomeScreen" aria-label="Bienvenue dans VitaTrack">
   <div class="welcome-inner">
@@ -1902,8 +1667,8 @@ input[type="range"]{width:100%;}
       </div>
     </div>
     <div class="nutrition-block">
-      <div class="nutrition-section-head"><h2><svg class="nutrition-line-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10l-1 15H8L7 4Z"/><path d="M6 4h12M9 8h6M10 19v2M14 19v2"/></svg> Boissons & alcool</h2></div>
-      <div class="card drink-card drink-card-click" onclick="toggleDrinkPicker(event)">
+      <div class="nutrition-section-head"><h2><svg class="nutrition-line-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10l-1 15H8L7 4Z"/><path d="M6 4h12M9 8h6M10 19v2M14 19v2"/></svg> Boissons & alcool</h2><button class="inline-link" type="button" onclick="event.stopPropagation();openDrinkPicker()">+ Ajouter</button></div>
+      <div class="card drink-card drink-card-click" onclick="toggleDrinkHistoryCard(event)">
         <div class="drink-summary">
           <div class="drink-stat">
             <span class="drink-label">Aujourd’hui</span>
@@ -2010,14 +1775,19 @@ input[type="range"]{width:100%;}
 
 <div class="sheet-overlay" id="foodSheetOverlay" onclick="closeSheetIfBg(event,'foodSheetOverlay')"><div class="sheet"><div class="sheet-handle"></div><h3>Ajouter un repas</h3>
 <div class="meal-chips" id="mealTypeChooser"></div>
-<div class="scanner scanner-large"><button class="btn btn-ghost" onclick="scanPlate()">📷 Scanner l’assiette</button><button class="btn btn-ghost" onclick="scanBarcode()">▣ Scanner le code-barres</button></div>
-<video id="barcodeVideo" class="barcode-video" playsinline muted></video>
-<video id="plateVideo" class="barcode-video" playsinline muted></video><div id="plateStatus" class="muted small" style="margin-top:6px"></div>
-<div class="divider"></div><label class="search-label">Recherche automatique</label><input id="foodSearch" oninput="renderFoodSearch()" placeholder="Rechercher poulet, riz, pomme…" style="width:100%;padding:11px 13px;border-radius:12px;border:1px solid var(--border);background:var(--surface-alt);color:var(--ink);font-size:14.5px"><div class="search-results" id="foodSearchResults"></div>
-<div id="foodPickedBox" style="display:none"><div class="row" style="margin-bottom:8px"><strong id="foodPickedName"></strong><span class="muted small" id="foodPickedKcal"></span></div><div id="foodPickedInfo"></div><div class="field"><label>Quantité (g / ml)</label><input type="number" id="foodQty" value="100"></div><button class="btn btn-primary btn-block" onclick="confirmAddFood()">Ajouter au repas</button></div>
+<div class="scanner scanner-large"><button class="btn btn-ghost" onclick="openMealDescription()">✍️ Décrire mon repas</button><button class="btn btn-ghost" onclick="scanBarcode()">▣ Scanner le code-barres</button></div>
+<video id="barcodeVideo" class="barcode-video" playsinline muted></video><div id="barcodeStatus" class="muted small" style="margin-top:6px"></div>
+<div class="meal-description-card" id="mealDescriptionCard">
+  <div class="meal-description-head"><div><strong>✍️ Décrire mon repas</strong><small>Écris ou dicte naturellement ce que tu as mangé. VitaTrack proposera des quantités à vérifier avant l’ajout.</small></div></div>
+  <textarea id="mealDescriptionText" class="meal-description-input" placeholder="Ex. J’ai mangé une salade de maïs avec une tranche de poulet, un morceau de comté et un petit-suisse"></textarea>
+  <div id="mealDictationStatus" class="meal-dictation-status" aria-live="polite">🎙️ Je t’écoute… parle naturellement.</div>
+  <div class="meal-description-actions"><button type="button" class="btn btn-ghost" onclick="clearMealDescription()">Effacer</button><button type="button" class="btn btn-ghost meal-dictate-btn" id="mealDictateBtn" onclick="toggleMealDictation()" aria-pressed="false">🎙️ Parler</button><button type="button" class="btn btn-primary" onclick="analyzeMealDescription()">Analyser</button></div>
+  <div id="mealDescriptionReview" class="meal-description-review"></div>
+</div>
+<div class="divider"></div><label class="search-label">Recherche automatique</label><input id="foodSearch" oninput="renderFoodSearch()" placeholder="Rechercher poulet, riz, pomme…" style="width:100%;padding:11px 13px;border-radius:12px;border:1px solid var(--border);background:var(--surface-alt);color:var(--ink);font-size:14.5px"><div class="food-browse-categories" id="foodBrowseCategories"></div><div class="search-results" id="foodSearchResults"></div>
+<div id="foodPickedBox" style="display:none"><div class="row" style="margin-bottom:8px"><strong id="foodPickedName"></strong><span style="display:flex;align-items:center;gap:6px"><span class="muted small" id="foodPickedKcal"></span><button type="button" class="food-fav-btn" id="foodPickedFavorite" onclick="togglePickedFoodFavorite()" aria-label="Ajouter aux favoris">☆</button></span></div><div id="foodPickedInfo"></div><div class="food-portion-quick" id="foodPortionQuick"></div><div class="field"><label>Quantité (g / ml)</label><input type="number" id="foodQty" value="100"></div><button class="btn btn-primary btn-block" onclick="confirmAddFood()">Ajouter au repas</button></div>
 <button class="small-link" onclick="toggleCustomFoodForm()">+ Créer un aliment personnalisé</button><div id="customFoodForm" style="display:none;margin-top:12px"><div class="field"><label>Nom</label><input id="cf_name"></div><div class="field-row"><div class="field"><label>kcal / 100g</label><input type="number" id="cf_kcal"></div><div class="field"><label>Protéines / 100g</label><input type="number" id="cf_protein"></div></div><div class="field-row"><div class="field"><label>Glucides / 100g</label><input type="number" id="cf_carbs"></div><div class="field"><label>Sucres / 100g</label><input type="number" id="cf_sugar"></div></div><div class="field-row"><div class="field"><label>Fibres / 100g</label><input type="number" id="cf_fiber"></div><div class="field"><label>Lipides / 100g</label><input type="number" id="cf_fat"></div></div><div class="field-row"><div class="field"><label>Graisses saturées / 100g</label><input type="number" id="cf_satfat"></div><div class="field"><label>Sel / 100g</label><input type="number" id="cf_salt"></div></div><div class="field"><label>Glycémie (optionnel)</label><select id="cf_gi"><option value="">Non renseignée</option><option value="faible">Faible</option><option value="moyen">Moyen</option><option value="élevé">Élevé</option></select></div><button class="btn btn-ghost btn-block" onclick="saveCustomFood()">Enregistrer</button></div></div></div>
 
-<div class="sheet-overlay" id="mealDetailsOverlay" onclick="closeSheetIfBg(event,'mealDetailsOverlay')"><div class="sheet"><div class="sheet-handle"></div><h3 id="mealDetailsTitle">Repas</h3><div id="mealDetailsBody"></div></div></div>
 <div class="sheet-overlay" id="waterSheetOverlay" onclick="closeSheetIfBg(event,'waterSheetOverlay')"><div class="sheet"><div class="sheet-handle"></div><h3>Ajouter de l’eau</h3><div class="water-quick"><button type="button" class="chip" onclick="setVal('waterQty',200)">200 ml</button><button type="button" class="chip" onclick="setVal('waterQty',250)">250 ml</button><button type="button" class="chip" onclick="setVal('waterQty',330)">330 ml</button><button type="button" class="chip" onclick="setVal('waterQty',500)">500 ml</button></div><div class="field"><label>Quantité (ml)</label><input type="number" id="waterQty" value="250" min="1"></div><button class="btn btn-primary btn-block" onclick="addWater()">Ajouter</button></div></div>
 
 <div class="sheet-overlay" id="guideSheetOverlay" onclick="closeSheetIfBg(event,'guideSheetOverlay')"><div class="sheet"><div class="sheet-handle"></div><h3 id="guideTitle">Aliment</h3><div id="guideDetail"></div></div></div>
@@ -2113,7 +1883,7 @@ input[type="range"]{width:100%;}
             </div>
           </div>
 
-          <div class="notif-caption" style="margin-top:12px">Les horaires sont enregistrés dans VitaTrack. L’envoi réel des notifications système sera branché ensuite via Web Push.</div>
+          <div class="notif-caption" style="margin-top:12px">Les rappels système utilisent les horaires ci-dessus dès que les notifications sont autorisées. Pour garantir un rappel lorsque VitaTrack est totalement fermée, le Web Push sera ajouté ultérieurement.</div>
         </div>
         <div class="profile-setting-row" onclick="toggleProfilePanel('themePanel')">
           <div class="profile-setting-icon">◐</div><div class="profile-setting-main"><strong>Apparence</strong><span id="themeSummary">Clair</span></div><button class="profile-chevron" type="button">›</button>
@@ -2149,13 +1919,16 @@ input[type="range"]{width:100%;}
 <div class="toast" id="toast"></div>
 <script src="data.js"></script><script src="sport-data.js"></script><script src="sport-engine.js"></script><script src="app.js"></script><script src="nutrition.js"></script><script src="cloud-sync.js"></script>
 <script>
-/* Interactions compactes : boissons et pesées s’ouvrent directement depuis leurs cartes. */
-window.toggleDrinkPicker = function(ev){
-  if(ev && ev.target.closest('#drinkPicker,#drinkTodayList')) return;
-  const p=document.getElementById('drinkPicker');
-  if(!p)return;
-  const open=getComputedStyle(p).display!=='none';
-  if(open) closeDrinkPicker(); else openDrinkPicker();
+/* Interactions compactes : le bloc boissons affiche son historique ; l’ajout reste séparé. */
+window.toggleDrinkHistoryCard = function(ev){
+  if(ev && ev.target.closest('#drinkPicker,#drinkTodayList,.drink-remove')) return;
+  if(ev) ev.stopPropagation();
+  const list=document.getElementById('drinkTodayList');
+  if(!list)return;
+  const hasItems=!!list.children.length;
+  if(!hasItems){toast('Aucune boisson enregistrée aujourd’hui');return;}
+  const open=getComputedStyle(list).display!=='none';
+  list.style.display=open?'none':'block';
 };
 window.toggleWeightHistory = function(ev){
   if(ev) ev.stopPropagation();
@@ -2215,102 +1988,7 @@ window.renderQuickAddSummary = function(){
   } catch(e) {}
 };
 
-/* UI nutrition : cercles de repas avec progression réelle */
-(function(){
-  const originalRenderAll = window.renderAll;
-  window.renderFood = function(){
-    const t=currentTargets(), d=dayTotals(),
-          drinkKcalEl=document.getElementById('drinkCaloriesToday'),
-          drinkKcal=drinkKcalEl?Math.max(0,Number(String(drinkKcalEl.textContent||'0').replace(/[^0-9.,-]/g,'').replace(',','.'))||0):0,
-          totalKcal=Math.round(d.kcal),
-          list=(DATA.foodLog[TODAY]||[]).slice().sort((a,b)=>(a.time||'').localeCompare(b.time||'')),
-          rem=t.calories?Math.max(0,Math.round(t.calories-totalKcal)):null,
-          mt=macroTargets(t.calories||2100);
-
-    setText('foodKcalTotal',totalKcal);
-    setText('foodGoalLabel',t.calories?`${t.calories} kcal`:'Objectif à calculer');
-    const consumedPct=t.calories?Math.max(0,Math.round((totalKcal/t.calories)*100)):0;
-    setText('foodRemainingPct',consumedPct+'%');
-    setText('foodRemaining',rem===null?'0 kcal':rem+' kcal');
-    const sportHistory=typeof window.getSportHistory==='function'?window.getSportHistory():[];
-    const sportBurnedToday=Math.round(sportHistory.reduce((sum,a)=>{
-      const localDate=a?.recordedAt?new Date(a.recordedAt).toLocaleDateString('en-CA'):String(a?.completedDate||a?.date||'');
-      const kcal=Number(a?.estimatedKcal||((typeof window.sportKcalForActivity==='function')?window.sportKcalForActivity(a):0))||0;
-      return sum+(localDate===TODAY?kcal:0);
-    },0));
-    setText('foodBurned',sportBurnedToday);
-    setText('foodProteinTotal',Math.round(d.protein)+' g');
-    setText('foodProteinGoal',t.protein?`${t.protein} g`:'—');
-    setText('foodWeight',DATA.profile.weightCurrent?DATA.profile.weightCurrent+' kg':'—');
-    setText('nutritionCurrentWeight',DATA.profile.weightCurrent?DATA.profile.weightCurrent+' kg':'—');
-    setText('nutritionWeightGoal',DATA.objective.targetWeight?DATA.objective.targetWeight+' kg':'—');
-    setText('nutritionGoalLabel',goalLabel(DATA.objective.type));
-    setText('nutritionCalorieTarget',t.calories?t.calories+' kcal/j':'—');
-
-    const ring=document.getElementById('calorieRing');
-    if(ring){
-      const ratio=t.calories?Math.max(0,Math.min(1,totalKcal/t.calories)):0;
-      ring.style.strokeDashoffset=(314.16*(1-ratio)).toFixed(2);
-      updateCalorieExcessRing(totalKcal,t.calories);
-    }
-
-    setText('macroCarbs',`${Math.round(d.carbs)} / ${mt.carbs} g`);
-    setText('macroProtein',`${Math.round(d.protein)} / ${t.protein||'—'} g`);
-    setText('macroFat',`${Math.round(d.fat)} / ${mt.fat} g`);
-    setText('macroFiber',`${Math.round(d.fiber)} / ${mt.fiber} g`);
-    setBar('macroCarbsBar',macroPct(d.carbs,mt.carbs));
-    setBar('macroProteinBar',macroPct(d.protein,t.protein));
-    setBar('macroFatBar',macroPct(d.fat,mt.fat));
-    setBar('macroFiberBar',macroPct(d.fiber,mt.fiber));
-
-    const water=waterTotal(), waterGoal=(DATA.nutrition.waterTarget||2)*1000,
-          glasses=water/250;
-    setText('waterGlasses',`${glasses.toLocaleString('fr-FR',{maximumFractionDigits:1})} ${glasses===1?'verre':'verres'}`);
-    setText('waterTotal',`${(water/1000).toFixed(2).replace('.',',')} L`);
-    setText('waterGoal',`${(waterGoal/1000).toFixed(2).replace('.',',')} L`);
-    const waterPct=Math.min(100,water/waterGoal*100);
-    const waterRing=document.getElementById('waterRing');
-    if(waterRing) waterRing.style.strokeDashoffset=(131.95*(1-waterPct/100)).toFixed(2);
-    setText('waterRingLabel',`${Math.round(waterPct)}%`);
-
-    const groups=[['Petit-déjeuner','☕'],['Déjeuner','🍽️'],['Dîner','🥗'],['En-cas','🍎']];
-    const card=document.getElementById('foodListCard');
-    if(card){
-      card.innerHTML=groups.map(([type,icon])=>{
-        const items=list.filter(f=>(f.mealType||'Repas')===type);
-        const kcal=items.reduce((sum,f)=>sum+Number(f.kcal||0),0);
-        const goal=Math.round((t.calories||2100)*({'Petit-déjeuner':.25,'Déjeuner':.33,'Dîner':.33,'En-cas':.09}[type]));
-        const pct=goal?Math.min(100,Math.round(kcal/goal*100)):0;
-        const offset=(125.66*(1-pct/100)).toFixed(2);
-        const foodRows=items.length ? items.map(f=>`
-          <div class="meal-food-row">
-            <div class="meal-food-time">${f.time||'—'}</div>
-            <div class="meal-food-main">
-              <strong>${f.name||'Aliment'}</strong>
-              <small>${f.qty?`${f.qty} g`:''}</small>
-            </div>
-            <b>${Math.round(Number(f.kcal||0))} kcal</b>
-          </div>`).join('') :
-          `<div class="meal-empty">Aucun aliment enregistré</div>`;
-        return `<details class="meal-group">
-          <summary class="meal-group-head">
-            <span class="meal-ring-wrap" aria-hidden="true"><svg viewBox="0 0 48 48"><circle class="meal-ring-track" cx="24" cy="24" r="20"></circle><circle class="meal-ring-progress" style="stroke-dashoffset:${offset}" cx="24" cy="24" r="20"></circle></svg><span class="meal-ring-label">${pct}%</span></span>
-            <div class="meal-main"><strong>${type}</strong><small>${kcal} / ${goal} kcal</small></div>
-            <span class="meal-chevron" aria-hidden="true">›</span>
-          </summary>
-          <div class="meal-food-list">${foodRows}</div>
-        </details>`;
-      }).join('');
-    }
-    window.renderQuickAddSummary();
-  };
-
-  // Recalcule le total dès que les calories des boissons/alcools sont mises à jour.
-  const drinkKcalEl=document.getElementById('drinkCaloriesToday');
-  if(drinkKcalEl && window.MutationObserver){
-    new MutationObserver(function(){ window.renderFood(); window.renderQuickAddSummary(); }).observe(drinkKcalEl,{childList:true,characterData:true,subtree:true});
-  }
-})();
+/* Le rendu principal Nutrition est maintenant centralisé dans nutrition.js. */
 setTimeout(function(){ window.renderQuickAddSummary && window.renderQuickAddSummary(); },0);
 </script>
 
@@ -2433,17 +2111,6 @@ setTimeout(function(){ window.renderQuickAddSummary && window.renderQuickAddSumm
   if(document.getElementById('screen-sport')?.classList.contains('active')) sportVisualMain();
 })();
 
-function updateCalorieExcessRing(totalKcal, calorieGoal){
-  const over=document.querySelector('.ring-progress-over');
-  if(!over)return;
-  const goal=Number(calorieGoal)||0;
-  const total=Number(totalKcal)||0;
-  const pct=goal>0?(total/goal)*100:0;
-  const excess=Math.max(0,Math.min(100,pct-100));
-  const circumference=314.16;
-  over.style.strokeDasharray=circumference;
-  over.style.strokeDashoffset=(circumference*(1-excess/100)).toFixed(2);
-}
 function updateCalorieExcessRing(totalKcal, calorieGoal){
   const over=document.querySelector('.ring-progress-over');
   if(!over)return;
