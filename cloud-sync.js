@@ -4,6 +4,9 @@
   const API='/api/cloud';
   let account={configured:false,authenticated:false,user:null,cloudUpdatedAt:null};
   let syncing=false,pushTimer=null,initialised=false,suppressDirty=false;
+  let resolveCloudReady;
+  window.vitaCloudReady=new Promise(resolve=>{resolveCloudReady=resolve;});
+  window.getVitaCloudAccount=()=>({...account});
 
   function meta(){try{return JSON.parse(localStorage.getItem(META_KEY)||'{}')}catch{return{}}}
   function setMeta(patch){localStorage.setItem(META_KEY,JSON.stringify({...meta(),...patch}));}
@@ -28,22 +31,28 @@
   }
   function fmtDate(v){if(!v)return 'Jamais';try{return new Date(v).toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'})}catch{return String(v)}}
 
+  function setAccountSummary(text){const el=document.getElementById('cloudAccountSummary');if(el)el.textContent=text;}
   function renderCloudUI(){
-    const box=document.getElementById('cloudAccountBox'); if(!box)return;
+    const box=document.getElementById('cloudAccountBox');
     if(!account.configured){
-      box.innerHTML='<div class="row"><div><strong>☁️ Compte VitaTrack</strong><div class="muted small">Synchronisation cloud non configurée sur le serveur</div></div></div>';
+      setAccountSummary('Cloud à activer');
+      if(box)box.innerHTML=`<div><strong>Compte multi-appareils</strong><div class="muted small" style="margin-top:5px;line-height:1.45">La fonction est prête dans VitaTrack, mais le stockage cloud doit encore être activé sur le serveur. Une fois configuré, tu pourras créer ton identifiant et retrouver tes données sur un autre appareil.</div></div>`;
       return;
     }
     if(!account.authenticated){
-      box.innerHTML=`<strong>☁️ Compte VitaTrack</strong><div class="muted small" style="margin-top:4px">Sauvegarde et retrouve tes données sur plusieurs appareils.</div>
-        <div class="field" style="margin-top:10px"><label>E-mail</label><input id="cloudEmail" type="email" autocomplete="email" placeholder="toi@exemple.com"></div>
+      setAccountSummary('Non connecté · données locales');
+      if(box)box.innerHTML=`<strong>Créer ou utiliser mon identifiant</strong><div class="muted small" style="margin-top:4px;line-height:1.45">Utilise ton e-mail comme identifiant VitaTrack. Tes données restent enregistrées sur cet appareil et seront synchronisées automatiquement avec ton compte.</div>
+        <div class="field" style="margin-top:12px"><label>Identifiant (e-mail)</label><input id="cloudEmail" type="email" autocomplete="email" inputmode="email" placeholder="toi@exemple.com"></div>
         <div class="field"><label>Mot de passe</label><input id="cloudPassword" type="password" autocomplete="current-password" placeholder="8 caractères minimum"></div>
-        <div class="field-row"><button class="btn btn-primary" onclick="cloudLogin()">Se connecter</button><button class="btn btn-ghost" onclick="cloudSignup()">Créer un compte</button></div>`;
+        <div class="field-row"><button class="btn btn-primary" onclick="cloudLogin()">Se connecter</button><button class="btn btn-ghost" onclick="cloudSignup()">Créer mon compte</button></div>
+        <div class="muted small" style="margin-top:9px;line-height:1.4">Sur un nouvel appareil, connecte-toi avec le même identifiant pour récupérer ta sauvegarde VitaTrack.</div>`;
       return;
     }
+    setAccountSummary(account.user?.email?`Connecté · ${account.user.email}`:'Connecté');
+    if(!box)return;
     const m=meta();
-    box.innerHTML=`<div class="row"><div><strong>☁️ ${escapeHtml(account.user?.email||'Compte VitaTrack')}</strong><div class="muted small" style="margin-top:3px">Dernière synchro : ${fmtDate(m.lastSyncedAt||account.cloudUpdatedAt)}</div></div><span class="chip">Connecté</span></div>
-      <div class="field-row" style="margin-top:10px"><button class="btn btn-primary" onclick="cloudSyncNow()">↻ Synchroniser</button><button class="btn btn-ghost" onclick="cloudLogout()">Déconnexion</button></div>`;
+    box.innerHTML=`<div class="row"><div><strong>☁️ ${escapeHtml(account.user?.email||'Compte VitaTrack')}</strong><div class="muted small" style="margin-top:3px">Synchronisation automatique active<br>Dernière synchro : ${fmtDate(m.lastSyncedAt||account.cloudUpdatedAt)}</div></div><span class="chip">Connecté</span></div>
+      <div class="field-row" style="margin-top:12px"><button class="btn btn-primary" onclick="cloudSyncNow()">↻ Synchroniser maintenant</button><button class="btn btn-ghost" onclick="cloudLogout()">Déconnexion</button></div>`;
   }
 
   async function refreshStatus(){
@@ -98,19 +107,32 @@
     else {await pushState(true);toast('Sauvegarde cloud mise à jour');}
   }
 
+  window.refreshCloudAccountUI=async function(){return refreshStatus();};
+
+  window.cloudLoginWithCredentials=async function(email,password){
+    email=String(email||'').trim();password=String(password||'');
+    if(!email||!password)throw new Error('E-mail et mot de passe requis');
+    const d=await request('login',{method:'POST',body:JSON.stringify({email,password})});
+    account={...account,...d,configured:true};renderCloudUI();await reconcileAfterLogin();
+    return {...account};
+  };
+  window.cloudSignupWithCredentials=async function(email,password){
+    email=String(email||'').trim();password=String(password||'');
+    if(!email||!password)throw new Error('E-mail et mot de passe requis');
+    if(password.length<8)throw new Error('Le mot de passe doit contenir au moins 8 caractères');
+    const d=await request('signup',{method:'POST',body:JSON.stringify({email,password})});
+    if(d.authenticated){account={...account,...d,configured:true};renderCloudUI();await reconcileAfterLogin();}
+    return {...d,configured:true};
+  };
   window.cloudLogin=async function(){
     const email=document.getElementById('cloudEmail')?.value.trim(),password=document.getElementById('cloudPassword')?.value||'';
-    if(!email||!password){toast('E-mail et mot de passe requis');return;}
-    try{const d=await request('login',{method:'POST',body:JSON.stringify({email,password})});account={...account,...d,configured:true};renderCloudUI();await reconcileAfterLogin();}
+    try{await window.cloudLoginWithCredentials(email,password);}
     catch(e){toast(e.message||'Connexion impossible');}
   };
   window.cloudSignup=async function(){
     const email=document.getElementById('cloudEmail')?.value.trim(),password=document.getElementById('cloudPassword')?.value||'';
-    if(!email||!password){toast('E-mail et mot de passe requis');return;}
-    try{const d=await request('signup',{method:'POST',body:JSON.stringify({email,password})});
-      if(d.authenticated){account={...account,...d,configured:true};renderCloudUI();await reconcileAfterLogin();}
-      else toast(d.message||'Vérifie ton e-mail pour confirmer le compte');
-    }catch(e){toast(e.message||'Création du compte impossible');}
+    try{const d=await window.cloudSignupWithCredentials(email,password);if(!d.authenticated)toast(d.message||'Vérifie ton e-mail pour confirmer le compte');}
+    catch(e){toast(e.message||'Création du compte impossible');}
   };
   window.cloudLogout=async function(){
     try{await request('logout',{method:'POST',body:'{}'});}catch{}
@@ -147,6 +169,8 @@
       }catch(e){console.warn('VitaTrack cloud init:',e);}
     }
     renderCloudUI();
+    if(resolveCloudReady){resolveCloudReady({...account});resolveCloudReady=null;}
+    window.dispatchEvent(new CustomEvent('vitatrack:cloud-ready',{detail:{...account}}));
   }
   window.addEventListener('online',()=>{if(account.authenticated&&meta().dirty)pushState(true);});
   window.addEventListener('beforeunload',()=>{if(account.authenticated&&meta().dirty){try{navigator.sendBeacon(`${API}?action=push`,new Blob([JSON.stringify({state:cloudSafeState()})],{type:'application/json'}));}catch{}}});

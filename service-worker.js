@@ -1,5 +1,5 @@
-const CACHE_PREFIX = 'vitatrack-';
-const CACHE_VERSION = 'v39';
+const CACHE_PREFIX = 'vitatrack-account-onboarding-';
+const CACHE_VERSION = 'v57';
 const CORE_CACHE = `${CACHE_PREFIX}core-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}runtime-${CACHE_VERSION}`;
 

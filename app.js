@@ -19,9 +19,9 @@ function normaliseDrinkLog(log){
 function migrate(d){const def=defaultData(); const p=Object.assign({},def.profile,d.profile||{}); const oldGoal=p.goal;
   const objective=Object.assign({},def.objective,d.objective||{});
   if(!d.objective){if(oldGoal==='lose')objective.type='fat_loss'; else if(oldGoal==='gain')objective.type='muscle_gain'; else if(oldGoal==='maintain')objective.type='maintain';}
-  p.visceralFat=p.visceralFat??null; return Object.assign({},def,d,{profile:p,objective,nutrition:Object.assign({},def.nutrition,d.nutrition||{}),waterLog:d.waterLog||{},drinkLog:normaliseDrinkLog(d.drinkLog),stepsLog:d.stepsLog||{},settings:Object.assign({},def.settings,d.settings||{}),foodLog:d.foodLog||{},weights:d.weights||[],customFoods:d.customFoods||[],foodFavorites:Array.isArray(d.foodFavorites)?d.foodFavorites:[],coachDecisions:d.coachDecisions||[],reports:d.reports||{}});
+  p.visceralFat=p.visceralFat??null; return Object.assign({},def,d,{profile:p,objective,nutrition:Object.assign({},def.nutrition,d.nutrition||{}),waterLog:d.waterLog||{},drinkLog:normaliseDrinkLog(d.drinkLog),stepsLog:d.stepsLog||{},settings:Object.assign({},def.settings,d.settings||{}),foodLog:d.foodLog||{},weights:d.weights||[],customFoods:d.customFoods||[],foodFavorites:Array.isArray(d.foodFavorites)?d.foodFavorites:[],coachDecisions:d.coachDecisions||[],reports:d.reports||{},nutritionCoach:Object.assign({},def.nutritionCoach,d.nutritionCoach||{},{baseline:Object.assign({},def.nutritionCoach.baseline,d.nutritionCoach?.baseline||{}),lastWeek:Object.assign({},def.nutritionCoach.lastWeek,d.nutritionCoach?.lastWeek||{}),goalHistory:Array.isArray(d.nutritionCoach?.goalHistory)?d.nutritionCoach.goalHistory:[],contextAnswers:Array.isArray(d.nutritionCoach?.contextAnswers)?d.nutritionCoach.contextAnswers:[],recommendationHistory:Array.isArray(d.nutritionCoach?.recommendationHistory)?d.nutritionCoach.recommendationHistory:[],calorieAdjustments:Array.isArray(d.nutritionCoach?.calorieAdjustments)?d.nutritionCoach.calorieAdjustments:[]})});
 }
-function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(DATA));}
+function saveState(){try{if(typeof coachUpdateObservationState==='function')coachUpdateObservationState();}catch(e){console.warn('VitaTrack coach observation:',e);}localStorage.setItem(STORAGE_KEY,JSON.stringify(DATA));}
 function toast(msg){const el=document.getElementById('toast'); if(!el)return; el.textContent=msg; el.classList.add('show'); clearTimeout(window.__toast); window.__toast=setTimeout(()=>el.classList.remove('show'),2200);}
 
 
@@ -63,7 +63,7 @@ function renderProfile(){
   const pref=DATA.settings.theme||'light';setText('themeSummary',pref==='dark'?'Sombre':pref==='system'?'Selon le système':'Clair');document.querySelectorAll('[data-theme-choice]').forEach(b=>b.classList.toggle('active',b.dataset.themeChoice===pref));
 }
 function saveProfile(){const p=DATA.profile;p.name=document.getElementById('pf_name').value.trim();p.age=+document.getElementById('pf_age').value||0;p.sex=document.getElementById('pf_sex').value;p.height=+document.getElementById('pf_height').value||0;const w=+document.getElementById('pf_weight').value||0;if(w&&!p.startingWeight)p.startingWeight=w;p.weightCurrent=w;saveState();ensureTargets();saveState();toast('Profil enregistré');renderAll();}
-function saveGoals(){DATA.objective.type=document.getElementById('pf_goal').value;DATA.profile.activity=document.getElementById('pf_activity').value;const tw=+document.getElementById('pf_target').value;DATA.objective.targetWeight=tw>0?tw:null;const bf=+document.getElementById('pf_bodyfat_target').value;DATA.objective.targetBodyFat=bf>0?bf:null;const wa=+document.getElementById('pf_waist_target').value;DATA.objective.targetWaist=wa>0?wa:null;const stepsRaw=String(document.getElementById('pf_steps_goal')?.value||'').trim();const stepGoalValue=Math.round(Number(stepsRaw));if(stepsRaw&&(!Number.isFinite(stepGoalValue)||stepGoalValue<1000||stepGoalValue>50000)){toast('Choisis un objectif entre 1 000 et 50 000 pas');return;}DATA.settings=DATA.settings||{};if(stepsRaw)DATA.settings.stepsGoal=stepGoalValue;else delete DATA.settings.stepsGoal;DATA.nutrition.manualCalories=false;DATA.nutrition.manualProtein=false;ensureTargets();saveState();toast('Objectif mis à jour');renderAll();}
+function saveGoals(){const previousObjectiveState={type:DATA.objective.type,targetWeight:DATA.objective.targetWeight};DATA.objective.type=document.getElementById('pf_goal').value;DATA.profile.activity=document.getElementById('pf_activity').value;const tw=+document.getElementById('pf_target').value;DATA.objective.targetWeight=tw>0?tw:null;const bf=+document.getElementById('pf_bodyfat_target').value;DATA.objective.targetBodyFat=bf>0?bf:null;const wa=+document.getElementById('pf_waist_target').value;DATA.objective.targetWaist=wa>0?wa:null;const stepsRaw=String(document.getElementById('pf_steps_goal')?.value||'').trim();const stepGoalValue=Math.round(Number(stepsRaw));if(stepsRaw&&(!Number.isFinite(stepGoalValue)||stepGoalValue<1000||stepGoalValue>50000)){toast('Choisis un objectif entre 1 000 et 50 000 pas');return;}DATA.settings=DATA.settings||{};if(stepsRaw)DATA.settings.stepsGoal=stepGoalValue;else delete DATA.settings.stepsGoal;DATA.nutrition.manualCalories=false;DATA.nutrition.manualProtein=false;ensureTargets();if(typeof coachRecordGoalChange==='function'&&(previousObjectiveState.type!==DATA.objective.type||Number(previousObjectiveState.targetWeight||0)!==Number(DATA.objective.targetWeight||0)))coachRecordGoalChange(previousObjectiveState,{type:DATA.objective.type,targetWeight:DATA.objective.targetWeight});saveState();toast('Objectif mis à jour');renderAll();}
 function goalLabel(g){return{fat_loss:'Perte de gras',recomposition:'Recomposition',muscle_gain:'Prise de muscle',maintain:'Maintien',weight_target:'Atteindre un poids'}[g]||'—';}
 function ensureProfileSettings(){
   DATA.settings=DATA.settings||{};
@@ -747,25 +747,86 @@ function finishSession(sessionId){
   },500);
 }
 
-function closeWelcomeScreen(){
+const ACCOUNT_ONBOARDING_KEY='vitatrack_account_onboarding_v1';
+function accountOnboardingDone(){try{return localStorage.getItem(ACCOUNT_ONBOARDING_KEY)==='done';}catch(e){return false;}}
+function markAccountOnboardingDone(){try{localStorage.setItem(ACCOUNT_ONBOARDING_KEY,'done');}catch(e){}}
+function closeWelcomeScreen(options={}){
   const screen=document.getElementById('welcomeScreen');
   if(!screen)return;
   screen.classList.add('hidden');
   setTimeout(()=>screen.remove(),320);
-  if(needsSetup())setTimeout(openSetup,180);
+  if(options.openSetup)setTimeout(openSetup,180);
 }
 window.closeWelcomeScreen=closeWelcomeScreen;
-function renderWelcomeScreen(){
-  const screen=document.getElementById('welcomeScreen');
-  if(!screen)return;
-  const name=(DATA.profile&&DATA.profile.name||'').trim();
+let welcomeAuthMode='signup';
+function setWelcomeStatus(message){const el=document.getElementById('welcomeCloudStatus');if(el)el.textContent=message||'';}
+function openWelcomeAuth(mode='signup'){
+  welcomeAuthMode=mode==='login'?'login':'signup';
+  const panel=document.getElementById('welcomeAuthPanel'),actions=document.getElementById('welcomeActions');
+  if(actions)actions.style.display='none';if(panel)panel.classList.add('open');
+  setText('welcomeAuthTitle',welcomeAuthMode==='login'?'Se connecter':'Créer mon compte');
+  setText('welcomeAuthNote',welcomeAuthMode==='login'?'Retrouve ton profil et tes données VitaTrack.':'Crée ton identifiant avant de configurer ton profil.');
+  setText('welcomeAuthSubmit',welcomeAuthMode==='login'?'Se connecter':'Créer mon compte');
+  const acc=typeof getVitaCloudAccount==='function'?getVitaCloudAccount():null;
+  setWelcomeStatus(acc&&acc.configured===false?'Le cloud VitaTrack doit encore être activé sur le serveur.':'');
+  setTimeout(()=>document.getElementById('welcomeCloudEmail')?.focus(),50);
+}
+function closeWelcomeAuth(){const panel=document.getElementById('welcomeAuthPanel'),actions=document.getElementById('welcomeActions');if(panel)panel.classList.remove('open');if(actions)actions.style.display='grid';setWelcomeStatus('');}
+async function submitWelcomeAuth(){
+  const email=document.getElementById('welcomeCloudEmail')?.value.trim(),password=document.getElementById('welcomeCloudPassword')?.value||'';
+  if(!email||!password){setWelcomeStatus('Entre ton e-mail et ton mot de passe.');return;}
+  const submit=document.getElementById('welcomeAuthSubmit');if(submit){submit.disabled=true;submit.textContent='Connexion…';}
+  try{
+    if(welcomeAuthMode==='login'){
+      if(typeof cloudLoginWithCredentials!=='function')throw new Error('Le cloud VitaTrack n’est pas disponible.');
+      await cloudLoginWithCredentials(email,password);
+      markAccountOnboardingDone();
+      if(needsSetup())closeWelcomeScreen({openSetup:true});else closeWelcomeScreen();
+    }else{
+      if(typeof cloudSignupWithCredentials!=='function')throw new Error('Le cloud VitaTrack n’est pas disponible.');
+      const result=await cloudSignupWithCredentials(email,password);
+      if(result.authenticated){markAccountOnboardingDone();closeWelcomeScreen({openSetup:needsSetup()});}
+      else setWelcomeStatus(result.message||'Compte créé. Confirme ton e-mail puis choisis « J’ai déjà un compte ».');
+    }
+  }catch(e){setWelcomeStatus(e.message||'Impossible de continuer.');}
+  finally{if(submit&&document.body.contains(submit)){submit.disabled=false;submit.textContent=welcomeAuthMode==='login'?'Se connecter':'Créer mon compte';}}
+}
+function welcomeContinueLocal(){markAccountOnboardingDone();closeWelcomeScreen({openSetup:needsSetup()});}
+window.openWelcomeAuth=openWelcomeAuth;window.closeWelcomeAuth=closeWelcomeAuth;window.submitWelcomeAuth=submitWelcomeAuth;window.welcomeContinueLocal=welcomeContinueLocal;
+async function renderWelcomeScreen(){
+  const screen=document.getElementById('welcomeScreen');if(!screen)return;
   const title=document.getElementById('welcomeTitle');
-  if(name){
-    title.innerHTML=`Bonjour, <strong>${name}</strong>`;
-  }else{
-    title.innerHTML='Bienvenue';
+
+  // Laisser le cloud restaurer une éventuelle session avant de décider du parcours.
+  try{if(window.vitaCloudReady)await Promise.race([window.vitaCloudReady,new Promise(r=>setTimeout(r,1400))]);}catch(e){}
+  if(!document.getElementById('welcomeScreen'))return;
+
+  const account=typeof getVitaCloudAccount==='function'?getVitaCloudAccount():null;
+  const authenticated=!!account?.authenticated;
+
+  // Un compte déjà connecté ouvre normalement l'application.
+  if(authenticated){
+    markAccountOnboardingDone();
+    const name=(DATA.profile&&DATA.profile.name||'').trim();
+    if(title)title.innerHTML=name?`Bonjour, <strong>${name}</strong>`:'Bienvenue';
+    if(needsSetup())setTimeout(()=>closeWelcomeScreen({openSetup:true}),700);
+    else setTimeout(()=>closeWelcomeScreen(),900);
+    return;
   }
-  setTimeout(()=>closeWelcomeScreen(),3000);
+
+  // Tant que l'utilisateur n'a jamais choisi compte / connexion / mode local,
+  // présenter le choix même si un ancien profil local existe déjà.
+  if(!accountOnboardingDone()){
+    screen.classList.add('onboarding');
+    if(title)title.innerHTML='Bienvenue';
+    return;
+  }
+
+  // Mode local déjà choisi : splash habituel, puis setup uniquement si nécessaire.
+  const name=(DATA.profile&&DATA.profile.name||'').trim();
+  if(title)title.innerHTML=name?`Bonjour, <strong>${name}</strong>`:'Bienvenue';
+  if(needsSetup())setTimeout(()=>closeWelcomeScreen({openSetup:true}),700);
+  else setTimeout(()=>closeWelcomeScreen(),900);
 }
 window.addEventListener('load',()=>{applyTheme();renderAll();renderWelcomeScreen();});
 window.addEventListener('resize',()=>renderWeightChart());

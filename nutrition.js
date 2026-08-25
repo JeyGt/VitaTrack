@@ -4,6 +4,9 @@
  */
 let pickedFood=null;
 let currentGuideQuery='';
+let currentGuideCategory='all';
+let currentGuideCompare='';
+let currentGuideCompareDir='asc';
 let customDrinkSelection=null;
 
 /* ---------- Nutrition engine ---------- */
@@ -12,8 +15,633 @@ function bmr(){const p=DATA.profile;if(!p.age||!p.height||!p.weightCurrent)retur
 function tdee(){const base=bmr();return base?base*activityFactor():null;}
 function calorieTarget(){const base=tdee();if(!base)return null;const type=DATA.objective.type;let deficit=0;if(type==='fat_loss')deficit=Math.min(550,Math.max(250,base*0.18));if(type==='recomposition')deficit=Math.min(300,Math.max(100,base*0.08));if(type==='muscle_gain')deficit=-200;if(type==='maintain')deficit=0;if(type==='weight_target')deficit=DATA.objective.targetWeight && DATA.profile.weightCurrent>DATA.objective.targetWeight?Math.min(550,Math.max(250,base*0.18)):0;return Math.max(1400,Math.round(base-deficit));}
 function proteinTarget(){const w=DATA.profile.weightCurrent;if(!w)return null;let mult=1.6;if(['fat_loss','recomposition'].includes(DATA.objective.type))mult=1.8;if(DATA.objective.type==='muscle_gain')mult=1.7;return Math.round(w*mult);}
-function ensureTargets(){const k=calorieTarget(),p=proteinTarget();if(k&&!DATA.nutrition.manualCalories)DATA.nutrition.caloriesTarget=k;if(p&&!DATA.nutrition.manualProtein)DATA.nutrition.proteinTarget=p;return{k,p};}
+function ensureTargets(){const baseK=calorieTarget(),p=proteinTarget();const adjustment=Number(DATA.nutrition?.coachCalorieAdjustment)||0;const k=baseK?Math.max(1400,Math.round(baseK+adjustment)):null;if(k&&!DATA.nutrition.manualCalories)DATA.nutrition.caloriesTarget=k;if(p&&!DATA.nutrition.manualProtein)DATA.nutrition.proteinTarget=p;return{k,p,baseCalories:baseK,coachAdjustment:adjustment};}
 function currentTargets(){ensureTargets();return{calories:DATA.nutrition.caloriesTarget,protein:DATA.nutrition.proteinTarget};}
+
+
+/* ---------- Coach nutrition v1.1 — moteur d'observation ---------- */
+function coachEnsureState(){
+  const base={version:1,startedAt:null,calibrationRestartAt:null,baseline:{},lastWeek:{},phase:'waiting',lastObservationAt:null,goalHistory:[],contextAnswers:[],recommendationHistory:[],calorieAdjustments:[],lastGeneratedReport:null};
+  if(!DATA.nutritionCoach||typeof DATA.nutritionCoach!=='object')DATA.nutritionCoach={};
+  Object.entries(base).forEach(([k,v])=>{if(DATA.nutritionCoach[k]===undefined)DATA.nutritionCoach[k]=Array.isArray(v)?[]:(v&&typeof v==='object'?{}:v);});
+  ['goalHistory','contextAnswers','recommendationHistory','calorieAdjustments'].forEach(k=>{if(!Array.isArray(DATA.nutritionCoach[k]))DATA.nutritionCoach[k]=[];});
+  return DATA.nutritionCoach;
+}
+function coachDateObj(date){const d=new Date(`${date}T12:00:00`);return Number.isNaN(d.getTime())?new Date():d;}
+function coachDateDiff(from,to){return Math.floor((coachDateObj(to)-coachDateObj(from))/86400000);}
+function coachDates(endDate=TODAY,days=7){const end=coachDateObj(endDate);return Array.from({length:days},(_,i)=>{const d=new Date(end);d.setDate(end.getDate()-(days-1-i));return todayStr(d);});}
+function coachAvg(values){const a=values.filter(v=>Number.isFinite(v));return a.length?a.reduce((sum,v)=>sum+v,0)/a.length:null;}
+function coachTimeMinutes(v){const m=String(v||'').match(/^(\d{1,2}):(\d{2})/);if(!m)return null;return Number(m[1])*60+Number(m[2]);}
+function coachMealType(v){return v==='Repas tardif'?'Dîner':(v||'Repas');}
+function coachSnackOccasionCount(foods){const times=(foods||[]).filter(f=>coachMealType(f.mealType)==='En-cas').map(f=>coachTimeMinutes(f.time)).filter(v=>v!==null).sort((a,b)=>a-b);const untimed=(foods||[]).some(f=>coachMealType(f.mealType)==='En-cas'&&coachTimeMinutes(f.time)===null);if(!times.length)return untimed?1:0;let count=1,last=times[0];for(let i=1;i<times.length;i++){if(times[i]-last>45)count++;last=times[i];}return count;}
+function coachInferDrinkCategory(x){
+  if(x?.category)return x.category;
+  const n=normalizeFoodText(x?.name||'');
+  if(/biere|vin |champagne|porto|muscat|cidre|poire|whisky|rhum|vodka|gin|tequila|mojito|colada|spritz|kir|picon|monaco/.test(n))return'alcohol';
+  if(/jus|nectar/.test(n))return'juice';
+  if(/coca|pepsi|orangina|fanta|sprite|schweppes|ice tea/.test(n))return'soft';
+  if(/cafe|espresso|the |infusion|rooibos|chicoree|matcha/.test(n))return'hot';
+  return'other';
+}
+function coachReferenceTargets(date=TODAY){
+  const calories=Math.round(Number(DATA.nutrition?.calorieTargetHistory?.[date])||Number(currentTargets().calories)||0);
+  const currentWeight=Number(DATA.profile?.weightCurrent)||0,targetWeight=Number(DATA.objective?.targetWeight)||0;
+  let protein=Number(currentTargets().protein)||0;
+  if(['fat_loss','recomposition'].includes(DATA.objective?.type)&&targetWeight>0)protein=Math.round(targetWeight*1.8);
+  const fat=currentWeight>0?Math.max(0,Math.round(currentWeight*.66)):0;
+  const fiber=calories>0?Math.round(calories/1000*14):0;
+  const carbs=calories>0?Math.max(0,Math.round((calories-protein*4-fat*9)/4)):0;
+  return{calories,protein,fat,fiber,carbs};
+}
+function coachDailyObservation(date=TODAY){
+  const foods=Array.isArray(DATA.foodLog?.[date])?DATA.foodLog[date]:[];
+  const drinks=(Array.isArray(DATA.drinkLog)?DATA.drinkLog:[]).filter(x=>x.date===date);
+  const totals=dayTotals(date),targets=coachReferenceTargets(date),totalKcal=Number(totals.kcal)||0,foodKcal=foods.reduce((sum,f)=>sum+(Number(f.kcal)||0),0);
+  const mealNames=['Petit-déjeuner','Déjeuner','Dîner','En-cas'];
+  const meals={};mealNames.forEach(k=>meals[k]={entries:0,kcal:0,protein:0,fiber:0});
+  const mealTimes=[];
+  foods.forEach(f=>{const type=coachMealType(f.mealType),g=meals[type]||(meals[type]={entries:0,kcal:0,protein:0,fiber:0});g.entries++;g.kcal+=Number(f.kcal)||0;g.protein+=Number(f.protein)||0;g.fiber+=Number(f.fiber)||0;const tm=coachTimeMinutes(f.time);if(tm!==null)mealTimes.push(tm);});
+  const drinkStats={entries:drinks.length,kcal:0,hotKcal:0,sweetKcal:0,alcoholKcal:0,hotCount:0,sweetCount:0,alcoholCount:0};
+  drinks.forEach(x=>{const kcal=Number(x.kcal)||0,c=coachInferDrinkCategory(x);drinkStats.kcal+=kcal;if(c==='hot'){drinkStats.hotKcal+=kcal;drinkStats.hotCount++;}if(c==='soft'||c==='juice'){drinkStats.sweetKcal+=kcal;drinkStats.sweetCount++;}if(['alcohol','beer','wine','cider','spirit','cocktail'].includes(c)){drinkStats.alcoholKcal+=kcal;drinkStats.alcoholCount++;}});
+  const sessions=(DATA.sport?.sessionHistory||[]).filter(x=>String(x.completedDate||x.date||'').slice(0,10)===date);
+  const sportMinutes=sessions.reduce((sum,x)=>sum+Number(x.durationMinutes||x.targetDuration||((Number(x.durationSeconds)||0)/60)||0),0);
+  const sportKcal=sessions.reduce((sum,x)=>sum+(typeof sportKcalForSession==='function'?Number(sportKcalForSession(x))||0:0),0);
+  const water=waterTotal(date),steps=stepsForDate(date),weights=(DATA.weights||[]).filter(x=>String(x.date||'').slice(0,10)===date).map(x=>Number(x.weight)).filter(v=>v>0);
+  const mealTypes=mealNames.filter(k=>meals[k]?.entries>0),nutritionEntries=foods.length+drinks.length;
+  return{date,hasNutritionData:nutritionEntries>0,nutritionEntries,confidence:!nutritionEntries?'none':(foods.length>=2||mealTypes.length>=2?'medium':'low'),totals,targets,
+    caloriePct:targets.calories?totalKcal/targets.calories:null,proteinPct:targets.protein?Number(totals.protein||0)/targets.protein:null,fiberPct:targets.fiber?Number(totals.fiber||0)/targets.fiber:null,
+    meals,mealTypes,mealShares:Object.fromEntries(mealNames.map(k=>[k,foodKcal?Number(meals[k]?.kcal||0)/foodKcal:0])),snackCount:coachSnackOccasionCount(foods),snackKcal:Number(meals['En-cas']?.kcal||0),
+    firstMealMinute:mealTimes.length?Math.min(...mealTimes):null,lastMealMinute:mealTimes.length?Math.max(...mealTimes):null,drinks:drinkStats,drinkCalorieShare:totalKcal?drinkStats.kcal/totalKcal:0,
+    waterMl:water,steps,sport:{sessions:sessions.length,minutes:Math.round(sportMinutes),kcal:Math.round(sportKcal)},weights};
+}
+function coachEarliestDataDate(){const dates=[];Object.entries(DATA.foodLog||{}).forEach(([d,v])=>{if(Array.isArray(v)&&v.length)dates.push(d);});(Array.isArray(DATA.drinkLog)?DATA.drinkLog:[]).forEach(x=>{if(x.date)dates.push(String(x.date).slice(0,10));});return dates.filter(Boolean).sort()[0]||null;}
+function coachBuildBaseline(days=14){
+  const observations=coachDates(TODAY,days).map(coachDailyObservation),nutritionDays=observations.filter(x=>x.hasNutritionData),usable=nutritionDays.filter(x=>x.confidence==='medium'),sample=usable.length>=3?usable:nutritionDays;
+  const mealNames=['Petit-déjeuner','Déjeuner','Dîner','En-cas'];
+  const mealShares=Object.fromEntries(mealNames.map(k=>[k,coachAvg(sample.map(x=>x.mealShares[k]))||0]));
+  const drinkKcal=coachAvg(sample.map(x=>x.drinks.kcal))||0,totalKcal=coachAvg(sample.map(x=>Number(x.totals.kcal)||0))||0;
+  const weightPoints=observations.flatMap(x=>x.weights.map(w=>({date:x.date,weight:w}))).sort((a,b)=>a.date.localeCompare(b.date));
+  return{windowDays:days,daysWithNutrition:nutritionDays.length,usableDays:usable.length,confidence:sample.length>=5?'good':sample.length>=3?'building':'low',
+    avgCalories:coachAvg(sample.map(x=>Number(x.totals.kcal)||0)),avgProtein:coachAvg(sample.map(x=>Number(x.totals.protein)||0)),avgFiber:coachAvg(sample.map(x=>Number(x.totals.fiber)||0)),avgCarbs:coachAvg(sample.map(x=>Number(x.totals.carbs)||0)),avgFat:coachAvg(sample.map(x=>Number(x.totals.fat)||0)),
+    mealShares,avgSnackCount:coachAvg(sample.map(x=>x.snackCount)),avgSnackKcal:coachAvg(sample.map(x=>x.snackKcal)),avgDrinkKcal:drinkKcal,avgDrinkShare:totalKcal?drinkKcal/totalKcal:0,avgSweetDrinkKcal:coachAvg(sample.map(x=>x.drinks.sweetKcal))||0,avgAlcoholKcal:coachAvg(sample.map(x=>x.drinks.alcoholKcal))||0,
+    avgWaterMl:coachAvg(observations.map(x=>x.waterMl).filter(v=>v>0)),avgSteps:coachAvg(observations.map(x=>x.steps).filter(v=>v>0)),sportDays:observations.filter(x=>x.sport.sessions>0).length,sportSessions:observations.reduce((a,x)=>a+x.sport.sessions,0),
+    avgFirstMealMinute:coachAvg(sample.map(x=>x.firstMealMinute).filter(v=>v!==null)),avgLastMealMinute:coachAvg(sample.map(x=>x.lastMealMinute).filter(v=>v!==null)),weightPoints:weightPoints.length,weightDelta:weightPoints.length>=2?weightPoints[weightPoints.length-1].weight-weightPoints[0].weight:null};
+}
+function coachRollingWeek(){const observations=coachDates(TODAY,7).map(coachDailyObservation),nutrition=observations.filter(x=>x.hasNutritionData);return{start:observations[0]?.date||TODAY,end:TODAY,daysWithNutrition:nutrition.length,avgCalories:coachAvg(nutrition.map(x=>Number(x.totals.kcal)||0)),avgProtein:coachAvg(nutrition.map(x=>Number(x.totals.protein)||0)),avgFiber:coachAvg(nutrition.map(x=>Number(x.totals.fiber)||0)),avgSnackCount:coachAvg(nutrition.map(x=>x.snackCount)),drinkKcal:nutrition.reduce((a,x)=>a+x.drinks.kcal,0),sweetDrinkKcal:nutrition.reduce((a,x)=>a+x.drinks.sweetKcal,0),alcoholKcal:nutrition.reduce((a,x)=>a+x.drinks.alcoholKcal,0),sportDays:observations.filter(x=>x.sport.sessions>0).length,sportSessions:observations.reduce((a,x)=>a+x.sport.sessions,0),avgSteps:coachAvg(observations.map(x=>x.steps).filter(v=>v>0))};}
+function coachObservationPhase(){const st=coachEnsureState(),start=st.calibrationRestartAt||st.startedAt;if(!start)return'waiting';const day=Math.max(1,coachDateDiff(start,TODAY)+1),recal=!!st.calibrationRestartAt;if(day<=7)return recal?'recalibration1':'week1';if(day<=14)return recal?'recalibration2':'week2';return'active';}
+function coachObservationStatus(){const st=coachEnsureState(),phase=coachObservationPhase(),b=st.baseline||{};if(phase==='waiting')return{phase,title:'Coach en attente de données',text:'Enregistre normalement tes repas et boissons. VitaTrack commencera par apprendre ton rythme sans le juger.'};if(phase==='week1')return{phase,title:'Observation en cours',text:`Première semaine : je construis ta référence personnelle. ${b.daysWithNutrition||0} jour${b.daysWithNutrition===1?'':'s'} de nutrition observé${b.daysWithNutrition===1?'':'s'}.`};if(phase==='week2')return{phase,title:'Calibration de ton rythme',text:'Je confirme maintenant ta répartition habituelle des repas, tes collations, tes boissons et ton activité. Aucun ajustement calorique n’est appliqué.'};if(phase==='recalibration1'||phase==='recalibration2')return{phase,title:'Nouvel objectif : recalibration',text:'Ton objectif a changé. Je conserve ton historique comportemental, mais j’observe deux nouvelles semaines avant d’interpréter la tendance du poids.'};return{phase,title:'Référence personnelle construite',text:`Le moteur d’observation dispose maintenant d’une base exploitable (${b.daysWithNutrition||0} jours sur les 14 derniers). Les conseils détaillés seront activés dans l’étape d’analyse.`};}
+function coachRecordGoalChange(from,to){const st=coachEnsureState();st.goalHistory.push({date:TODAY,from,to});st.calibrationRestartAt=TODAY;st.phase='recalibration1';DATA.nutrition.coachCalorieAdjustment=0;st.lastGeneratedReport=null;}
+function coachUpdateObservationState(){const st=coachEnsureState(),earliest=coachEarliestDataDate();if(!st.startedAt&&earliest)st.startedAt=earliest;if(st.calibrationRestartAt&&coachDateDiff(st.calibrationRestartAt,TODAY)>=14)st.calibrationRestartAt=null;st.baseline=coachBuildBaseline(14);st.lastWeek=coachRollingWeek();st.phase=coachObservationPhase();st.lastObservationAt=TODAY;return st;}
+
+/* ---------- Coach nutrition v1.1 — analyse étape 2A : énergie + répartition ----------
+ * IMPORTANT : ce bloc est volontairement pur et n'est jamais exécuté automatiquement
+ * au démarrage ni dans saveState(). Le futur bilan hebdomadaire l'appellera à la demande.
+ */
+function coachConsecutiveCount(items,predicate){
+  let best=0,current=0;
+  (items||[]).forEach(x=>{if(predicate(x)){current++;best=Math.max(best,current);}else current=0;});
+  return best;
+}
+function coachMealAnalysisSnapshot(endDate=TODAY){
+  const observations=coachDates(endDate,7).map(coachDailyObservation);
+  const nutritionDays=observations.filter(x=>x.hasNutritionData);
+  const usableDays=nutritionDays.filter(x=>x.confidence==='medium');
+  const sample=usableDays.length>=3?usableDays:nutritionDays;
+  const phase=coachObservationPhase();
+  const baseline=coachEnsureState().baseline||{};
+  const signals=[],patterns=[];
+  const addSignal=(id,priority,title,data={})=>signals.push({id,priority,title,...data});
+  const addPattern=(id,title,data={})=>patterns.push({id,title,...data});
+  const ratio=x=>Number.isFinite(x.caloriePct)?x.caloriePct:null;
+  const lowDays=sample.filter(x=>ratio(x)!==null&&ratio(x)<.70);
+  const outside20=sample.filter(x=>ratio(x)!==null&&(ratio(x)<.80||ratio(x)>1.20));
+  const over140=sample.filter(x=>ratio(x)!==null&&ratio(x)>1.40);
+  const aboveTarget=sample.filter(x=>ratio(x)!==null&&ratio(x)>1.00);
+  const consecutiveLow=coachConsecutiveCount(sample,x=>ratio(x)!==null&&ratio(x)<.70);
+  if(consecutiveLow>=2)addSignal('very_low_intake',1,'Apports très bas répétés',{days:lowDays.map(x=>x.date),consecutiveDays:consecutiveLow});
+  if(outside20.length>=3)addSignal('calorie_target_variation',2,'Écarts caloriques répétés',{days:outside20.map(x=>x.date),count:outside20.length});
+  if(over140.length>=3)addSignal('repeated_high_intake',2,'Dépassements importants répétés',{days:over140.map(x=>x.date),count:over140.length});
+  let largeJumps=0;
+  for(let i=1;i<sample.length;i++){
+    const a=Number(sample[i-1].totals?.kcal)||0,b=Number(sample[i].totals?.kcal)||0;
+    if(a>0&&b>0&&Math.abs(b-a)>600)largeJumps++;
+  }
+  if(largeJumps>=3)addSignal('high_day_to_day_variability',2,'Forte alternance calorique',{occurrences:largeJumps});
+
+  const mealNames=['Petit-déjeuner','Déjeuner','Dîner','En-cas'];
+  const mealStats=Object.fromEntries(mealNames.map(name=>[name,{name,largeDays:[],daysPresent:0,avgShareOfTarget:null,shares:[]}]))
+  sample.forEach(day=>{
+    mealNames.forEach(name=>{
+      const kcal=Number(day.meals?.[name]?.kcal)||0,target=Number(day.targets?.calories)||0;
+      if(kcal>0)mealStats[name].daysPresent++;
+      if(target>0&&kcal>0){
+        const share=kcal/target;mealStats[name].shares.push(share);
+        if(share>=.45)mealStats[name].largeDays.push({date:day.date,share,dayPct:ratio(day)});
+      }
+    });
+  });
+  mealNames.forEach(name=>{mealStats[name].avgShareOfTarget=coachAvg(mealStats[name].shares);});
+  const baselineDinner=Number(baseline.mealShares?.['Dîner'])||0;
+  const baselineLunch=Number(baseline.mealShares?.['Déjeuner'])||0;
+  if(baselineDinner>=.40)addPattern('evening_weighted_rhythm','Rythme naturellement plus chargé le soir',{baselineDinnerShare:baselineDinner,baselineLunchShare:baselineLunch});
+  if(baselineDinner>=.40&&baselineLunch>0&&baselineLunch<=.25)addPattern('light_lunch_evening_main','Déjeuner léger / dîner principal',{baselineDinnerShare:baselineDinner,baselineLunchShare:baselineLunch});
+
+  mealNames.forEach(name=>{
+    const stat=mealStats[name];
+    if(stat.largeDays.length<3)return;
+    const overageDays=stat.largeDays.filter(x=>Number(x.dayPct)>1).length;
+    const baselineShare=Number(baseline.mealShares?.[name])||0;
+    const isNaturalPattern=baselineShare>=.40 && overageDays<2;
+    if(isNaturalPattern){
+      addPattern(`large_${name}_baseline`,`${name} habituellement important`,{meal:name,count:stat.largeDays.length,baselineShare,overageDays});
+      return;
+    }
+    if(overageDays>=2)addSignal('large_meal_with_overage',2,'Repas très important associé à des dépassements',{meal:name,count:stat.largeDays.length,overageDays,days:stat.largeDays.map(x=>x.date)});
+    else addPattern(`large_${name}_without_overage`,`${name} important sans dépassement récurrent`,{meal:name,count:stat.largeDays.length,overageDays});
+  });
+
+  const avgCalories=coachAvg(sample.map(x=>Number(x.totals?.kcal)||0));
+  const avgTarget=coachAvg(sample.map(x=>Number(x.targets?.calories)||0).filter(v=>v>0));
+  const avgRatio=avgCalories!==null&&avgTarget?avgCalories/avgTarget:null;
+  signals.sort((a,b)=>a.priority-b.priority);
+  return{
+    version:'2A',endDate,phase,
+    readyForGuidance:phase==='active'&&usableDays.length>=3,
+    dataQuality:{nutritionDays:nutritionDays.length,usableDays:usableDays.length,sufficient:nutritionDays.length>=3},
+    energy:{avgCalories,avgTarget,avgRatio,daysAboveTarget:aboveTarget.length,daysBelow70:lowDays.length,daysOutside20:outside20.length},
+    meals:mealStats,patterns,signals
+  };
+}
+/* ---------- Coach nutrition v1.1 — analyse étape 2B : boissons ----------
+ * Module pur : aucune exécution automatique au démarrage.
+ * Il complète 2A et sera appelé à la demande par le futur bilan hebdomadaire.
+ */
+function coachDrinkIsAlcoholic(x){
+  const cat=coachInferDrinkCategory(x),name=normalizeFoodText(x?.name||'');
+  if(/sans alcool|0[,.]?0\s*%/.test(name))return false;
+  return ['alcohol','beer','wine','cider','spirit','cocktail'].includes(cat);
+}
+function coachDrinkIsSweetCaloric(x){
+  const cat=coachInferDrinkCategory(x),name=normalizeFoodText(x?.name||''),kcal=Number(x?.kcal)||0;
+  if(/zero|sans sucre|light/.test(name))return false;
+  if(cat==='juice')return kcal>=15;
+  return cat==='soft'&&kcal>=15;
+}
+function coachDrinkAnalysisSnapshot(endDate=TODAY){
+  const dates=coachDates(endDate,7),observations=dates.map(coachDailyObservation);
+  const nutritionDays=observations.filter(x=>x.hasNutritionData),usableDays=nutritionDays.filter(x=>x.confidence==='medium');
+  const sample=usableDays.length>=3?usableDays:nutritionDays,signals=[],patterns=[];
+  const addSignal=(id,priority,title,data={})=>signals.push({id,priority,title,...data});
+  const addPattern=(id,title,data={})=>patterns.push({id,title,...data});
+  const perDay=sample.map(day=>{
+    const drinks=(Array.isArray(DATA.drinkLog)?DATA.drinkLog:[]).filter(x=>x.date===day.date);
+    const totalKcal=Number(day.totals?.kcal)||0;
+    let drinkKcal=0,sweetKcal=0,alcoholKcal=0,hotKcal=0,sweetCount=0,alcoholCount=0,hotCount=0;
+    drinks.forEach(x=>{
+      const kcal=Number(x.kcal)||0,cat=coachInferDrinkCategory(x);
+      drinkKcal+=kcal;
+      if(coachDrinkIsSweetCaloric(x)){sweetKcal+=kcal;sweetCount++;}
+      if(coachDrinkIsAlcoholic(x)){alcoholKcal+=kcal;alcoholCount++;}
+      if(cat==='hot'){hotKcal+=kcal;hotCount++;}
+    });
+    return{date:day.date,totalKcal,drinkKcal,share:totalKcal>0?drinkKcal/totalKcal:0,sweetKcal,alcoholKcal,hotKcal,sweetCount,alcoholCount,hotCount,drinkCount:drinks.length};
+  });
+  const totalEnergy=perDay.reduce((s,x)=>s+x.totalKcal,0),totalDrink=perDay.reduce((s,x)=>s+x.drinkKcal,0);
+  const totalSweet=perDay.reduce((s,x)=>s+x.sweetKcal,0),totalAlcohol=perDay.reduce((s,x)=>s+x.alcoholKcal,0),totalHot=perDay.reduce((s,x)=>s+x.hotKcal,0);
+  const weeklyShare=totalEnergy>0?totalDrink/totalEnergy:0;
+  const highLiquidDays=perDay.filter(x=>x.share>.15&&x.drinkKcal>=80);
+  const sweetDays=perDay.filter(x=>x.sweetKcal>=20),alcoholDays=perDay.filter(x=>x.alcoholKcal>0),hotDays=perDay.filter(x=>x.hotCount>0);
+  if(sample.length>=3&&(weeklyShare>.15||highLiquidDays.length>=3))addSignal('liquid_calorie_share',3,'Part importante des calories venant des boissons',{weeklyShare,totalDrinkKcal:Math.round(totalDrink),days:highLiquidDays.map(x=>x.date),count:highLiquidDays.length});
+  if(sweetDays.length>=4)addSignal('frequent_sweet_drinks',3,'Boissons sucrées fréquentes',{days:sweetDays.map(x=>x.date),count:sweetDays.length,totalKcal:Math.round(totalSweet)});
+  if(totalAlcohol>300)addSignal('notable_alcohol_calories',3,'Calories d’alcool notables sur la semaine',{days:alcoholDays.map(x=>x.date),count:alcoholDays.length,totalKcal:Math.round(totalAlcohol)});
+  if(hotDays.length>=3)addPattern('regular_hot_drinks','Boissons chaudes régulières',{days:hotDays.length,totalKcal:Math.round(totalHot),avgKcalPerActiveDay:hotDays.length?Math.round(totalHot/hotDays.length):0});
+  if(totalDrink>0&&weeklyShare<=.05)addPattern('low_liquid_calorie_share','Faible contribution calorique des boissons',{weeklyShare,totalDrinkKcal:Math.round(totalDrink)});
+  signals.sort((a,b)=>a.priority-b.priority);
+  return{
+    version:'2B',endDate,phase:coachObservationPhase(),
+    readyForGuidance:coachObservationPhase()==='active'&&usableDays.length>=3,
+    dataQuality:{nutritionDays:nutritionDays.length,usableDays:usableDays.length,sufficient:nutritionDays.length>=3},
+    drinks:{weeklyShare,totalDrinkKcal:Math.round(totalDrink),sweetKcal:Math.round(totalSweet),alcoholKcal:Math.round(totalAlcohol),hotKcal:Math.round(totalHot),highLiquidDays:highLiquidDays.length,sweetDays:sweetDays.length,alcoholDays:alcoholDays.length,hotDays:hotDays.length,perDay},
+    patterns,signals
+  };
+}
+
+
+/* ---------- Coach nutrition v1.1 — analyse étape 2C : collations + repas précédent ----------
+ * Module pur : aucune exécution automatique au démarrage.
+ * Une collation n'est jamais considérée comme un problème par défaut : le moteur
+ * recherche d'abord le repas précédent, l'horaire et le rythme personnel.
+ */
+function coachSnackSlot(minute){
+  if(minute===null||!Number.isFinite(minute))return'unknown';
+  if(minute<11*60)return'morning';
+  if(minute<17*60)return'afternoon';
+  if(minute<21*60)return'evening';
+  return'night';
+}
+function coachSnackOccasionsForDate(date){
+  const foods=(DATA.foodLog?.[date]||[]).slice().sort((a,b)=>(coachTimeMinutes(a.time)??9999)-(coachTimeMinutes(b.time)??9999));
+  const snacks=foods.filter(f=>coachMealType(f.mealType)==='En-cas');
+  const timed=snacks.filter(f=>coachTimeMinutes(f.time)!==null);
+  const occasions=[];
+  timed.forEach(f=>{
+    const minute=coachTimeMinutes(f.time),last=occasions[occasions.length-1];
+    if(!last||minute-last.lastMinute>45){occasions.push({date,startMinute:minute,lastMinute:minute,items:[f]});}
+    else{last.items.push(f);last.lastMinute=minute;}
+  });
+  if(snacks.some(f=>coachTimeMinutes(f.time)===null))occasions.push({date,startMinute:null,lastMinute:null,items:snacks.filter(f=>coachTimeMinutes(f.time)===null)});
+  return occasions.map(o=>{
+    const kcal=o.items.reduce((sum,f)=>sum+(Number(f.kcal)||0),0);
+    const protein=o.items.reduce((sum,f)=>sum+(Number(f.protein)||0),0);
+    const fiber=o.items.reduce((sum,f)=>sum+(Number(f.fiber)||0),0);
+    let previousMeal=null;
+    if(o.startMinute!==null){
+      const candidates=foods.filter(f=>coachMealType(f.mealType)!=='En-cas'&&coachTimeMinutes(f.time)!==null&&coachTimeMinutes(f.time)<o.startMinute);
+      if(candidates.length){
+        const lastMinute=Math.max(...candidates.map(f=>coachTimeMinutes(f.time)));
+        const group=candidates.filter(f=>coachTimeMinutes(f.time)===lastMinute);
+        const mealType=coachMealType(group[0]?.mealType);
+        previousMeal={
+          type:mealType,timeMinute:lastMinute,gapMinutes:o.startMinute-lastMinute,
+          kcal:group.reduce((sum,f)=>sum+(Number(f.kcal)||0),0),
+          protein:group.reduce((sum,f)=>sum+(Number(f.protein)||0),0),
+          fiber:group.reduce((sum,f)=>sum+(Number(f.fiber)||0),0)
+        };
+      }
+    }
+    return{date:o.date,startMinute:o.startMinute,slot:coachSnackSlot(o.startMinute),kcal,protein,fiber,itemCount:o.items.length,previousMeal};
+  });
+}
+function coachSnackAnalysisSnapshot(endDate=TODAY){
+  const dates=coachDates(endDate,7),observations=dates.map(coachDailyObservation);
+  const nutritionDays=observations.filter(x=>x.hasNutritionData),usableDays=nutritionDays.filter(x=>x.confidence==='medium');
+  const sampleDates=(usableDays.length>=3?usableDays:nutritionDays).map(x=>x.date),signals=[],patterns=[];
+  const addSignal=(id,priority,title,data={})=>signals.push({id,priority,title,...data});
+  const addPattern=(id,title,data={})=>patterns.push({id,title,...data});
+  const occasions=sampleDates.flatMap(coachSnackOccasionsForDate);
+  const byDate=Object.fromEntries(sampleDates.map(d=>[d,occasions.filter(x=>x.date===d)]));
+  const avgSnackCount=sampleDates.length?coachAvg(sampleDates.map(d=>byDate[d].length))||0:0;
+  const totalSnackKcal=occasions.reduce((s,x)=>s+x.kcal,0);
+  const baseline=coachEnsureState().baseline||{};
+  const baselineCount=Number(baseline.avgSnackCount);
+  if(Number.isFinite(baselineCount)&&baselineCount>0&&avgSnackCount>=Math.max(1,baselineCount*1.30)&&sampleDates.length>=3){
+    addSignal('snack_increase_vs_baseline',3,'Collations plus fréquentes que d’habitude',{avgSnackCount,baselineAvgSnackCount:baselineCount,changeRatio:avgSnackCount/baselineCount});
+  }
+
+  const slotCounts={morning:0,afternoon:0,evening:0,night:0,unknown:0};
+  occasions.forEach(x=>slotCounts[x.slot]=(slotCounts[x.slot]||0)+1);
+  Object.entries(slotCounts).forEach(([slot,count])=>{if(slot!=='unknown'&&count>=3)addPattern(`snack_slot_${slot}`,'Collations répétées au même moment',{slot,count});});
+
+  const linked=occasions.filter(x=>x.previousMeal);
+  const afterLightMeal=linked.filter(x=>{
+    const p=x.previousMeal;
+    const lowKcal=p.kcal>0&&p.kcal<500,lowProtein=p.protein<20,lowFiber=p.fiber<5;
+    return (lowKcal&&(lowProtein||lowFiber)) || (lowProtein&&lowFiber);
+  });
+  const byPrevType={};
+  afterLightMeal.forEach(x=>{const t=x.previousMeal.type||'Repas';(byPrevType[t]||(byPrevType[t]=[])).push(x);});
+  Object.entries(byPrevType).forEach(([meal,items])=>{
+    if(items.length>=3){
+      addSignal('snacks_after_light_meal',4,'Collations souvent précédées d’un repas peu rassasiant',{meal,count:items.length,days:[...new Set(items.map(x=>x.date))],avgPreviousKcal:coachAvg(items.map(x=>x.previousMeal.kcal)),avgPreviousProtein:coachAvg(items.map(x=>x.previousMeal.protein)),avgPreviousFiber:coachAvg(items.map(x=>x.previousMeal.fiber)),avgGapMinutes:coachAvg(items.map(x=>x.previousMeal.gapMinutes))});
+    }
+  });
+
+  const eveningOrNight=occasions.filter(x=>['evening','night'].includes(x.slot));
+  const lateByDate={};
+  eveningOrNight.forEach(x=>{(lateByDate[x.date]||(lateByDate[x.date]=[])).push(x);});
+  const heavyLateDays=Object.entries(lateByDate).map(([date,items])=>({date,kcal:items.reduce((s,x)=>s+x.kcal,0),items})).filter(x=>x.kcal>200);
+  if(heavyLateDays.length>=4){
+    const withDinner=heavyLateDays.filter(x=>x.items.some(i=>i.previousMeal?.type==='Dîner'));
+    addSignal('repeated_evening_snacks',4,'Collations du soir répétées',{count:heavyLateDays.length,days:heavyLateDays.map(x=>x.date),totalKcal:Math.round(heavyLateDays.reduce((s,x)=>s+x.kcal,0)),afterDinnerDays:withDinner.length});
+  }
+
+  const longGapSnacks=linked.filter(x=>Number(x.previousMeal.gapMinutes)>360);
+  if(longGapSnacks.length>=3)addPattern('snacks_after_long_gap','Collations après une longue période sans manger',{count:longGapSnacks.length,days:[...new Set(longGapSnacks.map(x=>x.date))],avgGapMinutes:coachAvg(longGapSnacks.map(x=>x.previousMeal.gapMinutes))});
+
+  signals.sort((a,b)=>a.priority-b.priority);
+  return{
+    version:'2C',endDate,phase:coachObservationPhase(),
+    readyForGuidance:coachObservationPhase()==='active'&&usableDays.length>=3,
+    dataQuality:{nutritionDays:nutritionDays.length,usableDays:usableDays.length,sufficient:nutritionDays.length>=3},
+    snacks:{avgCountPerLoggedDay:avgSnackCount,totalKcal:Math.round(totalSnackKcal),occasionCount:occasions.length,slotCounts,heavyLateDays:heavyLateDays.length,linkedToPreviousMeal:linked.length,afterLightMealCount:afterLightMeal.length,occasions},
+    patterns,signals
+  };
+}
+
+
+/* ---------- Coach nutrition v1.1 — analyse étape 2D : protéines, fibres + satiété ----------
+ * Module pur : aucune exécution automatique au démarrage.
+ * Le potentiel rassasiant est un indicateur interne uniquement. Il sert à comprendre
+ * les repas répétés, jamais à attribuer une note visible ou à juger un repas isolé.
+ */
+function coachMealSatietyForDate(date){
+  const foods=Array.isArray(DATA.foodLog?.[date])?DATA.foodLog[date]:[];
+  const targets=coachReferenceTargets(date);
+  const mealNames=['Petit-déjeuner','Déjeuner','Dîner','En-cas'];
+  return mealNames.map(type=>{
+    const items=foods.filter(f=>coachMealType(f.mealType)===type);
+    if(!items.length)return null;
+    const kcal=items.reduce((s,f)=>s+(Number(f.kcal)||0),0);
+    const protein=items.reduce((s,f)=>s+(Number(f.protein)||0),0);
+    const fiber=items.reduce((s,f)=>s+(Number(f.fiber)||0),0);
+    const carbs=items.reduce((s,f)=>s+(Number(f.carbs??f.carb)||0),0);
+    const fat=items.reduce((s,f)=>s+(Number(f.fat)||0),0);
+    const sugar=items.reduce((s,f)=>s+(Number(f.sugar)||0),0);
+    const qty=items.reduce((s,f)=>{const q=Number(f.qty);return s+(Number.isFinite(q)&&q>0?q:0);},0);
+    const density=qty>0?kcal/qty:null;
+    let satietyScore=0;
+    if(protein>=25)satietyScore+=2;else if(protein>=15)satietyScore+=1;
+    if(fiber>=5)satietyScore+=2;else if(fiber>=3)satietyScore+=1;
+    if(density!==null){if(density<=1.5)satietyScore+=1;else if(density>=2.5)satietyScore-=1;}
+    if(qty>=300&&density!==null&&density<=2)satietyScore+=1;
+    if(sugar>=30&&protein<15&&fiber<3)satietyScore-=1;
+    const shareOfTarget=targets.calories>0?kcal/targets.calories:null;
+    const denseItems=items.map(f=>{
+      const q=Number(f.qty)||0,k=Number(f.kcal)||0;
+      return{name:f.name||'Aliment',kcal:k,qty:q,density:q>0?k/q:null};
+    }).filter(x=>x.kcal>0).sort((a,b)=>b.kcal-a.kcal).slice(0,3);
+    return{date,type,kcal,protein,fiber,carbs,fat,sugar,qty,density,shareOfTarget,satietyScore,
+      lowProtein:protein<20,lowFiber:fiber<5,highDensity:density!==null&&density>=2.5,
+      potentiallyLowSatiety:satietyScore<=1&&(kcal>=500||(shareOfTarget!==null&&shareOfTarget>=.35)),denseItems};
+  }).filter(Boolean);
+}
+function coachMacroSatietyAnalysisSnapshot(endDate=TODAY){
+  const dates=coachDates(endDate,7),observations=dates.map(coachDailyObservation);
+  const nutritionDays=observations.filter(x=>x.hasNutritionData),usableDays=nutritionDays.filter(x=>x.confidence==='medium');
+  const sample=usableDays.length>=3?usableDays:nutritionDays,signals=[],patterns=[];
+  const addSignal=(id,priority,title,data={})=>signals.push({id,priority,title,...data});
+  const addPattern=(id,title,data={})=>patterns.push({id,title,...data});
+
+  const proteinDays=sample.map(day=>{
+    const value=Number(day.totals?.protein)||0,target=Number(day.targets?.protein)||0;
+    return{date:day.date,value,target,ratio:target>0?value/target:null};
+  });
+  const lowProteinDays=proteinDays.filter(x=>x.ratio!==null&&x.ratio<.70);
+  if(lowProteinDays.length>=4)addSignal('low_protein_repeated',5,'Protéines souvent sous la cible personnalisée',{
+    count:lowProteinDays.length,days:lowProteinDays.map(x=>x.date),avgRatio:coachAvg(lowProteinDays.map(x=>x.ratio)),
+    avgProtein:coachAvg(proteinDays.map(x=>x.value)),avgTarget:coachAvg(proteinDays.map(x=>x.target).filter(v=>v>0))
+  });
+
+  const fiberDays=sample.map(day=>{
+    const kcal=Number(day.totals?.kcal)||0,fiber=Number(day.totals?.fiber)||0,target=Number(day.targets?.fiber)||0;
+    const per1000=kcal>0?fiber/kcal*1000:null;
+    return{date:day.date,fiber,kcal,target,per1000,ratio:target>0?fiber/target:null};
+  });
+  const lowFiberDays=fiberDays.filter(x=>x.per1000!==null&&x.per1000<10);
+  if(lowFiberDays.length>=4)addSignal('low_fiber_repeated',5,'Fibres souvent basses',{
+    count:lowFiberDays.length,days:lowFiberDays.map(x=>x.date),avgPer1000:coachAvg(lowFiberDays.map(x=>x.per1000)),
+    avgFiber:coachAvg(fiberDays.map(x=>x.fiber)),avgTarget:coachAvg(fiberDays.map(x=>x.target).filter(v=>v>0))
+  });
+
+  const meals=sample.flatMap(day=>coachMealSatietyForDate(day.date));
+  const lowSatietyMeals=meals.filter(x=>x.potentiallyLowSatiety);
+  const largeLowSatiety=lowSatietyMeals.filter(x=>x.shareOfTarget!==null&&x.shareOfTarget>=.45);
+  const byType={};lowSatietyMeals.forEach(x=>(byType[x.type]||(byType[x.type]=[])).push(x));
+  Object.entries(byType).forEach(([type,items])=>{
+    if(items.length>=3)addSignal('repeated_low_satiety_meal',4,'Repas répétés potentiellement peu rassasiants',{
+      meal:type,count:items.length,days:[...new Set(items.map(x=>x.date))],avgKcal:coachAvg(items.map(x=>x.kcal)),
+      avgProtein:coachAvg(items.map(x=>x.protein)),avgFiber:coachAvg(items.map(x=>x.fiber)),avgDensity:coachAvg(items.map(x=>x.density).filter(v=>v!==null)),
+      examples:items.slice(0,3).map(x=>({date:x.date,kcal:Math.round(x.kcal),protein:Math.round(x.protein),fiber:Math.round(x.fiber*10)/10,topItems:x.denseItems}))
+    });
+  });
+  if(largeLowSatiety.length>=3)addSignal('large_low_satiety_meals',4,'Gros repas répétés avec faible potentiel rassasiant',{
+    count:largeLowSatiety.length,days:[...new Set(largeLowSatiety.map(x=>x.date))],meals:largeLowSatiety.map(x=>x.type),
+    avgShareOfTarget:coachAvg(largeLowSatiety.map(x=>x.shareOfTarget)),avgDensity:coachAvg(largeLowSatiety.map(x=>x.density).filter(v=>v!==null))
+  });
+
+  const highProteinMeals=meals.filter(x=>x.protein>=25),fiberRichMeals=meals.filter(x=>x.fiber>=5),lowDensityMeals=meals.filter(x=>x.density!==null&&x.density<=1.5);
+  if(highProteinMeals.length>=4)addPattern('regular_protein_rich_meals','Repas régulièrement riches en protéines',{count:highProteinMeals.length});
+  if(fiberRichMeals.length>=4)addPattern('regular_fiber_rich_meals','Repas régulièrement riches en fibres',{count:fiberRichMeals.length});
+  if(lowDensityMeals.length>=4)addPattern('regular_low_density_meals','Repas régulièrement peu denses en calories',{count:lowDensityMeals.length});
+
+  signals.sort((a,b)=>a.priority-b.priority);
+  return{
+    version:'2D',endDate,phase:coachObservationPhase(),
+    readyForGuidance:coachObservationPhase()==='active'&&usableDays.length>=3,
+    dataQuality:{nutritionDays:nutritionDays.length,usableDays:usableDays.length,sufficient:nutritionDays.length>=3},
+    macros:{protein:{avg:coachAvg(proteinDays.map(x=>x.value)),avgTarget:coachAvg(proteinDays.map(x=>x.target).filter(v=>v>0)),lowDays:lowProteinDays.length},
+      fiber:{avg:coachAvg(fiberDays.map(x=>x.fiber)),avgTarget:coachAvg(fiberDays.map(x=>x.target).filter(v=>v>0)),lowDays:lowFiberDays.length,avgPer1000:coachAvg(fiberDays.map(x=>x.per1000).filter(v=>v!==null))}},
+    satiety:{mealCount:meals.length,lowSatietyMealCount:lowSatietyMeals.length,largeLowSatietyMealCount:largeLowSatiety.length,meals},
+    patterns,signals
+  };
+}
+
+
+/* ---------- Coach nutrition v1.1 — analyse étape 2E : poids + sport ----------
+ * Module pur : aucun calcul automatique au démarrage.
+ */
+function coachWeightPoints(endDate=TODAY,days=28){
+  const start=coachDates(endDate,days)[0];
+  return (Array.isArray(DATA.weights)?DATA.weights:[])
+    .map(x=>({date:String(x.date||'').slice(0,10),weight:Number(x.weight)}))
+    .filter(x=>x.date&&x.weight>0&&x.date>=start&&x.date<=endDate)
+    .sort((a,b)=>a.date.localeCompare(b.date));
+}
+function coachWeightAverageForDates(dates){
+  const set=new Set(dates),vals=(Array.isArray(DATA.weights)?DATA.weights:[])
+    .filter(x=>set.has(String(x.date||'').slice(0,10))).map(x=>Number(x.weight)).filter(v=>v>0);
+  return coachAvg(vals);
+}
+function coachWeightSportAnalysisSnapshot(endDate=TODAY){
+  const dates=coachDates(endDate,21),observations=dates.map(coachDailyObservation);
+  const last7=observations.slice(-7),nutritionDays=last7.filter(x=>x.hasNutritionData),usableDays=nutritionDays.filter(x=>x.confidence==='medium');
+  const signals=[],patterns=[];
+  const addSignal=(id,priority,title,data={})=>signals.push({id,priority,title,...data});
+  const addPattern=(id,title,data={})=>patterns.push({id,title,...data});
+
+  const weights=coachWeightPoints(endDate,28);
+  let weeklyRate=null;
+  if(weights.length>=3){
+    const first=weights[0],last=weights[weights.length-1],span=Math.max(1,coachDateDiff(first.date,last.date));
+    weeklyRate=(last.weight-first.weight)/(span/7);
+    if(span>=10&&weeklyRate<-1)addSignal('rapid_weight_loss',1,'Perte de poids rapide sur la tendance récente',{weeklyRate,from:first.weight,to:last.weight,spanDays:span});
+  }
+
+  const weekDates=[coachDates(endDate,21).slice(0,7),coachDates(endDate,14).slice(0,7),coachDates(endDate,7)];
+  const weeklyWeights=weekDates.map(ds=>coachWeightAverageForDates(ds));
+  const validWeekly=weeklyWeights.filter(v=>Number.isFinite(v));
+  const objective=DATA.objective?.type;
+  const energy=coachMealAnalysisSnapshot(endDate).energy;
+  const adherence=Number.isFinite(energy.avgRatio)&&energy.avgRatio>=.85&&energy.avgRatio<=1.15;
+  if(['fat_loss','weight_target'].includes(objective)&&validWeekly.length===3){
+    const delta=weeklyWeights[2]-weeklyWeights[0];
+    if(Math.abs(delta)<.2&&adherence)addSignal('weight_stagnation_with_adherence',5,'Poids stable malgré un apport proche de la cible',{threeWeekDelta:delta,weeklyWeights,avgRatio:energy.avgRatio});
+  }
+
+  const sportDays=last7.filter(x=>x.sport.sessions>0),nonSportDays=last7.filter(x=>x.hasNutritionData&&x.sport.sessions===0);
+  if(sportDays.length>=2&&nonSportDays.length>=2){
+    const sportSnack=coachAvg(sportDays.map(x=>x.snackCount))||0,restSnack=coachAvg(nonSportDays.map(x=>x.snackCount))||0;
+    const sportSnackKcal=coachAvg(sportDays.map(x=>x.snackKcal))||0,restSnackKcal=coachAvg(nonSportDays.map(x=>x.snackKcal))||0;
+    if(sportSnack>=restSnack+.75 || sportSnackKcal>=restSnackKcal+150){
+      addSignal('sport_appetite_link',4,'Collations plus importantes les jours de sport',{sportDays:sportDays.length,nonSportDays:nonSportDays.length,sportSnackCount:sportSnack,restSnackCount:restSnack,sportSnackKcal,restSnackKcal});
+    }else addPattern('sport_without_snack_shift','Pas de hausse nette des collations les jours de sport',{sportDays:sportDays.length});
+  }
+
+  const baseline=coachEnsureState().baseline||{};
+  if(Number(baseline.sportDays)>=2)addPattern('usual_sport_rhythm','Rythme sportif connu',{baselineSportDays:Number(baseline.sportDays)||0,currentSportDays:sportDays.length});
+  signals.sort((a,b)=>a.priority-b.priority);
+  return{
+    version:'2E',endDate,phase:coachObservationPhase(),
+    readyForGuidance:coachObservationPhase()==='active'&&usableDays.length>=3,
+    dataQuality:{nutritionDays:nutritionDays.length,usableDays:usableDays.length,sufficient:nutritionDays.length>=3},
+    weight:{points:weights.length,weeklyRate,weeklyWeights,adherence},
+    sport:{days:sportDays.length,sessions:sportDays.reduce((s,x)=>s+x.sport.sessions,0)},
+    patterns,signals
+  };
+}
+
+/* ---------- Coach nutrition v1.1 — fusion + hiérarchie finale ---------- */
+function coachSignalStrength(signal){
+  const count=Number(signal.count||signal.consecutiveDays||signal.occurrences||signal.days?.length)||1;
+  return Math.min(10,count);
+}
+function coachFullAnalysisSnapshot(endDate=TODAY){
+  const modules=[
+    ['energy',coachMealAnalysisSnapshot(endDate)],
+    ['drinks',coachDrinkAnalysisSnapshot(endDate)],
+    ['snacks',coachSnackAnalysisSnapshot(endDate)],
+    ['satiety',coachMacroSatietyAnalysisSnapshot(endDate)],
+    ['weightSport',coachWeightSportAnalysisSnapshot(endDate)]
+  ];
+  const nutritionDays=Math.max(...modules.map(([,m])=>Number(m.dataQuality?.nutritionDays)||0));
+  const usableDays=Math.max(...modules.map(([,m])=>Number(m.dataQuality?.usableDays)||0));
+  const ready=coachObservationPhase()==='active'&&nutritionDays>=3;
+  const seen=new Map();
+  modules.forEach(([source,m])=>(m.signals||[]).forEach(s=>{
+    const item={...s,source,strength:coachSignalStrength(s)};
+    const prev=seen.get(item.id);
+    if(!prev||item.priority<prev.priority||item.strength>prev.strength)seen.set(item.id,item);
+  }));
+  const signals=[...seen.values()].sort((a,b)=>(a.priority-b.priority)||(b.strength-a.strength));
+  const patterns=modules.flatMap(([source,m])=>(m.patterns||[]).map(x=>({...x,source})));
+  return{version:'2F',endDate,phase:coachObservationPhase(),readyForGuidance:ready,
+    dataQuality:{nutritionDays,usableDays,sufficient:nutritionDays>=3},
+    modules:Object.fromEntries(modules),signals,patterns,primarySignal:signals[0]||null};
+}
+
+function coachSignalCopy(signal){
+  if(!signal)return null;
+  const copies={
+    very_low_intake:{observation:'Tes apports semblent très bas plusieurs jours de suite.',action:'Cette semaine, la priorité est de retrouver des journées suffisamment nourrissantes et de vérifier que tout est bien enregistré. Je ne réduis pas ta cible calorique.'},
+    rapid_weight_loss:{observation:'La tendance de poids baisse rapidement sur les dernières semaines.',action:'On garde les calories pour l’instant et on vérifie d’abord que les apports sont suffisants et correctement enregistrés.'},
+    high_day_to_day_variability:{observation:'Tes apports alternent fortement entre journées basses et journées hautes.',action:'Cette semaine, on peut tester un peu plus de régularité entre les journées, sans chercher à manger moins.'},
+    calorie_target_variation:{observation:'Tes apports s’écartent souvent nettement de ta cible.',action:'Cette semaine, observe surtout ce qui rend certaines journées très différentes des autres. L’objectif est de comprendre le rythme, pas de compenser.'},
+    repeated_high_intake:{observation:'Plusieurs journées sont nettement au-dessus de ta cible.',action:'On va d’abord identifier le moment qui concentre le plus de calories avant de modifier quoi que ce soit.'},
+    large_meal_with_overage:{observation:`Tes ${signal.meal||'repas'} les plus importants sont parfois associés à un dépassement de la journée.`,action:'Cette semaine, garde un repas satisfaisant mais teste une petite réduction de l’élément le plus dense en calories, en conservant ou augmentant le volume avec des légumes ou un accompagnement riche en fibres.'},
+    liquid_calorie_share:{observation:'Les boissons représentent une part notable de tes calories cette semaine.',action:'Teste simplement une substitution sur quelques boissons cette semaine et regarde si cela facilite ta journée sans augmenter la faim.'},
+    frequent_sweet_drinks:{observation:'Les boissons sucrées reviennent plusieurs jours cette semaine.',action:'Cette semaine, remplace seulement une boisson sucrée habituelle par une option sans sucre ou de l’eau, sans changer le reste.'},
+    notable_alcohol_calories:{observation:'L’alcool représente une quantité notable de calories cette semaine.',action:'Si tu veux tester un levier simple, alterne certains verres avec une boisson sans alcool ou de l’eau, sans chercher la perfection.'},
+    snack_increase_vs_baseline:{observation:'Tes collations sont plus fréquentes que dans ton rythme habituel.',action:'Avant de chercher à les réduire, j’aimerais comprendre ce qui a changé cette semaine.'},
+    snacks_after_light_meal:{observation:`Tes collations arrivent souvent après un ${String(signal.meal||'repas').toLowerCase()} assez léger.`,action:`Cette semaine, teste un ${String(signal.meal||'repas').toLowerCase()} légèrement plus rassasiant — surtout protéines et fibres — et observe si ta faim change ensuite.`},
+    repeated_evening_snacks:{observation:'Les collations du soir reviennent régulièrement cette semaine.',action:'Cette semaine, observe si elles correspondent plutôt à de la faim, une envie, de la fatigue ou un contexte particulier avant de chercher à les modifier.'},
+    large_low_satiety_meals:{observation:'Plusieurs gros repas semblent assez denses en calories pour relativement peu de protéines, fibres ou volume.',action:'Cette semaine, conserve le volume du repas mais teste plus de légumes/fibres et un peu moins de l’ingrédient le plus dense en calories.'},
+    repeated_low_satiety_meal:{observation:`Plusieurs ${String(signal.meal||'repas').toLowerCase()} semblent peu rassasiants relativement à leurs calories.`,action:`Cette semaine, enrichis légèrement ce ${String(signal.meal||'repas').toLowerCase()} en protéines ou fibres et observe la faim qui suit.`},
+    sport_appetite_link:{observation:'Tes collations semblent plus importantes les jours de sport.',action:'Cette semaine, observe simplement ta faim les jours d’entraînement. Si le lien se confirme, on pourra travailler la composition du repas autour de la séance plutôt que réduire les collations.'},
+    low_protein_repeated:{observation:'Tes protéines sont souvent sous ta cible personnalisée.',action:'Cette semaine, ajoute une source de protéines à un seul repas qui en contient habituellement peu.'},
+    low_fiber_repeated:{observation:'Tes fibres sont souvent basses cette semaine.',action:'Cette semaine, ajoute une source de fibres à un repas que tu manges déjà : légumes, fruit entier, légumineuses ou céréales complètes.'},
+    weight_stagnation_with_adherence:{observation:'Ton poids semble stable depuis plusieurs semaines alors que ton apport est proche de la cible.',action:'Je garde ta cible pour ce bilan. Cette tendance est maintenant suffisamment claire pour être réévaluée lors de l’étape d’adaptation calorique.'}
+  };
+  return copies[signal.id]||{observation:signal.title||'J’ai repéré une tendance cette semaine.',action:'Cette semaine, on observe cette tendance sans modifier plusieurs choses à la fois.'};
+}
+function coachBehaviorQuestionForSignal(signal,endDate=TODAY){
+  if(!signal||!['snack_increase_vs_baseline','repeated_evening_snacks'].includes(signal.id))return null;
+  const recent=(coachEnsureState().contextAnswers||[]).find(x=>x.kind==='snack_context'&&coachDateDiff(x.date,endDate)<=14);
+  return{id:`snack_context_${endDate}`,kind:'snack_context',text:'Cette semaine, tes collations ont changé. Quelle raison correspond le mieux ?',choices:['Faim','Envie','Stress','Fatigue','Ennui','Social','Autre'],answered:recent?.answer||null};
+}
+function coachPositivePoints(analysis){
+  const out=[],energy=analysis.modules.energy?.energy||{},macro=analysis.modules.satiety?.macros||{},drinks=analysis.modules.drinks?.drinks||{};
+  const ids=new Set((analysis.signals||[]).map(x=>x.id));
+  if(Number.isFinite(energy.avgRatio)&&energy.avgRatio>=.85&&energy.avgRatio<=1.10)out.push('Ton apport calorique moyen est proche de ta cible.');
+  if(!ids.has('low_protein_repeated')&&Number(macro.protein?.avg)>0&&Number(macro.protein?.avgTarget)>0&&macro.protein.avg/macro.protein.avgTarget>=.85)out.push('Tes protéines sont globalement régulières par rapport à ta cible.');
+  if(!ids.has('low_fiber_repeated')&&Number(macro.fiber?.avg)>0&&Number(macro.fiber?.avgTarget)>0&&macro.fiber.avg/macro.fiber.avgTarget>=.80)out.push('Tes fibres sont globalement proches de leur repère.');
+  if(Number(drinks.totalDrinkKcal)>0&&Number(drinks.weeklyShare)<=.05)out.push('Les boissons apportent peu de calories dans l’ensemble.');
+  return out.slice(0,3);
+}
+function coachAdaptationWeekStats(endDate=TODAY,offsetDays=0){
+  const end=coachDateObj(endDate);end.setDate(end.getDate()-offsetDays);const key=todayStr(end);
+  const obs=coachDates(key,7).map(coachDailyObservation),nutrition=obs.filter(x=>x.hasNutritionData);
+  const ratios=nutrition.map(x=>Number(x.caloriePct)).filter(Number.isFinite);
+  return{endDate:key,days:nutrition.length,avgRatio:coachAvg(ratios),avgCalories:coachAvg(nutrition.map(x=>Number(x.totals?.kcal)||0)),avgTarget:coachAvg(nutrition.map(x=>Number(x.targets?.calories)||0).filter(v=>v>0))};
+}
+function coachCalorieAdaptationAssessment(analysis,endDate=TODAY){
+  const target=currentTargets(),st=coachEnsureState(),objective=DATA.objective?.type,current=Number(target.calories)||0;
+  const result={eligible:false,delta:0,from:current,to:current,reason:'Je garde ta cible actuelle.',checks:{}};
+  if(!current||coachObservationPhase()!=='active')return result;
+  const w0=coachAdaptationWeekStats(endDate,0),w1=coachAdaptationWeekStats(endDate,7);
+  result.checks={currentWeekDays:w0.days,previousWeekDays:w1.days,currentWeekRatio:w0.avgRatio,previousWeekRatio:w1.avgRatio};
+  if(w0.days<5||w1.days<5){result.reason='Il faut au moins deux semaines avec 5 jours enregistrés chacune avant d’adapter les calories.';return result;}
+  if(!Number.isFinite(w0.avgRatio)||!Number.isFinite(w1.avgRatio)||w0.avgRatio<.85||w0.avgRatio>1.15||w1.avgRatio<.85||w1.avgRatio>1.15){result.reason='Ton apport n’est pas encore assez proche de la cible sur deux semaines pour interpréter correctement la tendance du poids.';return result;}
+  const ids=new Set((analysis?.signals||[]).map(x=>x.id));
+  if(ids.has('very_low_intake')||ids.has('high_day_to_day_variability')||ids.has('calorie_target_variation')){result.reason='Je préfère d’abord stabiliser les apports avant de modifier la cible calorique.';return result;}
+  const sortedAdjustments=(st.calorieAdjustments||[]).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)));const last=sortedAdjustments.length?sortedAdjustments[sortedAdjustments.length-1]:null;
+  if(last&&coachDateDiff(last.date,endDate)<14){result.reason='Une adaptation a déjà été faite récemment. Je garde cette cible au moins deux semaines avant de réévaluer.';return result;}
+  const lossGoal=['fat_loss','recomposition'].includes(objective)||(objective==='weight_target'&&Number(DATA.objective?.targetWeight)>0&&Number(DATA.profile?.weightCurrent)>Number(DATA.objective?.targetWeight));
+  if(!lossGoal){result.reason='L’adaptation automatique est pour l’instant réservée aux objectifs de perte de poids ou recomposition.';return result;}
+  if(ids.has('rapid_weight_loss')){
+    result.eligible=true;result.delta=100;result.to=Math.max(1400,current+100);result.reason='Ta perte de poids paraît rapide malgré un apport proche de la cible. Je propose une petite hausse de 100 kcal et une nouvelle observation pendant deux semaines.';return result;
+  }
+  if(ids.has('weight_stagnation_with_adherence')){
+    result.eligible=true;result.delta=-100;result.to=Math.max(1400,current-100);result.delta=result.to-current;result.reason='Ton poids semble stable depuis plusieurs semaines alors que ton apport est proche de la cible. Je propose une baisse prudente de 100 kcal puis une réévaluation dans deux semaines.';return result;
+  }
+  result.reason='La tendance actuelle ne justifie pas de modifier ta cible calorique.';
+  return result;
+}
+function coachApplyCalorieProposal(){
+  const st=coachEnsureState(),r=st.lastGeneratedReport,p=r?.calorie?.proposal;if(!p||!p.eligible||r?.calorie?.applied)return;
+  const current=Number(currentTargets().calories)||0;if(!current)return;
+  DATA.nutrition.coachCalorieAdjustment=(Number(DATA.nutrition.coachCalorieAdjustment)||0)+Number(p.delta||0);
+  ensureTargets();const next=Number(DATA.nutrition.caloriesTarget)||current;
+  DATA.nutrition.calorieTargetHistory=DATA.nutrition.calorieTargetHistory||{};DATA.nutrition.calorieTargetHistory[TODAY]=Math.round(next);
+  st.calorieAdjustments.push({date:TODAY,from:current,to:next,delta:next-current,reason:p.reason,reportEndDate:r.endDate});
+  if(st.calorieAdjustments.length>24)st.calorieAdjustments=st.calorieAdjustments.slice(-24);
+  r.calorie.applied=true;r.calorie.appliedAt=new Date().toISOString();r.calorie.appliedTarget=next;r.calorie.text=`Nouvelle cible : ${Math.round(next)} kcal.`;r.calorie.reason=`${p.reason} La nouvelle cible est appliquée et sera réévaluée après au moins deux semaines.`;
+  saveState();toast(`Nouvelle cible : ${Math.round(next)} kcal`);renderAll();
+}
+function coachDismissCalorieProposal(){
+  const st=coachEnsureState(),r=st.lastGeneratedReport;if(!r?.calorie?.proposal)return;r.calorie.dismissed=true;r.calorie.text=`On garde ${Math.round(currentTargets().calories)} kcal.`;r.calorie.reason='Tu as choisi de conserver ta cible actuelle. Le coach continuera à observer la tendance.';saveState();renderWeeklyReport('weeklyReportHome');
+}
+function coachGenerateWeeklyReport(endDate=TODAY){
+  coachUpdateObservationState();
+  const st=coachEnsureState(),phase=coachObservationPhase(),target=currentTargets();
+  if(!target.calories)return{status:'setup'};
+  if(phase!=='active')return{status:'calibration',phase};
+  const analysis=coachFullAnalysisSnapshot(endDate);
+  if(!analysis.dataQuality.sufficient)return{status:'insufficient',analysis};
+  const energy=analysis.modules.energy.energy||{},weight=analysis.modules.weightSport.weight||{};
+  const selected=analysis.signals.slice(0,2),primary=selected[0]||null,copy=coachSignalCopy(primary);
+  const positives=coachPositivePoints(analysis);
+  const question=coachBehaviorQuestionForSignal(primary,endDate);
+  const adaptation=coachCalorieAdaptationAssessment(analysis,endDate);
+  let calorieText=adaptation.eligible?`Je propose de passer de ${Math.round(adaptation.from)} à ${Math.round(adaptation.to)} kcal.`:`On garde ${Math.round(target.calories)} kcal.`;
+  let calorieReason=adaptation.reason;
+  if(primary?.id==='very_low_intake')calorieReason='Tes données indiquent qu’il ne faut surtout pas réduire davantage les calories.';
+  const report={
+    status:'ready',version:'3.0',generatedAt:new Date().toISOString(),endDate,
+    cap:{avgCalories:energy.avgCalories,avgTarget:energy.avgTarget||target.calories,weightWeeklyRate:weight.weeklyRate,loggedDays:analysis.dataQuality.nutritionDays},
+    positives,observations:selected.map(s=>coachSignalCopy(s).observation),
+    priority:copy?copy.action:'Rien de particulier à corriger cette semaine. Continue normalement et on regarde la suite.',
+    calorie:{text:calorieText,reason:calorieReason,proposal:adaptation},
+    question,primarySignalId:primary?.id||null,analysisSummary:{signalIds:analysis.signals.map(x=>x.id),patterns:analysis.patterns.map(x=>x.id)}
+  };
+  st.lastGeneratedReport=report;
+  st.recommendationHistory=Array.isArray(st.recommendationHistory)?st.recommendationHistory:[];
+  st.recommendationHistory.push({date:endDate,signalId:report.primarySignalId,priority:report.priority});
+  if(st.recommendationHistory.length>24)st.recommendationHistory=st.recommendationHistory.slice(-24);
+  saveState();
+  return report;
+}
+function coachAnswerContext(questionId,answer){
+  const st=coachEnsureState(),allowed=['Faim','Envie','Stress','Fatigue','Ennui','Social','Autre'];
+  if(!allowed.includes(answer))return;
+  st.contextAnswers.push({id:questionId,kind:'snack_context',date:TODAY,answer});
+  if(st.contextAnswers.length>50)st.contextAnswers=st.contextAnswers.slice(-50);
+  if(st.lastGeneratedReport?.question?.id===questionId)st.lastGeneratedReport.question.answered=answer;
+  saveState();toast('Réponse enregistrée');renderWeeklyReport('weeklyReportHome');
+}
+function coachClearGeneratedReport(){
+  const st=coachEnsureState();st.lastGeneratedReport=null;saveState();renderWeeklyReport('weeklyReportHome');
+}
+
 function rememberDailyCalorieTarget(date=TODAY){
   DATA.nutrition=DATA.nutrition||{};
   DATA.nutrition.calorieTargetHistory=DATA.nutrition.calorieTargetHistory||{};
@@ -29,33 +657,39 @@ function dayTotals(date=TODAY){
   }),{kcal:0,protein:0,carbs:0,fat:0,sugar:0,fiber:0,satFat:0,salt:0,sodium:0,potassium:0,calcium:0,iron:0,magnesium:0,vitaminC:0});
   const drinks=(Array.isArray(DATA.drinkLog)?DATA.drinkLog:[]).filter(x=>x.date===date).reduce((s,x)=>s+Number(x.kcal||0),0);base.kcal+=drinks;return base;}
 
-function waterTotal(date=TODAY){return (DATA.waterLog?.[date]||[]).reduce((s,x)=>s+Number(x.ml||0),0);}
+function drinkHydrationMl(entry){
+  if(!entry)return 0;
+  const cat=String(entry.category||'').toLowerCase();
+  const name=String(entry.name||'').toLowerCase();
+  // Alcoholic drinks are intentionally excluded from the hydration counter.
+  const eligible=cat==='hot'||cat==='soft'||cat==='juice'||(cat==='beer'&&name.includes('sans alcool'));
+  if(!eligible)return 0;
+  const meta=drinkPortionMeta(entry.portion);if(!meta||!(meta.qty>0))return 0;
+  if(meta.unit==='cl')return meta.qty*10;
+  if(meta.unit==='ml')return meta.qty;
+  if(meta.unit==='l')return meta.qty*1000;
+  return 0;
+}
+function drinkHydrationTotal(date=TODAY){
+  const drinks=Array.isArray(DATA.drinkLog)?DATA.drinkLog:[];
+  return drinks.filter(x=>x.date===date).reduce((s,x)=>s+drinkHydrationMl(x),0);
+}
+function waterTotal(date=TODAY){
+  const water=(DATA.waterLog?.[date]||[]).reduce((s,x)=>s+Number(x.ml||0),0);
+  return water+drinkHydrationTotal(date);
+}
 function macroTargets(calories){return {carbs:Math.round((calories||2100)*0.48/4),fat:Math.round((calories||2100)*0.27/9),fiber:30};}
 function macroPct(v,target){return target?Math.min(100,Math.max(0,v/target*100)):0;}
 function lastNDays(n=7){return Array.from({length:n},(_,i)=>dateOffset(-(n-1-i)));}
 function avgFor(key,days=7){const dates=lastNDays(days);const vals=dates.map(d=>dayTotals(d)[key]).filter(v=>v>0);return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;}
 function weightTrend(){const pts=DATA.weights.slice().sort((a,b)=>a.date.localeCompare(b.date));if(pts.length<2)return null;const recent=pts.filter(x=>x.date>=dateOffset(-6));const prior=pts.filter(x=>x.date<dateOffset(-6)).slice(-7);if(recent.length<2)return null;const avg=a=>a.reduce((s,x)=>s+x.weight,0)/a.length;const r=avg(recent);const p=prior.length?avg(prior):pts.length>1?pts[pts.length-2].weight:null;return p?{recent:r,previous:p,delta:r-p,points:recent.length}:null;}
 function coachDecision(){
-  const target=currentTargets();
-  if(!target.calories)return{status:'setup',title:'Complète ton profil',text:'J’ai besoin de ton âge, sexe, taille et poids pour calculer ton point de départ.'};
-  const avgK=avgFor('kcal'),avgP=avgFor('protein'),trend=weightTrend();
-  if(!trend)return{status:'observe',title:'Je commence par observer',text:'Enregistre tes repas et quelques pesées. Je ne change pas encore ton objectif calorique avec si peu de données.',avgK,avgP,target};
-  const weeklyRate=trend.delta/Math.max(0.01,trend.previous);
-  let next=target.calories,status='keep';
-  let reason='Ta progression est cohérente avec l’objectif.';
-  if(DATA.objective.type==='fat_loss'||DATA.objective.type==='weight_target'){
-    if(weeklyRate < -0.009){next+=100;status='up';reason='La perte observée est plus rapide que le rythme recherché. Je ralentis légèrement le déficit.';}
-    else if(weeklyRate > -0.002){next-=100;status='down';reason='La tendance du poids est presque stable. Si l’adhérence alimentaire est bonne, je resserre légèrement l’objectif.';}
-    else if(trend.delta<0){reason='Le poids baisse à un rythme raisonnable. Je conserve les calories.';}
-    if(trend.delta>=0 && avgK!==null && avgK>target.calories*1.06){status='observe';reason='La moyenne alimentaire dépasse sensiblement la cible. Je préfère d’abord travailler la régularité avant de réduire davantage les calories.';next=target.calories;}
-  }
-  const daysSinceReview=DATA.nutrition.lastCoachReview?Math.floor((new Date(TODAY)-new Date(DATA.nutrition.lastCoachReview))/86400000):99;
-  const shouldApply=status!=='observe'&&next!==target.calories&&daysSinceReview>=7;
-  if(shouldApply){DATA.nutrition.caloriesTarget=Math.max(1400,next);DATA.nutrition.lastCoachReview=TODAY;DATA.coachDecisions.push({date:TODAY,from:target.calories,to:DATA.nutrition.caloriesTarget,reason,status});saveState();}
-  const proteinNote=avgP&&target.protein?(avgP>=target.protein*0.9?'Ton apport en protéines est globalement satisfaisant.':'Ton apport en protéines est souvent inférieur à ta cible.'):'Ajoute quelques jours de repas pour que je puisse analyser tes protéines.';
-  return{status,title:status==='up'?'Je ralentis légèrement le déficit':status==='down'?'Je resserre légèrement la cible':'Je conserve le cap',text:reason,proteinNote,avgK,avgP,trend,target,applied:shouldApply,next};
+  coachUpdateObservationState();
+  const target=currentTargets(),status=coachObservationStatus(),week=DATA.nutritionCoach?.lastWeek||{},baseline=DATA.nutritionCoach?.baseline||{};
+  if(!target.calories)return{status:'setup',title:'Complète ton profil',text:'J’ai besoin de ton âge, sexe, taille et poids pour calculer ton point de départ.',target,week,baseline};
+  return{status:'observe',phase:status.phase,title:status.title,text:status.text,target,week,baseline,avgK:week.avgCalories,avgP:week.avgProtein,trend:weightTrend(),proteinNote:'Le coach est en phase d’observation : aucune recommandation nutritionnelle automatique n’est appliquée pour le moment.'};
 }
-function weeklyReport(){const d=coachDecision();const avgK=avgFor('kcal'),avgP=avgFor('protein'),avgSugar=avgFor('sugar'),avgFiber=avgFor('fiber');return Object.assign({},d,{avgK,avgP,avgSugar,avgFiber});}
+function weeklyReport(){return coachDecision();}
 
 /* ---------- Hydration ---------- */
 function openWaterSheet(){closeSheet('addMenuOverlay');setVal('waterQty','250');openSheet('waterSheetOverlay');}
@@ -100,6 +734,11 @@ function localTimeMeta(){const d=new Date();return{time:d.toTimeString().slice(0
 /* ---------- Home ---------- */
 
 const DRINK_CATALOG={
+  hot:[
+    ['☕ Café filtre','25 cl',5],['☕ Espresso','3 cl',2],['☕ Café allongé','15 cl',3],
+    ['🍵 Thé noir','25 cl',1],['🍵 Thé vert','25 cl',1],['🌿 Infusion','25 cl',1],
+    ['🫖 Rooibos','25 cl',1],['🌾 Chicorée soluble','25 cl',10],['🍵 Matcha à l’eau','25 cl',5]
+  ],
   soft:[
     ['🥤 Coca-Cola','25 cl',105],['🥤 Coca-Cola Zero','25 cl',1],['🥤 Pepsi','25 cl',105],
     ['🥤 Orangina','25 cl',110],['🥤 Fanta Orange','25 cl',95],['🥤 Sprite','25 cl',80],
@@ -140,7 +779,7 @@ function showDrinkCategory(cat){
   c.innerHTML=list.map((x,i)=>`<div class="drink-choice-row"><button class="drink-choice drink-choice-main" onclick="addDrink('${cat}',${i})"><span>${x[0]}</span><small>${x[1]} · ${x[2]} kcal</small></button><button class="drink-customize" type="button" onclick="event.stopPropagation();openCustomDrink('${cat}',${i})">Personnaliser</button></div>`).join('');
   c.style.display='grid';
 }
-function addDrink(cat,i){const x=DRINK_CATALOG[cat]?.[i];if(!x)return;if(!Array.isArray(DATA.drinkLog))DATA.drinkLog=normaliseDrinkLog(DATA.drinkLog);rememberDailyCalorieTarget(TODAY);DATA.drinkLog.push({date:TODAY,name:x[0],portion:x[1],kcal:Number(x[2])||0});saveState();renderAll();toast(x[0]+' ajouté');}
+function addDrink(cat,i){const x=DRINK_CATALOG[cat]?.[i];if(!x)return;if(!Array.isArray(DATA.drinkLog))DATA.drinkLog=normaliseDrinkLog(DATA.drinkLog);rememberDailyCalorieTarget(TODAY);DATA.drinkLog.push({date:TODAY,name:x[0],portion:x[1],kcal:Number(x[2])||0,category:cat,time:new Date().toTimeString().slice(0,5)});saveState();renderAll();toast(x[0]+' ajouté');}
 function openCustomDrink(cat,i){
   const x=DRINK_CATALOG[cat]?.[i],meta=drinkPortionMeta(x?.[1]);if(!x||!meta)return;
   customDrinkSelection={cat,i,baseQty:meta.qty,unit:meta.unit,baseKcal:Number(x[2])||0,name:x[0]};
@@ -154,7 +793,7 @@ function updateCustomDrinkPreview(){const kcal=customDrinkCalories(),el=document
 function confirmCustomDrink(){
   const s=customDrinkSelection,qty=customDrinkQty(),kcal=customDrinkCalories();if(!s||!(qty>0)||kcal===null){toast('Indique une quantité valide');return;}
   if(!Array.isArray(DATA.drinkLog))DATA.drinkLog=normaliseDrinkLog(DATA.drinkLog);rememberDailyCalorieTarget(TODAY);
-  const qtyLabel=qty.toLocaleString('fr-FR',{maximumFractionDigits:1});DATA.drinkLog.push({date:TODAY,name:s.name,portion:`${qtyLabel} ${s.unit}`,kcal});
+  const qtyLabel=qty.toLocaleString('fr-FR',{maximumFractionDigits:1});DATA.drinkLog.push({date:TODAY,name:s.name,portion:`${qtyLabel} ${s.unit}`,kcal,category:s.cat,time:new Date().toTimeString().slice(0,5)});
   saveState();renderAll();toast(`${s.name} · ${qtyLabel} ${s.unit} ajouté`);showDrinkCategory(s.cat);
 }
 function removeDrink(i){if(!DATA.drinkLog)return;DATA.drinkLog.splice(i,1);saveState();renderAll();}
@@ -215,45 +854,13 @@ function vitaCoachSnapshot(date=TODAY){
   };
 }
 function vitaCoachDecision(snapshot=vitaCoachSnapshot()){
-  const s=snapshot,actions=[];
-  const push=(priority,icon,title,text,type)=>actions.push({priority,icon,title,text,type});
-  if(!s.targets.calories||!s.targets.protein){
-    push(100,'🎯','Complète ton profil','Renseigne âge, taille, poids et objectif pour que VitaTrack puisse personnaliser tes priorités.','setup');
-    return {status:'setup',title:'Coach en attente de ton profil',summary:'Complète ton profil pour obtenir des recommandations personnalisées.',actions:actions.slice(0,3),snapshot:s};
-  }
-  if(s.totals.kcal>0 && s.proteinPct!==null && s.proteinPct<0.7){
-    const missing=Math.max(0,Math.round(s.targets.protein-s.totals.protein));
-    push(94,'🥩','Priorité protéines',`Il te manque environ ${missing} g pour atteindre ta cible. Ajoute une source de protéines à ton prochain repas.`, 'protein');
-  }
-  if(s.totals.kcal>0 && s.caloriePct!==null && s.caloriePct>1.10){
-    const over=Math.max(0,Math.round(s.totals.kcal-s.targets.calories));
-    push(88,'🍽️','Reste simple pour la suite',`Tu es environ ${over} kcal au-dessus de la cible aujourd’hui. Évite de compenser brutalement : privilégie simplement des choix rassasiants et reviens au plan demain.`, 'calories_high');
-  }
-  if(s.steps>0 && s.stepPct!==null && s.stepPct<0.70){
-    const remaining=Math.max(0,s.goal-s.steps);
-    push(82,'👟','Complète ton activité',`Encore ${remaining.toLocaleString('fr-FR')} pas environ pour atteindre ton objectif. Une marche courte peut suffire à bien avancer.`, 'steps');
-  } else if(!s.steps){
-    push(48,'👟','Renseigne tes pas','Ajoute tes pas du jour pour que le Coach puisse évaluer ton niveau d’activité réel.', 'steps_missing');
-  }
-  if(s.recovery && /faible|basse|mauvaise|fatigu/i.test(String(s.recovery.label||'')) && !s.sessions.length){
-    push(86,'🧘','Priorité récupération','Ta récupération semble limitée. Une séance légère, de la mobilité ou du repos sera plus utile qu’une séance intense.', 'recovery');
-  } else if(s.sessions.length){
-    push(35,'✅','Séance enregistrée',`${s.sessions.length} séance${s.sessions.length>1?'s':''} aujourd’hui · ${Math.round(s.sportMinutes)} min au total.`, 'sport_done');
-  }
-  if(s.trend && ['fat_loss','weight_target'].includes(DATA.objective.type)){
-    if(s.trend.delta>0.2) push(58,'⚖️','Observe la tendance poids',`La tendance récente est de +${s.trend.delta.toFixed(1)} kg. Ne change rien sur une seule mesure : regarde surtout la régularité sur plusieurs jours.`, 'weight');
-    else if(s.trend.delta<-.8) push(64,'⚖️','Perte assez rapide',`La tendance récente est de ${s.trend.delta.toFixed(1)} kg. Garde un œil sur l’énergie, la récupération et les protéines.`, 'weight_fast');
-  }
-  if(s.totals.kcal>0 && s.caloriePct!==null && s.caloriePct>=0.8 && s.caloriePct<=1.08 && s.proteinPct!==null && s.proteinPct>=0.85){
-    push(30,'🎯','Nutrition bien engagée','Calories et protéines sont proches de leurs cibles. Inutile de compliquer la journée : garde ce rythme.', 'nutrition_good');
-  }
-  actions.sort((a,b)=>b.priority-a.priority);
-  const top=actions.slice(0,3);
-  let status='on_track',title='Garde le cap',summary='Ta journée est cohérente avec tes objectifs.';
-  if(top.some(a=>a.priority>=90)){status='priority';title='Une priorité ressort aujourd’hui';summary=top[0].text;}
-  else if(top.some(a=>a.priority>=80)){status='adjust';title='Petit ajustement utile';summary=top[0].text;}
-  else if(top.length){summary=top[0].text;}
-  return {status,title,summary,actions:top,snapshot:s};
+  coachUpdateObservationState();
+  const s=snapshot,status=coachObservationStatus(),actions=[];
+  if(!s.targets.calories||!s.targets.protein){actions.push({priority:100,icon:'🎯',title:'Complète ton profil',text:'Renseigne âge, taille, poids et objectif pour démarrer le suivi personnalisé.',type:'setup'});return{status:'setup',title:'Coach en attente de ton profil',summary:actions[0].text,actions,snapshot:s};}
+  const b=DATA.nutritionCoach?.baseline||{};
+  const detail=status.phase==='week1'?'Je mémorise simplement ton rythme alimentaire cette semaine. Aucun repas isolé ne déclenche de conseil.':status.phase==='week2'?`Je calibre ta référence personnelle${Number.isFinite(b.mealShares?.['Dîner'])?` · dîner ≈ ${Math.round(b.mealShares['Dîner']*100)} % de tes apports observés`:''}.`:status.phase?.startsWith('recalibration')?'Ton objectif a changé : je conserve tes habitudes connues mais je recalibre la tendance pendant deux semaines.':'Tes données du jour enrichissent la référence personnelle utilisée pour le futur bilan hebdomadaire.';
+  actions.push({priority:10,icon:'🧭',title:status.title,text:detail,type:'observation'});
+  return{status:'observe',title:status.title,summary:status.text,actions,snapshot:s};
 }
 function renderVitaCoach(snapshot=vitaCoachSnapshot()){
   const d=vitaCoachDecision(snapshot),box=document.getElementById('dailyCoachActions');
@@ -805,10 +1412,69 @@ async function toggleMealDictation(){
 
 
 /* ---------- Guide ---------- */
+function openGuideCatalog(){const p=document.getElementById('guideCatalogPanel');if(!p)return;p.classList.add('open');p.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';renderGuide();setTimeout(()=>document.getElementById('guideSearch')?.focus(),80);}
+function closeGuideCatalog(){const p=document.getElementById('guideCatalogPanel');if(!p)return;p.classList.remove('open');p.setAttribute('aria-hidden','true');document.body.style.overflow='';}
 function openGuideFood(name){const f=allFoods().find(x=>x.name===name);if(!f)return;document.getElementById('guideTitle').textContent=f.name;document.getElementById('guideDetail').innerHTML=`<div class="guide-hero"><div class="num">${f.kcal}</div><span>kcal / 100 g</span></div><div class="mini-stats"><span>🥩 ${f.protein} g protéines</span><span>🍬 ${f.sugar??'—'} g sucres</span></div><div class="guide-gi"><strong>🩸 Glycémie</strong><div>${f.giLabel?`Indice glycémique indicatif : <b>${f.giLabel}</b>`:'Donnée non renseignée'}</div></div><div class="coach-note"><strong>🎯 Pour la perte de gras</strong><p>${foodAdvice(f)}</p></div>`;openSheet('guideSheetOverlay');}
 function foodAdvice(f){if(f.kcal>=500&&f.protein<12)return'À consommer avec attention : très dense en calories et peu riche en protéines. Une petite portion peut vite peser dans la journée.';if(f.protein>=20&&f.kcal<=220)return'Très intéressant pour ton objectif : beaucoup de protéines pour une quantité de calories modérée.';if(f.kcal<=100)return'Facile à intégrer dans une journée de perte de gras, surtout si la portion reste adaptée à ton objectif.';return'Peut parfaitement trouver sa place dans une alimentation de perte de gras. La quantité et l’ensemble de ta journée comptent plus que le fait de classer un aliment comme « bon » ou « mauvais ». ';}
-function renderGuide(){const q=currentGuideQuery.trim().toLowerCase();const featured=['Poulet (blanc, cuit)','Œuf entier','Riz basmati cuit','Pâtes cuites','Avoine (flocons)','Banane','Pomme','Fraises','Skyr nature','Fromage blanc 0%','Amandes','Saumon (cuit)','Thon (nature, conserve)','Lentilles cuites','Pois chiches cuits','Avocat','Brocoli (cuit)','Patate douce (cuite)','Pomme de terre (cuite)','Chocolat noir 70%','Pizza margherita','Frites'];const base=allFoods();const res=(q?base.filter(f=>f.name.toLowerCase().includes(q)):featured.map(n=>base.find(f=>f.name===n)).filter(Boolean));document.getElementById('guideList').innerHTML=res.map(f=>`<button class="guide-row" onclick='openGuideFood(${JSON.stringify(f.name)})'><div><strong>${escapeHtml(f.name)}</strong><div class="muted small">${f.kcal} kcal · ${f.protein} g prot.${f.giLabel?' · IG '+f.giLabel:''}</div></div><span>›</span></button>`).join('') || '<div class="muted small" style="padding:14px">Aucun aliment trouvé.</div>';}
+function guideGiRank(label){return ({faible:1,moyen:2,'élevé':3,eleve:3})[String(label||'').toLowerCase()]||9;}
+function renderGuideCategories(){
+  const box=document.getElementById('guideCategories');if(!box)return;
+  const cats=[...new Set(allFoods().map(f=>f.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fr'));
+  const values=['all',...cats];
+  box.innerHTML=values.map(cat=>`<button type="button" class="guide-chip ${currentGuideCategory===cat?'active':''}" onclick='setGuideCategory(${JSON.stringify(cat)})'>${cat==='all'?'Tous':escapeHtml(cat)}</button>`).join('');
+}
+function renderGuide(){
+  const listEl=document.getElementById('guideList');if(!listEl)return;
+  renderGuideCategories();
+  const q=currentGuideQuery.trim().toLocaleLowerCase('fr');
+  let res=allFoods().filter(f=>{
+    const matchesQ=!q||String(f.name||'').toLocaleLowerCase('fr').includes(q);
+    const matchesCat=currentGuideCategory==='all'||f.category===currentGuideCategory;
+    return matchesQ&&matchesCat;
+  });
+  const compareValue=(f,key)=>{
+    if(key==='gi'){const rank=guideGiRank(f.giLabel);return rank===9?null:rank;}
+    return Number(f?.[key]||0);
+  };
+  if(currentGuideCompare){
+    const dir=currentGuideCompareDir==='desc'?-1:1;
+    res=res.slice().sort((a,b)=>{
+      const av=compareValue(a,currentGuideCompare),bv=compareValue(b,currentGuideCompare);
+      if(av===null&&bv===null)return a.name.localeCompare(b.name,'fr');
+      if(av===null)return 1;if(bv===null)return -1;
+      return (av-bv)*dir||a.name.localeCompare(b.name,'fr');
+    });
+  }else res=res.slice().sort((a,b)=>a.name.localeCompare(b.name,'fr'));
+  const count=document.getElementById('guideCount');if(count)count.textContent=`${res.length} aliment${res.length>1?'s':''}`;
+  document.querySelectorAll('[data-guide-compare]').forEach(btn=>{
+    const active=btn.dataset.guideCompare===currentGuideCompare;
+    btn.classList.toggle('active',active);
+    const base=({kcal:'Calories',gi:'IG',protein:'Protéines',carbs:'Glucides',fat:'Lipides',fiber:'Fibres'})[btn.dataset.guideCompare]||btn.textContent;
+    btn.innerHTML=active?`${base}<span class="guide-compare-arrow">${currentGuideCompareDir==='asc'?'↑':'↓'}</span>`:base;
+    btn.setAttribute('aria-pressed',active?'true':'false');
+    btn.setAttribute('aria-label',active?`${base}, ordre ${currentGuideCompareDir==='asc'?'croissant':'décroissant'}`:`Classer par ${base}`);
+  });
+  listEl.innerHTML=res.length?res.map(f=>{
+    const gi=f.giLabel?String(f.giLabel).toLowerCase():'';
+    const macro=(v)=>Number(v||0).toLocaleString('fr-FR',{maximumFractionDigits:1});
+    return `<div class="guide-food-card">
+      <span class="guide-food-category">${escapeHtml(f.category||'Aliment')}</span>
+      <strong>${escapeHtml(f.name)}</strong>
+      <span class="guide-food-kcal"><b>${Math.round(Number(f.kcal)||0)}</b> kcal <small>/ 100 g</small></span>
+      <div class="guide-food-macros">
+        <span><b>${macro(f.protein)}</b><small>Prot.</small></span>
+        <span><b>${macro(f.carbs)}</b><small>Gluc.</small></span>
+        <span><b>${macro(f.fat)}</b><small>Lip.</small></span>
+        <span><b>${macro(f.fiber)}</b><small>Fibres</small></span>
+      </div>
+      <span class="guide-food-bottom"><span class="guide-gi-badge ${gi==='élevé'?'high':gi==='moyen'?'medium':gi==='faible'?'low':''}">${gi?'IG '+escapeHtml(gi):'IG —'}</span></span>
+    </div>`;
+  }).join(''):'<div class="guide-empty">Aucun aliment ne correspond à cette sélection.</div>';
+}
 function filterGuide(v){currentGuideQuery=v;renderGuide();}
+function setGuideCategory(v){currentGuideCategory=v;renderGuide();}
+function setGuideCompare(v){if(currentGuideCompare===v)currentGuideCompareDir=currentGuideCompareDir==='asc'?'desc':'asc';else{currentGuideCompare=v;currentGuideCompareDir='asc';}renderGuide();}
+function clearGuideCompareFromRow(event){if(event.target!==event.currentTarget||!currentGuideCompare)return;currentGuideCompare='';currentGuideCompareDir='asc';renderGuide();}
 
 /* ---------- Weight / weekly report ---------- */
 function openWeightEntry(){const f=document.getElementById('weightEntryForm');if(!f)return;const h=document.getElementById('nutritionWeightHistory');if(h)h.style.display='none';const hidden=getComputedStyle(f).display==='none';f.style.display=hidden?'block':'none';if(f.style.display==='block')setTimeout(()=>document.getElementById('newWeight')?.focus(),50);}
@@ -817,7 +1483,38 @@ function renderWeightList(){const count=DATA.weights.length;setText('nutritionWe
 function removeWeight(i){DATA.weights.splice(i,1);const sorted=DATA.weights.slice().sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));const latest=sorted.length?sorted[sorted.length-1]:null;DATA.profile.weightCurrent=latest?(Number(latest.weight)||null):null;saveState();renderAll();}
 function formatDate(d){const [y,m,day]=d.split('-');return `${day}/${m}/${y}`;}
 function renderWeightChart(){const svg=document.getElementById('homeWeightChart');if(!svg)return;const pts=DATA.weights.slice().sort((a,b)=>a.date.localeCompare(b.date)).slice(-12);if(pts.length<2){svg.innerHTML='<text x="10" y="70" fill="var(--ink-soft)" font-size="13">Ajoute au moins 2 pesées pour voir la tendance</text>';return;}const W=Math.max(300,svg.parentElement.clientWidth),H=150,pad=22;svg.setAttribute('width',W);svg.setAttribute('viewBox',`0 0 ${W} ${H}`);const vals=pts.map(x=>x.weight),min=Math.min(...vals)-.5,max=Math.max(...vals)+.5,x=i=>pad+i/(pts.length-1)*(W-pad*2),y=v=>H-pad-(v-min)/(max-min)*(H-pad*2),path=pts.map((p,i)=>(i?'L':'M')+x(i)+','+y(p.weight)).join(' ');svg.innerHTML=`<path d="${path}" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round"/>${pts.map((p,i)=>`<circle cx="${x(i)}" cy="${y(p.weight)}" r="4" fill="var(--primary)"/>`).join('')}`;}
-function renderWeeklyReport(targetId='weeklyReportHome'){const r=weeklyReport();const el=document.getElementById(targetId);if(!el)return;const t=currentTargets();if(r.status==='setup'){el.innerHTML='<div class="card"><h2>Ton bilan</h2><p class="muted">Complète ton profil pour commencer.</p><button class="btn btn-primary btn-block" style="margin-top:12px" onclick="go(\'food\')">Compléter mon profil</button></div>';return;}el.innerHTML=`<div class="card"><div class="eyebrow">Bilan des 7 derniers jours</div><h2>${r.title}</h2><p>${r.text}</p><div class="report-grid"><div><strong>${r.avgK?Math.round(r.avgK):'—'}</strong><span>kcal moy./j</span></div><div><strong>${r.avgP?Math.round(r.avgP):'—'} g</strong><span>protéines moy./j</span></div><div><strong>${r.trend?r.trend.delta.toFixed(1):'—'} kg</strong><span>tendance poids</span></div><div><strong>${t.protein||'—'} g</strong><span>objectif protéines</span></div></div><div class="coach-note"><strong>💡 Conseil de la semaine</strong><p>${r.proteinNote}</p></div><div class="coach-note"><strong>🥗 À tester</strong><p>${weeklyFoodSuggestion()}</p></div><button class="btn btn-ghost btn-block" style="margin-top:12px" onclick="go(\'food\')">Voir ma nutrition</button></div>`;}
+function renderWeeklyReport(targetId='weeklyReportHome'){
+  coachUpdateObservationState();
+  const el=document.getElementById(targetId);if(!el)return;
+  const target=currentTargets();
+  if(!target.calories){el.innerHTML='<div class="card"><h2>Ton coach nutrition</h2><p class="muted">Complète ton profil pour commencer.</p><button class="btn btn-primary btn-block" style="margin-top:12px" onclick="go(\'food\')">Compléter mon profil</button></div>';return;}
+  const st=coachEnsureState(),status=coachObservationStatus(),phase=coachObservationPhase(),b=st.baseline||{},w=st.lastWeek||{};
+  if(phase!=='active'){
+    const dinner=Number(b.mealShares?.['Dîner']||0),lunch=Number(b.mealShares?.['Déjeuner']||0);
+    const rhythm=(b.daysWithNutrition||0)>=3?`Déjeuner ≈ ${Math.round(lunch*100)} % · Dîner ≈ ${Math.round(dinner*100)} %`:'Répartition en cours d’apprentissage';
+    el.innerHTML=`<div class="card"><div class="eyebrow">Coach nutrition · observation</div><h2>${escapeHtml(status.title)}</h2><p>${escapeHtml(status.text)}</p><div class="report-grid"><div><strong>${w.avgCalories?Math.round(w.avgCalories):'—'}</strong><span>kcal moy./j · 7 j</span></div><div><strong>${w.avgProtein?Math.round(w.avgProtein):'—'} g</strong><span>protéines moy./j</span></div><div><strong>${b.daysWithNutrition||0}</strong><span>jours observés · 14 j</span></div><div><strong>${b.avgDrinkKcal?Math.round(b.avgDrinkKcal):'—'}</strong><span>kcal boissons moy./j</span></div></div><div class="coach-note"><strong>🧭 Ton rythme en construction</strong><p>${escapeHtml(rhythm)}. Collations moyennes : ${Number.isFinite(b.avgSnackCount)?Number(b.avgSnackCount).toFixed(1).replace('.',','):'—'} / jour observé.</p></div><div class="coach-note"><strong>🔒 Pour l’instant</strong><p>Aucune cible calorique n’est modifiée. Cette phase sert à construire une référence personnelle fiable.</p></div></div>`;
+    return;
+  }
+  const r=st.lastGeneratedReport?.endDate===TODAY?st.lastGeneratedReport:null;
+  if(!r){
+    el.innerHTML=`<div class="card"><div class="eyebrow">Coach nutrition · bilan hebdomadaire</div><h2>Ton bilan est prêt à être analysé</h2><p class="muted">L’analyse complète se lance uniquement quand tu la demandes. Elle n’alourdit donc pas le démarrage de VitaTrack.</p><div class="report-grid"><div><strong>${w.avgCalories?Math.round(w.avgCalories):'—'}</strong><span>kcal moy./j · 7 j</span></div><div><strong>${w.avgProtein?Math.round(w.avgProtein):'—'} g</strong><span>protéines moy./j</span></div><div><strong>${w.daysWithNutrition||0}</strong><span>jours enregistrés</span></div><div><strong>${w.drinkKcal?Math.round(w.drinkKcal):0}</strong><span>kcal boissons · semaine</span></div></div><button class="btn btn-primary btn-block" style="margin-top:14px" onclick="const rr=coachGenerateWeeklyReport();if(rr.status==='insufficient')toast('Pas assez de jours enregistrés pour un bilan fiable');renderWeeklyReport('weeklyReportHome')">✨ Générer mon bilan</button></div>`;
+    return;
+  }
+  if(r.status!=='ready'){el.innerHTML=`<div class="card"><h2>Bilan indisponible</h2><p class="muted">Les données de cette semaine ne sont pas encore suffisantes pour une analyse fiable.</p></div>`;return;}
+  const weightText=Number.isFinite(r.cap.weightWeeklyRate)?`${r.cap.weightWeeklyRate>0?'+':''}${r.cap.weightWeeklyRate.toFixed(2).replace('.',',')} kg/sem`:'Tendance insuffisante';
+  const positives=r.positives?.length?r.positives.map(x=>`<li>${escapeHtml(x)}</li>`).join(''):'<li>Rien de particulier à signaler positivement cette semaine — je préfère ne rien inventer.</li>';
+  const observations=r.observations?.length?r.observations.map(x=>`<li>${escapeHtml(x)}</li>`).join(''):'<li>Rien de particulier à signaler cette semaine. Ton équilibre paraît raisonnable.</li>';
+  const q=r.question;
+  const questionHtml=q?`<div class="coach-note"><strong>Une question pour mieux comprendre</strong><p>${escapeHtml(q.text)}</p>${q.answered?`<span class="chip">Réponse : ${escapeHtml(q.answered)}</span>`:`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${q.choices.map(c=>`<button class="btn btn-ghost btn-sm" onclick="coachAnswerContext('${q.id}','${c}')">${c}</button>`).join('')}</div>`}</div>`:'';
+  el.innerHTML=`<div class="card"><div class="eyebrow">Coach nutrition · bilan hebdomadaire</div><h2>Ta semaine en 5 points</h2>
+    <div class="coach-note"><strong>1 · Ton cap</strong><p>${Math.round(r.cap.avgCalories||0)} / ${Math.round(r.cap.avgTarget||target.calories)} kcal en moyenne · ${r.cap.loggedDays}/7 jours enregistrés<br>${escapeHtml(weightText)}</p></div>
+    <div class="coach-note"><strong>2 · Ce qui va bien</strong><ul style="margin:7px 0 0;padding-left:18px">${positives}</ul></div>
+    <div class="coach-note"><strong>3 · Ce que j’ai remarqué</strong><ul style="margin:7px 0 0;padding-left:18px">${observations}</ul></div>
+    ${questionHtml}
+    <div class="coach-note"><strong>4 · Ta priorité</strong><p>${escapeHtml(r.priority)}</p></div>
+    <div class="coach-note"><strong>5 · Calories</strong><p><b>${escapeHtml(r.calorie.text)}</b><br>${escapeHtml(r.calorie.reason)}</p>${r.calorie?.proposal?.eligible&&!r.calorie.applied&&!r.calorie.dismissed?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn btn-primary btn-sm" onclick="coachApplyCalorieProposal()">Appliquer ${Math.round(r.calorie.proposal.to)} kcal</button><button class="btn btn-ghost btn-sm" onclick="coachDismissCalorieProposal()">Garder ma cible</button></div>`:''}${r.calorie?.applied?`<div style="margin-top:8px"><span class="chip">✓ Cible appliquée</span></div>`:''}</div>
+    <button class="btn btn-ghost btn-block" style="margin-top:12px" onclick="coachClearGeneratedReport()">↻ Recalculer le bilan</button></div>`;
+}
 function weeklyFoodSuggestion(){const d=dayTotals();if(d.protein<proteinTarget()*0.7)return'Ajoute une source de protéines simple à un repas que tu manges déjà : skyr, fromage blanc, œufs, poulet, poisson ou légumineuses.';if(d.kcal>calorieTarget())return'Privilégie les aliments rassasiants et peu denses en calories : légumes, fruits entiers, pommes de terre, soupes, protéines maigres.';return'Garde les aliments que tu apprécies. Pour varier, compare leurs fiches dans le Guide nutritionnel et choisis une alternative qui te convient.';}
 
 function renderNutritionCoach(){const r=weeklyReport();setText('nutritionCoachTitle',r.title);setText('nutritionCoachText',r.text);}

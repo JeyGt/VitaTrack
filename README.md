@@ -32,3 +32,21 @@ Les anciens modules Sport ont été regroupés sans modifier leur logique :
 - Apparence : clair, sombre ou selon le système.
 - Connexion Withings accessible depuis Profil, en réutilisant le connecteur existant.
 - Zone prête pour de futurs connecteurs (Apple Santé, Health Connect, Garmin, etc.).
+
+
+## Compte VitaTrack et synchronisation multi-appareils
+
+Le frontend et l’API de synchronisation sont déjà inclus (`cloud-sync.js` et `api/cloud.js`). Le compte utilise un e-mail comme identifiant et un mot de passe d’au moins 8 caractères.
+
+Pour activer la fonction sur le déploiement :
+
+1. Créer/configurer un projet Supabase.
+2. Exécuter `supabase/cloud_sync.sql` dans l’éditeur SQL Supabase.
+3. Configurer les variables d’environnement du serveur :
+   - `SUPABASE_URL`
+   - `SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `CLOUD_SESSION_SECRET` (secret long et aléatoire)
+4. Redéployer VitaTrack.
+
+Fonctionnement : les données restent local-first. Après connexion, chaque sauvegarde locale marque l’état comme modifié et déclenche une synchronisation cloud différée. Sur un autre appareil, la connexion au même compte permet de récupérer l’état cloud. Les réponses de `/api/` ne sont jamais mises en cache par le service worker.
