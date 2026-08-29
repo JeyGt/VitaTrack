@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'vitatrack-sport-custom-v1';
-const CACHE_VERSION = 'v145-workout-remove-intro';
+const CACHE_VERSION = 'v130-exercise-zones-eight-no-scroll';
 const CORE_CACHE = `${CACHE_PREFIX}core-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}runtime-${CACHE_VERSION}`;
 
@@ -24,15 +24,7 @@ const CORE_ASSETS = [
   './icon-512.png',
   './assets/sport-card-defis.png',
   './assets/sport-card-entrainements.png',
-  './assets/sport-card-exercices.png',
-  './assets/zones/cardio.png',
-  './assets/zones/jambes.png',
-  './assets/zones/bras.png',
-  './assets/zones/dos.png',
-  './assets/zones/abdos.png',
-  './assets/zones/pectoraux.png',
-  './assets/zones/fullbody.png',
-  './assets/zones/mobilite.png',
+  './assets/sport-card-exercices.png'
 ];
 
 self.addEventListener('install', event => {

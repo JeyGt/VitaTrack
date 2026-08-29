@@ -2,7 +2,7 @@
 
 
 (function(){
-  const S = { q:"", searchOpen:false, difficulty:[], equipment:[], duration:[], body:[], type:[], zone:[], goal:[], favorite:false, openFamilies:new Set() };
+  const S = { q:"", difficulty:[], equipment:[], duration:[], body:[], type:[], zone:[], goal:[], favorite:false, openFamilies:new Set() };
   const escapeHtml = v => String(v ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const E = () => window.EXERCISES || window.VITATRACK_EXERCISES || window.EXERCISES_CATALOG?.exercises || [];
   const favoriteIds = () => {
@@ -26,16 +26,15 @@
   const VARIANT_FAMILIES = new Set(['pushups','vertical_pushups','dips','bench_press','chest_fly','pullups','rows','deadlift','biceps','triceps','shoulder_press','shoulder_isolation','abs_flexion','leg_raises','planks','squats','lunges','hip_extension','glute_isolation','hamstrings','burpees','handstand','lsit','levers','planche_skill','single_leg_squat']);
   const label = v => labels[v] || v;
   const filterIcon = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-6.2 7.1v5.4l-3.6 1.8v-7.2L4 5z"/></svg>`;
-  const searchIcon = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m15.5 15.5 4.2 4.2"/></svg>`;
   const zoneIcons = {
-    cardio:`<img src="./assets/zones/cardio.png" alt="" aria-hidden="true">`,
-    jambes:`<img src="./assets/zones/jambes.png" alt="" aria-hidden="true">`,
-    bras:`<img src="./assets/zones/bras.png" alt="" aria-hidden="true">`,
-    dos:`<img src="./assets/zones/dos.png" alt="" aria-hidden="true">`,
-    abdos:`<img src="./assets/zones/abdos.png" alt="" aria-hidden="true">`,
-    pectoraux:`<img src="./assets/zones/pectoraux.png" alt="" aria-hidden="true">`,
-    fullbody:`<img src="./assets/zones/fullbody.png" alt="" aria-hidden="true">`,
-    mobilite:`<img src="./assets/zones/mobilite.png" alt="" aria-hidden="true">`
+    cardio:`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 26.2S6.2 20.6 6.2 13.2c0-3.7 4.3-5.4 9.8-1.6 5.5-3.8 9.8-2.1 9.8 1.6 0 7.4-9.8 13-9.8 13Z"/><path d="M8.6 16h4l1.8-3.7 3.1 7 1.7-3.3h4.2"/></svg>`,
+    jambes:`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M12.2 6.1c.4 4.3.1 8.2-1.1 12l-1.8 7.1"/><path d="M19.8 6.1c-.4 4.3-.1 8.2 1.1 12l1.8 7.1"/><path d="M9.3 25.2c2.1.1 3.5.8 4.3 2.3M22.7 25.2c-2.1.1-3.5.8-4.3 2.3"/><path d="M11.5 17.9h9"/></svg>`,
+    bras:`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M8.1 23.4c3.3-.8 5.1-2.9 5.8-6.4.3-1.6 1.5-2.7 3-2.7 1.3 0 2.4.8 2.9 2l.7 1.8c.4.9 1.2 1.4 2.1 1.4H25c-.4 4.2-3.8 6.5-9.1 6.5h-5.2c-1.4 0-2.6-1.1-2.6-2.6Z"/><path d="M14.3 15.1 12 10.3l2.9-2.1 2.8 4.6"/></svg>`,
+    dos:`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M12.1 6.6c1 1 2.3 1.5 3.9 1.5s2.9-.5 3.9-1.5"/><path d="m11 8.5-2.1 4.8 2 12.2h10.2l2-12.2L21 8.5"/><path d="M16 8.8v16.7"/><path d="M12.6 12.4c.8 1.1 2 1.7 3.4 1.7s2.6-.6 3.4-1.7"/></svg>`,
+    abdos:`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M11.2 6.1c1.3.9 2.9 1.4 4.8 1.4s3.5-.5 4.8-1.4l1.7 4.1-1.7 15.6h-9.6L9.5 10.2l1.7-4.1Z"/><path d="M13.2 11.2h5.6M13 15.3h6M13 19.4h6M16 9.1v15"/></svg>`,
+    pectoraux:`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M11.3 6.4c1.3.9 2.8 1.3 4.7 1.3s3.4-.4 4.7-1.3l2.8 2.2-1.7 15.8H10.2L8.5 8.6l2.8-2.2Z"/><path d="M10.4 12.2c2-1.4 3.9-1.6 5.6-.1 1.7-1.5 3.6-1.3 5.6.1"/><path d="M16 11.3v5.3"/></svg>`,
+    fullbody:`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="6.1" r="2.4"/><path d="M16 8.8v8.2M10.8 12.5 16 9.8l5.2 2.7M12.5 26.1 16 17l3.5 9.1M10.2 20.2l4.2-5M21.8 20.2l-4.2-5"/></svg>`,
+    mobilite:`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="21.2" cy="6.4" r="2.2"/><path d="m19.6 9.3-4 4.5-5.2 1.8M15.6 13.8l4 4 5 1M15.6 13.8l-.8 7.4-4.8 5M19.6 17.8l.8 8"/></svg>`
   };
   const smallIcons = {
     burn:`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c2.5 3.4 4.8 5.6 4.8 9.1A4.8 4.8 0 1 1 7.2 12c0-2.2 1.2-4.2 3.2-6 .1 2 .7 3 1.6 3.8C12.7 8 12.8 5.8 12 3Z"/></svg>`,
@@ -47,7 +46,7 @@
   };
   const zoneDefs = [
     ['cardio','Cardio'],['jambes','Jambes'],['bras','Bras'],['dos','Dos'],
-    ['abdos','Abdos'],['pectoraux','Pecs'],['fullbody','Corps'],['mobilite','Mobilité']
+    ['abdos','Abdos'],['pectoraux','Pectoraux'],['fullbody','Full body'],['mobilite','Mobilité']
   ];
   const goalDefs = [
     ['perte_poids','Perte de poids','burn'],['prise_muscle','Prise de muscle','muscle'],['endurance','Endurance','endurance']
@@ -185,14 +184,14 @@
     el.innerHTML=`
       <div class="exercise-header">
         <button class="exercise-back" onclick="closeExerciseLibrary()" aria-label="Retour">←</button>
-        <h2>Exercices</h2>
-        <div class="exercise-header-actions">
-          <button class="exercise-search-open ${S.searchOpen||S.q?'active':''}" onclick="exerciseSearchToggle()" aria-label="Rechercher un exercice" aria-pressed="${S.searchOpen?'true':'false'}">${searchIcon}</button>
-          <button class="exercise-filter-open ${filtersActive()?"active":""}" onclick="exerciseFiltersToggle()" aria-label="Filtrer les exercices" aria-pressed="${filtersActive()?"true":"false"}">${filterIcon}${activeCount?`<span class="exercise-filter-badge">${activeCount}</span>`:''}</button>
-        </div>
+        <input class="exercise-search" value="${escapeHtml(S.q)}" placeholder="Rechercher un exercice ou une famille…" oninput="exerciseSetSearch(this.value)">
+        <button class="exercise-filter-open ${filtersActive()?"active":""}" onclick="exerciseFiltersToggle()" aria-label="Filtrer les exercices" aria-pressed="${filtersActive()?"true":"false"}">${filterIcon}${activeCount?`<span class="exercise-filter-badge">${activeCount}</span>`:''}</button>
       </div>
-      ${S.searchOpen?`<div class="exercise-search-panel"><input id="exerciseSearchInput" class="exercise-search" value="${escapeHtml(S.q)}" placeholder="Rechercher un exercice ou une famille…" oninput="exerciseSetSearch(this.value)"><button type="button" class="exercise-search-clear" onclick="exerciseSearchClear()" aria-label="Effacer la recherche">×</button></div>`:''}
       <div class="exercise-quick-zones-section">
+        <div class="exercise-quick-zones-head">
+          <span>Zones du corps</span>
+          ${S.zone.length?`<button type="button" class="exercise-quick-zones-clear" onclick="exerciseClearZones()">Effacer</button>`:''}
+        </div>
         <div class="exercise-zone-grid">
           ${zoneDefs.map(([id,text])=>zoneTile(id,text)).join('')}
         </div>
@@ -243,16 +242,6 @@
   window.openExerciseLibrary = render;
   window.closeExerciseLibrary = ()=>{screen().classList.remove("open");document.body.style.overflow="";};
   window.exerciseSetSearch = v=>{S.q = v;renderResults();};
-  window.exerciseSearchToggle = ()=>{
-    S.searchOpen=!S.searchOpen;
-    render();
-    if(S.searchOpen)requestAnimationFrame(()=>{const input=document.getElementById('exerciseSearchInput');input?.focus();if(input){const n=input.value.length;input.setSelectionRange?.(n,n);}});
-  };
-  window.exerciseSearchClear = ()=>{
-    S.q='';
-    render();
-    if(S.searchOpen)requestAnimationFrame(()=>document.getElementById('exerciseSearchInput')?.focus());
-  };
   window.exerciseToggleFamily=id=>{
     if(S.openFamilies.has(id))S.openFamilies.delete(id);else S.openFamilies.add(id);
     renderResults();
@@ -274,6 +263,7 @@
   }
   window.exerciseToggle = (k,v)=>updateExerciseFilter(()=>{const i=S[k].indexOf(v);if(i>=0)S[k].splice(i,1);else S[k].push(v);});
   window.exerciseZoneToggle = v=>quickUpdate(()=>{const i=S.zone.indexOf(v);if(i>=0)S.zone.splice(i,1);else S.zone.push(v);});
+  window.exerciseClearZones = ()=>quickUpdate(()=>{S.zone=[];});
   window.exerciseGoalToggle = v=>updateExerciseFilter(()=>{const i=S.goal.indexOf(v);if(i>=0)S.goal.splice(i,1);else S.goal.push(v);});
   window.exerciseFavorite = (ev,id)=>{
     ev?.preventDefault?.();
@@ -316,17 +306,11 @@
 
 (function(){
   const W = window.VITATRACK_WORKOUTS || [];
-  const WF = { levels:[], durations:[], equipment:[], goals:[], zones:[], favorite:false };
+  let activeType = "Tous", activeLevel = "Tous";
   const escapeHtml = v => String(v ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const E = id => (window.EXERCISES||window.VITATRACK_EXERCISES||window.EXERCISES_CATALOG?.exercises||[]).find(x=>x.id===id);
   const customWorkouts = () => Array.isArray(window.DATA?.sport?.customWorkouts)?window.DATA.sport.customWorkouts:[];
   const all = () => [...W,...customWorkouts()];
-  const favoriteWorkoutIds=()=>{
-    if(typeof DATA==='undefined'||!DATA?.sport)return new Set();
-    if(!Array.isArray(DATA.sport.favoriteWorkouts))DATA.sport.favoriteWorkouts=[];
-    return new Set(DATA.sport.favoriteWorkouts);
-  };
-  const isFavoriteWorkout=id=>favoriteWorkoutIds().has(id);
   window.sportAllWorkouts = all;
   window.getSportWorkoutById = id => all().find(x=>x.id===id)||null;
   function screen(){
@@ -347,7 +331,6 @@
             <span class="workout-tag">${w.time||"—"} min</span>
           </div>
         </div>
-        <button type="button" class="exercise-fav workout-fav ${isFavoriteWorkout(w.id)?'active':''}" aria-label="${isFavoriteWorkout(w.id)?'Retirer des favoris':'Ajouter aux favoris'}" aria-pressed="${isFavoriteWorkout(w.id)?'true':'false'}" onclick="toggleWorkoutFavorite(event,'${escapeHtml(w.id)}')">${isFavoriteWorkout(w.id)?'♥':'♡'}</button>
       </div>
       <div class="workout-ex-list">
         ${(w.ex||[]).map(a=>`<div class="workout-ex-line"><span>${escapeHtml(E(a[0])?.name||a[0])}</span><span>${a[1]} × ${escapeHtml(a[2])}</span></div>`).join("")}
@@ -356,169 +339,32 @@
       ${String(w.id||'').startsWith('custom-')?`<button class="workout-start" style="margin-top:7px;background:transparent;color:var(--ink-soft);border:1px solid var(--border)" onclick="deleteCustomWorkout('${escapeHtml(w.id)}')">Supprimer</button>`:''}
     </div>`;
   }
+  const filtersActive=()=>activeType!=="Tous"||activeLevel!=="Tous";
   const filterIcon=`<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-6.2 7.1v5.4l-3.6 1.8v-7.2L4 5z"/></svg>`;
-  const workoutIcons={
-    burn:`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c2.5 3.4 4.8 5.6 4.8 9.1A4.8 4.8 0 1 1 7.2 12c0-2.2 1.2-4.2 3.2-6 .1 2 .7 3 1.6 3.8C12.7 8 12.8 5.8 12 3Z"/></svg>`,
-    muscle:`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17c2.2-.8 3.4-2.5 3.8-5 .2-1.2 1.1-2 2.3-2 .9 0 1.7.5 2 1.3l.7 1.7c.3.7.9 1 1.6 1H20c0 3.8-2.9 6-7.2 6H6c-1.1 0-2-.9-2-2v-1Z"/><path d="M8.5 11 7 7.3 9.3 5.7l2.1 3.5"/></svg>`,
-    endurance:`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21S4 16.3 4 10.5C4 7.2 8 5.6 12 8.8c4-3.2 8-1.6 8 1.7C20 16.3 12 21 12 21Z"/><path d="M6.5 13h3l1.4-2.8 2.3 5.2 1.6-2.4h2.7"/></svg>`,
-    none:`<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="m7 17 10-10"/></svg>`,
-    halteres:`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10v4M6 8v8M9 10v4M15 10v4M18 8v8M21 10v4M9 12h6"/></svg>`,
-    barre:`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 11v2M5 8v8M8 10v4M16 10v4M19 8v8M22 11v2M8 12h8"/></svg>`
-  };
-  const workoutZoneDefs=[
-    ['cardio','Cardio'],['jambes','Jambes'],['bras','Bras'],['dos','Dos'],
-    ['abdos','Abdos'],['pectoraux','Pecs'],['fullbody','Corps'],['mobilite','Mobilité']
-  ];
-  const workoutZoneIcons={
-    cardio:`<img src="./assets/zones/cardio.png" alt="" aria-hidden="true">`,
-    jambes:`<img src="./assets/zones/jambes.png" alt="" aria-hidden="true">`,
-    bras:`<img src="./assets/zones/bras.png" alt="" aria-hidden="true">`,
-    dos:`<img src="./assets/zones/dos.png" alt="" aria-hidden="true">`,
-    abdos:`<img src="./assets/zones/abdos.png" alt="" aria-hidden="true">`,
-    pectoraux:`<img src="./assets/zones/pectoraux.png" alt="" aria-hidden="true">`,
-    fullbody:`<img src="./assets/zones/fullbody.png" alt="" aria-hidden="true">`,
-    mobilite:`<img src="./assets/zones/mobilite.png" alt="" aria-hidden="true">`
-  };
-  const workoutZoneBodyMap={
-    jambes:['jambes','quadriceps','fessiers','ischio-jambiers'],
-    bras:['bras','biceps','triceps'],
-    dos:['dos'],
-    abdos:['abdominaux','tronc'],
-    pectoraux:['pectoraux'],
-    fullbody:['corps complet']
-  };
-  const workoutAtomicZones=['jambes','bras','dos','abdos','pectoraux'];
-  const workoutAllScoredZones=[...workoutAtomicZones,'cardio','mobilite'];
-  const exerciseWorkoutZones=ex=>{
-    if(!ex)return [];
-    const body=Array.isArray(ex.body_area)?ex.body_area:[];
-    const types=Array.isArray(ex.types)?ex.types:[];
-    const zones=[];
-    for(const z of workoutAtomicZones){
-      if((workoutZoneBodyMap[z]||[]).some(v=>body.includes(v)))zones.push(z);
-    }
-    if(types.includes('cardio')||types.includes('hiit'))zones.push('cardio');
-    if(types.includes('mobilite')||types.includes('recuperation'))zones.push('mobilite');
-    return [...new Set(zones)];
-  };
-  const workoutZoneProfile=w=>{
-    // Règle simple : une zone est associée à l'entraînement dès que
-    // deux exercices distincts de la séance ciblent cette zone.
-    const counts=Object.fromEntries([...workoutAllScoredZones,'fullbody'].map(z=>[z,0]));
-    for(const item of (w?.ex||[])){
-      const ex=E(item?.[0]);
-      if(!ex)continue;
-      const body=Array.isArray(ex.body_area)?ex.body_area:[];
-      const zones=exerciseWorkoutZones(ex);
-      zones.forEach(z=>{counts[z]=(counts[z]||0)+1;});
-      if(body.includes('corps complet'))counts.fullbody+=1;
-    }
-    const significant=workoutAllScoredZones.filter(z=>(counts[z]||0)>=2);
-    const fullbody=(counts.fullbody||0)>=2;
-    const ranked=[...workoutAllScoredZones]
-      .map(zone=>({zone,count:counts[zone]||0}))
-      .filter(x=>x.count>0)
-      .sort((a,b)=>b.count-a.count||String(a.zone).localeCompare(String(b.zone),'fr'));
-    const primary=ranked[0]?.zone||null;
-    const secondary=ranked.filter(x=>x.zone!==primary&&x.count>=2).map(x=>x.zone).slice(0,2);
-    return {counts,significant,fullbody,primary,secondary};
-  };
-  const workoutZoneMatches=(w,z)=>{
-    const profile=workoutZoneProfile(w);
-    return z==='fullbody'?profile.fullbody:profile.significant.includes(z);
-  };
-  window.getWorkoutZoneProfile=workoutZoneProfile;
-  const workoutZoneTile=(id,label)=>`<button class="exercise-zone-tile ${WF.zones.includes(id)?'active':''}" onclick="toggleWorkoutZone('${id}')" aria-pressed="${WF.zones.includes(id)?'true':'false'}"><span class="exercise-zone-icon">${workoutZoneIcons[id]||''}</span><span>${label}</span></button>`;
-  const goalOptions=[["perte_poids","Perte de poids","burn"],["prise_muscle","Prise de muscle","muscle"],["endurance","Endurance","endurance"]];
-  const levelOptions=[["Débutant","★"],["Intermédiaire","★★"],["Avancé","★★★"]];
-  const durationOptions=[["short","20 min ou moins"],["medium","21–30 min"],["long","31 min et +"]];
-  const equipmentOrder=['none','halteres','barre','elastiques','kettlebell','machine','banc','trx'];
-  const equipmentLabels={none:'Sans matériel',halteres:'Haltères',barre:'Barre',elastiques:'Élastiques',kettlebell:'Kettlebell',machine:'Machine',banc:'Banc',trx:'TRX'};
-  const normaliseEquipment=v=>({aucun:'none',machines:'machine',barre_traction:'barre'}[v]||v);
-  const durationKey=w=>Number(w?.time||0)<=20?'short':Number(w?.time||0)<=30?'medium':'long';
-  const workoutEquipmentSet=w=>{
-    const set=new Set();
-    for(const item of (w?.ex||[])){
-      const ex=E(item?.[0]);
-      for(const eq of (ex?.equipment||[]))set.add(normaliseEquipment(eq));
-    }
-    if(!set.size){
-      if(/sans matériel/i.test(String(w?.eq||'')))set.add('none');
-      else if(/halt[eè]res/i.test(String(w?.eq||'')))set.add('halteres');
-    }
-    return set;
-  };
-  const availableEquipmentOptions=()=>{
-    const present=new Set();
-    all().forEach(w=>workoutEquipmentSet(w).forEach(v=>present.add(v)));
-    return equipmentOrder.filter(v=>present.has(v)).map(v=>[v,equipmentLabels[v]]);
-  };
-  const workoutGoalMatches=(w,g)=>{
-    const cats=String(w?.cat||'').toLowerCase();
-    const exs=(w?.ex||[]).map(a=>E(a?.[0])).filter(Boolean);
-    const types=new Set(exs.flatMap(x=>x.types||[]));
-    if(g==='perte_poids')return /hiit|cardio|express/.test(cats)||types.has('hiit')||types.has('cardio');
-    if(g==='prise_muscle')return /full body|haut du corps|bas du corps|tronc|renforcement|calisthénie|matériel/.test(cats)||types.has('renforcement')||types.has('calisthenie');
-    if(g==='endurance')return /hiit|cardio/.test(cats)||types.has('cardio')||types.has('hiit');
-    return true;
-  };
-  const filtersActive=()=>WF.favorite||WF.levels.length||WF.durations.length||WF.equipment.length||WF.goals.length;
-  const activeFilterCount=()=>WF.levels.length+WF.durations.length+WF.equipment.length+WF.goals.length+(WF.favorite?1:0);
-  const workoutFiltered=()=>all().filter(w=>{
-    if(WF.favorite&&!isFavoriteWorkout(w.id))return false;
-    if(WF.zones.length&&!WF.zones.some(z=>workoutZoneMatches(w,z)))return false;
-    if(WF.goals.length&&!WF.goals.some(g=>workoutGoalMatches(w,g)))return false;
-    if(WF.levels.length&&w.level!=='Tous niveaux'&&!WF.levels.includes(w.level))return false;
-    if(WF.durations.length&&!WF.durations.includes(durationKey(w)))return false;
-    if(WF.equipment.length){const set=workoutEquipmentSet(w);if(!WF.equipment.some(v=>set.has(v)))return false;}
-    return true;
-  });
-  const filterChip=(key,value,label,extra='')=>`<button class="workout-filter-chip ${WF[key].includes(value)?'active':''}" onclick="toggleWorkoutFilter('${key}','${value}')" aria-pressed="${WF[key].includes(value)?'true':'false'}">${extra}${label}</button>`;
   function render(){
     const el=screen();
-    const list=workoutFiltered();
-    const activeCount=activeFilterCount();
-    el.innerHTML=`<div class="workout-header"><button class="workout-back" onclick="closeWorkoutLibrary()">←</button><h2>Entraînements</h2><div class="workout-header-actions"><button class="workout-filter-open ${filtersActive()?"active":""}" onclick="workoutFiltersToggle()" aria-label="Filtrer les entraînements" aria-pressed="${filtersActive()?"true":"false"}">${filterIcon}${activeCount?`<span class="exercise-filter-badge">${activeCount}</span>`:''}</button><button class="workout-add" onclick="openWorkoutBuilder()" aria-label="Créer un entraînement">+</button></div></div>
-    <div class="exercise-quick-zones-section workout-quick-zones">
-      <div class="exercise-zone-grid">${workoutZoneDefs.map(([id,label])=>workoutZoneTile(id,label)).join('')}</div>
-    </div>
+    const list=all().filter(w=>(activeType==="Tous"||w.cat===activeType)&&(activeLevel==="Tous"||w.level===activeLevel));
+    const types=["Tous","Full body","Haut du corps","Bas du corps","Tronc","HIIT","Cardio","Mobilité","Express","Calisthénie","Renforcement"];
+    const levels=["Tous","Débutant","Intermédiaire","Avancé","Tous niveaux"];
+    el.innerHTML=`<div class="workout-header"><button class="workout-back" onclick="closeWorkoutLibrary()">←</button><h2>Entraînements</h2><div class="workout-header-actions"><button class="workout-filter-open ${filtersActive()?"active":""}" onclick="workoutFiltersToggle()" aria-label="Filtrer les entraînements" aria-pressed="${filtersActive()?"true":"false"}">${filterIcon}</button><button class="workout-add" onclick="openWorkoutBuilder()" aria-label="Créer un entraînement">+</button></div></div>
     <div class="workout-content">
-      ${list.map(card).join("")||'<div class="workout-card">Aucun entraînement ne correspond aux filtres.</div>'}
+      <p class="workout-intro">Choisis une séance prête à l’emploi ou compose la tienne avec les exercices de la bibliothèque.</p>
+      <div class="workout-tabs"><button class="workout-tab active">Séances</button><button class="workout-tab" onclick="openWorkoutBuilder()">Créer mon entraînement</button></div>
+      ${list.map(card).join("")||'<div class="workout-card">Aucune séance ne correspond aux filtres.</div>'}
     </div>
     <div id="workoutFilterBackdrop" class="exercise-filter-backdrop" onclick="workoutFiltersToggle()"></div>
-    <div id="workoutFilterSheet" class="exercise-filter-panel workout-filter-panel" role="dialog" aria-modal="true" aria-label="Filtres des entraînements">
-      <div class="exercise-filter-head"><h2>Filtres</h2><button type="button" class="exercise-filter-close" onclick="workoutFiltersToggle()" aria-label="Fermer les filtres">×</button></div>
-      <div class="exercise-filter-scroll">
-        <section class="exercise-filter-section exercise-favorite-section">
-          <div class="exercise-filter-title">Affichage</div>
-          <button type="button" class="exercise-favorite-only ${WF.favorite?'active':''}" onclick="toggleWorkoutFavoriteFilter()" aria-pressed="${WF.favorite?'true':'false'}">
-            <span class="exercise-favorite-only-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20.4S4.5 16 4.5 10.5C4.5 7.4 8.3 5.8 12 8.8c3.7-3 7.5-1.4 7.5 1.7 0 5.5-7.5 9.9-7.5 9.9Z"/></svg></span>
-            <span class="exercise-favorite-only-copy"><strong>Favoris uniquement</strong><small>${favoriteWorkoutIds().size} entraînement${favoriteWorkoutIds().size!==1?'s':''} enregistré${favoriteWorkoutIds().size!==1?'s':''}</small></span>
-            <span class="exercise-favorite-only-check" aria-hidden="true">✓</span>
-          </button>
-        </section>
-        <section class="exercise-filter-section"><div class="exercise-filter-title">Objectif</div><div class="workout-filter-wrap">${goalOptions.map(([v,t,icon])=>filterChip('goals',v,t,`<span class="workout-filter-icon">${workoutIcons[icon]||''}</span>`)).join('')}</div></section>
-        <section class="exercise-filter-section"><div class="exercise-filter-title">Matériel</div><div class="workout-filter-wrap">${availableEquipmentOptions().map(([v,t])=>filterChip('equipment',v,t,`<span class="workout-filter-icon">${workoutIcons[v]||''}</span>`)).join('')}</div></section>
-        <section class="exercise-filter-section"><div class="exercise-filter-title">Difficulté</div><div class="workout-filter-wrap difficulty-filter-row">${levelOptions.map(([v,stars])=>filterChip('levels',v,v,`<span class="difficulty-stars">${stars}</span>`)).join('')}</div></section>
-        <section class="exercise-filter-section"><div class="exercise-filter-title">Durée</div><div class="workout-filter-wrap">${durationOptions.map(([v,t])=>filterChip('durations',v,t)).join('')}</div></section>
-      </div>
-      <div class="exercise-filter-actions"><button class="exercise-filter-reset" onclick="resetWorkoutFilters()"><span aria-hidden="true">↻</span> Réinitialiser</button><button class="exercise-filter-results" onclick="workoutFiltersToggle()">Voir les résultats <span>${list.length}</span> <b aria-hidden="true">→</b></button></div>
+    <div id="workoutFilterSheet" class="exercise-filter-panel workout-filter-panel">
+      <div class="exercise-filter-title">Type d’entraînement</div>
+      <div class="exercise-filters">${types.map(t=>`<button class="workout-chip ${t===activeType?"active":""}" onclick="setWorkoutType('${t}')">${t}</button>`).join("")}</div>
+      <div class="exercise-filter-title">Niveau</div>
+      <div class="exercise-filters">${levels.map(t=>`<button class="workout-chip ${t===activeLevel?"active":""}" onclick="setWorkoutLevel('${t}')">${t}</button>`).join("")}</div>
+      <div class="exercise-filter-actions"><button class="exercise-filter-reset" onclick="resetWorkoutFilters()">Réinitialiser</button><button class="exercise-filter-results" onclick="workoutFiltersToggle()">Voir les résultats (${list.length})</button></div>
     </div>`;
     el.classList.add("open");document.body.style.overflow="hidden";
   }
-  function reopenFilters(scrollTop=0){
-    const panel=document.getElementById("workoutFilterSheet"),back=document.getElementById("workoutFilterBackdrop");
-    panel?.classList.add("open","filter-refresh");back?.classList.add("open");
-    requestAnimationFrame(()=>{const scroll=panel?.querySelector('.exercise-filter-scroll');if(scroll)scroll.scrollTop=scrollTop;});
-  }
-  function updateWorkoutFilter(mutator,resetScroll=false){
-    const scrollTop=resetScroll?0:(document.querySelector('#workoutFilterSheet .exercise-filter-scroll')?.scrollTop||0);
-    mutator();render();reopenFilters(scrollTop);
-  }
-  function updateWorkoutZone(mutator){
-    const top=screen().scrollTop;
-    mutator();render();
-    requestAnimationFrame(()=>{screen().scrollTop=top;});
+  function reopenFilters(){
+    document.getElementById("workoutFilterSheet")?.classList.add("open");
+    document.getElementById("workoutFilterBackdrop")?.classList.add("open");
   }
   window.openWorkoutLibrary=render;
   window.closeWorkoutLibrary=()=>{screen().classList.remove("open");document.body.style.overflow="";};
@@ -526,22 +372,11 @@
     const panel=document.getElementById("workoutFilterSheet"),back=document.getElementById("workoutFilterBackdrop");
     if(!panel)return;
     const open=!panel.classList.contains("open");
-    if(open)panel.classList.remove('filter-refresh');
     panel.classList.toggle("open",open);back?.classList.toggle("open",open);
   };
-  window.toggleWorkoutFilter=(key,value)=>updateWorkoutFilter(()=>{const i=WF[key].indexOf(value);if(i>=0)WF[key].splice(i,1);else WF[key].push(value);});
-  window.toggleWorkoutZone=value=>updateWorkoutZone(()=>{const i=WF.zones.indexOf(value);if(i>=0)WF.zones.splice(i,1);else WF.zones.push(value);});
-  window.toggleWorkoutFavoriteFilter=()=>updateWorkoutFilter(()=>{WF.favorite=!WF.favorite;});
-  window.toggleWorkoutFavorite=(ev,id)=>{
-    ev?.preventDefault?.();ev?.stopPropagation?.();
-    if(typeof DATA==='undefined'||!DATA?.sport)return;
-    const list=Array.isArray(DATA.sport.favoriteWorkouts)?DATA.sport.favoriteWorkouts:(DATA.sport.favoriteWorkouts=[]);
-    const i=list.indexOf(id);if(i>=0)list.splice(i,1);else list.push(id);
-    DATA.sport.favoriteWorkouts=[...new Set(list)];
-    if(typeof saveState==='function')saveState();
-    render();
-  };
-  window.resetWorkoutFilters=()=>updateWorkoutFilter(()=>{WF.levels=[];WF.durations=[];WF.equipment=[];WF.goals=[];WF.zones=[];WF.favorite=false;},true);
+  window.setWorkoutType=v=>{activeType=v;render();reopenFilters();};
+  window.setWorkoutLevel=v=>{activeLevel=v;render();reopenFilters();};
+  window.resetWorkoutFilters=()=>{activeType="Tous";activeLevel="Tous";render();reopenFilters();};
   window.openWorkoutBuilder=()=>{
     const el=screen(); window.__workoutBuilder=[];
     el.innerHTML=`<div class="workout-header"><button class="workout-back" onclick="openWorkoutLibrary()">←</button><h2>Créer</h2><div></div></div>
