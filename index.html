@@ -1680,29 +1680,54 @@ body[data-theme="dark"] .calendar-nutrition-summary.bad{background:rgba(224,105,
 </style>
 <style>
 /* Catalogue alimentaire visuel */
-.guide-catalog-head{padding:14px}
-.guide-catalog-intro{display:flex;flex-direction:column;gap:3px;margin-bottom:11px}.guide-catalog-intro strong{font-size:15px}.guide-catalog-intro span{font-size:11px;color:var(--ink-soft);line-height:1.4}
-.guide-search{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--surface-alt);color:var(--ink);font-size:14px;box-sizing:border-box}
+.guide-search{width:100%;padding:12px 14px;border-radius:14px;border:1px solid var(--border);background:var(--surface-alt);color:var(--ink);font-size:14px;box-sizing:border-box}
 .guide-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);font-weight:800;margin:13px 0 7px}
 .guide-chip-row{display:flex;gap:7px;overflow-x:auto;padding-bottom:3px;scrollbar-width:none}.guide-chip-row::-webkit-scrollbar{display:none}
-.guide-chip{flex:none;border:1px solid var(--border);background:var(--surface);color:var(--ink-soft);border-radius:999px;padding:7px 10px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap}
+.guide-chip{flex:none;border:1px solid var(--border);background:var(--surface);color:var(--ink-soft);border-radius:999px;padding:8px 11px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap}
 .guide-chip.active{background:var(--primary-tint);border-color:var(--primary);color:var(--primary-dark)}
-.guide-compare-row .guide-chip.active{padding-right:9px}.guide-compare-arrow{display:inline-block;margin-left:4px;font-size:10px;font-weight:900}.guide-count-row{display:flex;align-items:center;justify-content:flex-end;margin-top:10px;padding-top:9px;border-top:1px solid var(--border)}.guide-count-row>span{font-size:11px;color:var(--ink-soft);font-weight:750}
-.guide-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:10px}
-.guide-food-card{min-width:0;border:1px solid var(--border);background:var(--surface);border-radius:15px;padding:12px;text-align:left;color:var(--ink);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
-.guide-food-category{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.guide-food-card>strong{font-size:13px;line-height:1.25;min-height:32px}.guide-food-kcal{font-size:12px;color:var(--ink-soft)}.guide-food-kcal b{font-family:Fraunces,serif;font-size:23px;color:var(--ink);font-weight:600}.guide-food-kcal small{font-size:9px}.guide-food-macros{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:7px 0 6px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}.guide-food-macros span{min-width:0;display:flex;flex-direction:column;gap:1px}.guide-food-macros b{font-size:10px;line-height:1.1}.guide-food-macros small{font-size:8px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.guide-food-bottom{display:flex;align-items:center;justify-content:flex-start;gap:6px;margin-top:auto;font-size:9px;color:var(--ink-soft);font-weight:750}.guide-gi-badge{padding:4px 6px;border-radius:999px;background:var(--surface-alt);white-space:nowrap}.guide-gi-badge.low{background:rgba(30,160,90,.10);color:#187848}.guide-gi-badge.medium{background:rgba(210,145,35,.12);color:#9a6412}.guide-gi-badge.high{background:rgba(205,70,70,.10);color:#a33b3b}.guide-empty{grid-column:1/-1;padding:22px 12px;text-align:center;color:var(--ink-soft);font-size:12px}
+.guide-compare-row .guide-chip.active{padding-right:9px}.guide-compare-arrow{display:inline-block;margin-left:4px;font-size:10px;font-weight:900}
+.guide-count-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
+.guide-count-row>span{font-size:11px;color:var(--ink-soft);font-weight:750}
+.guide-active-hint{font-size:10px;color:var(--primary);font-weight:800}
+.guide-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:12px;padding-bottom:8px}
+.guide-food-card{width:100%;min-width:0;border:1px solid var(--border);background:var(--surface);border-radius:17px;padding:12px;text-align:left;color:var(--ink);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:7px}
+.guide-food-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.guide-food-category{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.guide-food-card>strong{font-size:13px;line-height:1.25;min-height:32px}
+.guide-food-kcal{font-size:12px;color:var(--ink-soft)}.guide-food-kcal b{font-family:Fraunces,serif;font-size:23px;color:var(--ink);font-weight:600}.guide-food-kcal small{font-size:9px}
+.guide-food-macros{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:7px 0 6px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}.guide-food-macros span{min-width:0;display:flex;flex-direction:column;gap:1px}.guide-food-macros b{font-size:10px;line-height:1.1}.guide-food-macros small{font-size:8px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.guide-food-bottom{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:auto;font-size:9px;color:var(--ink-soft);font-weight:750}
+.guide-gi-badge,.guide-quality-badge{padding:4px 7px;border-radius:999px;background:var(--surface-alt);white-space:nowrap;font-size:9px;font-weight:900}
+.guide-gi-badge.low{background:rgba(30,160,90,.10);color:#187848}.guide-gi-badge.medium{background:rgba(210,145,35,.12);color:#9a6412}.guide-gi-badge.high{background:rgba(205,70,70,.10);color:#a33b3b}
+.guide-quality-badge.star{background:rgba(212,163,28,.14);color:#926507}.guide-quality-badge.good{background:rgba(30,160,90,.12);color:#187848}.guide-quality-badge.dose{background:rgba(210,145,35,.12);color:#9a6412}.guide-quality-badge.limit{background:rgba(205,70,70,.11);color:#a33b3b}
+.guide-empty{grid-column:1/-1;padding:22px 12px;text-align:center;color:var(--ink-soft);font-size:12px}
 @media(max-width:350px){.guide-card-grid{grid-template-columns:1fr}}
 .nutrition-guide-entry{width:100%;border:1px solid var(--border);background:var(--surface);border-radius:16px;padding:15px 16px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;color:var(--ink);font-weight:800;font-size:14px;text-align:left}
 .nutrition-guide-entry:active{transform:scale(.99)}
 .nutrition-guide-chevron{font-size:22px;color:var(--ink-soft);font-weight:500;line-height:1}
-.guide-catalog-panel{position:fixed;inset:0;z-index:49;background:var(--bg);display:none;overflow-y:auto;padding:18px 18px calc(34px + env(safe-area-inset-bottom));overscroll-behavior:contain}
+.guide-catalog-panel{position:fixed;inset:0;z-index:49;background:var(--bg);display:none;overflow:hidden;overscroll-behavior:contain}
 .guide-catalog-panel.open{display:block}
-.guide-catalog-panel-head{position:sticky;top:-18px;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;margin:-18px -18px 13px;padding:18px 18px 12px;background:var(--bg);border-bottom:1px solid var(--border)}
-.guide-catalog-panel-head h2{font-family:Fraunces,serif;font-size:25px;margin:1px 0 0;font-weight:600}
-.guide-panel-eyebrow{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-soft);font-weight:850}
-.guide-catalog-panel-body{max-width:760px;margin:0 auto}
-.guide-catalog-panel .guide-catalog-head{margin:0}
-.guide-catalog-panel .guide-card-grid{padding-bottom:8px}
+.guide-catalog-topbar{position:sticky;top:0;z-index:5;display:grid;grid-template-columns:84px 1fr 84px;align-items:center;gap:8px;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;background:var(--bg);border-bottom:1px solid var(--border)}
+.guide-topbar-back,.guide-topbar-btn{width:40px;height:40px;border:0;background:transparent;color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.guide-topbar-back{font-size:25px;font-weight:400;line-height:1}
+.guide-topbar-back:active,.guide-topbar-btn:active{opacity:.72;transform:scale(.96)}
+.guide-topbar-actions{display:flex;align-items:center;justify-content:flex-end;gap:4px;width:84px}
+.guide-topbar-btn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.guide-topbar-btn.active{color:var(--primary)}
+.guide-topbar-center{text-align:center;min-width:0}.guide-topbar-center h2{font-family:'Fraunces',serif;font-size:18px;line-height:1.2;font-weight:700;margin:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.guide-catalog-panel-body{height:calc(100vh - env(safe-area-inset-top) - 62px);overflow-y:auto;max-width:760px;margin:0 auto;padding:14px 14px calc(34px + env(safe-area-inset-bottom));box-sizing:border-box;scrollbar-width:none}
+.guide-catalog-panel-body::-webkit-scrollbar{display:none}
+.guide-search-shell{display:none;margin-bottom:10px}.guide-search-shell.open{display:block}
+.guide-catalog-head{padding:14px;display:none}.guide-catalog-head.open{display:block}
+.guide-catalog-intro{display:flex;flex-direction:column;gap:3px;margin-bottom:11px}.guide-catalog-intro strong{font-size:15px}.guide-catalog-intro span{font-size:11px;color:var(--ink-soft);line-height:1.4}
+.guide-filter-group+.guide-filter-group{margin-top:2px}
+.guide-detail-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.guide-detail-sub{font-size:11px;color:var(--ink-soft);font-weight:800}
+.guide-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+.guide-detail-grid .metric{padding:11px}
+.guide-detail-grid .metric strong{font-size:18px;font-family:inherit}
+.guide-detail-grid .metric span{font-size:10px}
+@media(max-width:360px){.guide-catalog-panel-body{padding-left:10px;padding-right:10px}.guide-topbar-actions{gap:6px}.guide-topbar-back,.guide-topbar-btn{width:38px;height:38px}}
 </style>
 
 <style id="dashboard-weight-cleanup">
@@ -1897,13 +1922,14 @@ body[data-theme="dark"] .calendar-nutrition-summary.bad{background:rgba(224,105,
 .exercise-quick-zones-section{padding:8px 14px 0}
 .exercise-quick-zones-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 7px}
 .exercise-quick-zones-head>span{font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
-.exercise-zone-grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;overflow:visible;padding-bottom:0}
-.exercise-zone-tile{width:auto;min-width:0;min-height:50px;padding:5px 2px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--ink-soft);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;transition:transform .14s ease,background .14s ease,border-color .14s ease,color .14s ease,box-shadow .14s ease;box-shadow:var(--shadow)}
+.exercise-quick-zones-clear{border:0;background:transparent;color:var(--primary);font:inherit;font-size:10px;font-weight:850;padding:2px 0;cursor:pointer}
+.exercise-zone-grid{display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;padding-bottom:2px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.exercise-zone-grid::-webkit-scrollbar{display:none}
+.exercise-zone-tile{width:64px;min-width:64px;min-height:58px;padding:6px 4px 6px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--ink-soft);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:transform .14s ease,background .14s ease,border-color .14s ease,color .14s ease,box-shadow .14s ease;box-shadow:var(--shadow);flex:none}
 .exercise-zone-tile:active{transform:scale(.97)}
-.exercise-zone-tile>span:last-child{font-size:6.4px;line-height:1;font-weight:900;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-.exercise-zone-icon{width:25px;height:25px;display:flex;align-items:center;justify-content:center;color:var(--ink)}
-.exercise-zone-icon svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;overflow:visible}
-.exercise-zone-icon img{width:26px;height:26px;object-fit:contain;display:block;filter:none;opacity:.98}
+.exercise-zone-tile>span:last-child{font-size:7.2px;line-height:1.05;font-weight:900;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.exercise-zone-icon{width:26px;height:26px;display:flex;align-items:center;justify-content:center;color:var(--ink)}
+.exercise-zone-icon svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;overflow:visible}
 .exercise-zone-tile.active{background:var(--primary-tint);border-color:color-mix(in srgb,var(--primary) 52%,var(--border));color:var(--primary);box-shadow:0 6px 16px color-mix(in srgb,var(--primary) 12%,transparent)}
 .exercise-zone-tile.active .exercise-zone-icon{color:var(--primary)}
 .exercise-quick-zones-section + .exercise-results{padding-top:10px}
@@ -1940,167 +1966,14 @@ body[data-theme="dark"] .calendar-nutrition-summary.bad{background:rgba(224,105,
 @media(max-width:420px){
   .exercise-filter-head{padding-left:16px;padding-right:16px}.exercise-filter-scroll{padding-left:16px;padding-right:16px}
   #exerciseFilterSheet .exercise-filter-actions{padding-left:16px!important;padding-right:16px!important}
-  .exercise-zone-grid{gap:3px}.exercise-zone-tile{min-height:49px;border-radius:9px;padding-left:1px;padding-right:1px}.exercise-zone-icon{width:23px;height:23px}.exercise-zone-icon svg{width:22px;height:22px}.exercise-zone-icon img{width:23px;height:23px}
+  .exercise-zone-grid{gap:5px}.exercise-zone-tile{width:60px;min-width:60px;min-height:54px;border-radius:11px}.exercise-zone-icon{width:24px;height:24px}.exercise-zone-icon svg{width:23px;height:23px}
 }
 @media(max-width:350px){
-  .exercise-zone-tile>span:last-child{font-size:5.9px}
+  .exercise-zone-tile>span:last-child{font-size:6.9px}
   #exerciseFilterSheet .exercise-filter-actions{grid-template-columns:1fr!important}
 }
 </style>
 
-<style id="workout-filters-visual-v138">
-.workout-quick-zones{padding-bottom:2px}
-.workout-quick-zones + .workout-content{padding-top:10px}
-
-.workout-fav{margin-left:auto;align-self:flex-start}
-
-/* Filtres Entraînements — même langage visuel que les filtres Exercices */
-.workout-header .workout-filter-open{position:relative;display:flex;align-items:center;justify-content:center;width:40px;height:40px;padding:0;border-radius:13px;transition:transform .15s ease,background .15s ease,border-color .15s ease,color .15s ease}
-.workout-header .workout-filter-open svg{width:19px;height:19px}
-.workout-header .workout-filter-open.active{background:var(--primary-tint)!important;border-color:color-mix(in srgb,var(--primary) 42%,var(--border))!important;color:var(--primary)!important}
-
-#workoutFilterBackdrop{display:none!important;background:transparent!important;backdrop-filter:none!important}
-#workoutFilterSheet{left:0!important;right:0!important;top:0!important;bottom:0!important;transform:none!important;width:100vw!important;height:100vh!important;height:100dvh!important;max-height:none!important;margin:0!important;padding:0!important;overflow:hidden!important;border:0!important;border-radius:0!important;background:var(--bg)!important;box-shadow:none!important;z-index:181!important;box-sizing:border-box!important}
-#workoutFilterSheet.open{display:flex!important;flex-direction:column;animation:exerciseFilterFullIn .18s ease-out both}
-#workoutFilterSheet.open.filter-refresh{animation:none!important}
-#workoutFilterSheet .exercise-filter-scroll{flex:1;min-height:0;width:100%;max-width:680px;margin:0 auto;box-sizing:border-box;overflow-y:auto;overscroll-behavior:contain;padding:8px 20px 20px;scrollbar-width:none}
-#workoutFilterSheet .exercise-filter-scroll::-webkit-scrollbar{display:none}
-#workoutFilterSheet .exercise-filter-title{margin:0 0 9px!important;font-family:inherit!important;font-size:12px!important;line-height:1.2!important;letter-spacing:0!important;text-transform:none!important;font-weight:900!important;color:var(--ink)!important}
-.workout-filter-wrap{display:flex;flex-wrap:wrap;gap:7px;overflow:visible;padding:0}
-.workout-filter-chip{min-height:40px;flex:1 1 112px;white-space:normal;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border:1px solid var(--border);border-radius:12px;background:var(--surface-alt);color:var(--ink-soft);font:inherit;font-size:9.5px;font-weight:850;line-height:1.15;text-align:center;cursor:pointer;transition:transform .14s ease,background .14s ease,border-color .14s ease,color .14s ease,box-shadow .14s ease}
-.workout-filter-chip:active{transform:scale(.98)}
-.workout-filter-chip.active{background:var(--primary)!important;border-color:var(--primary)!important;color:#fff!important;box-shadow:0 5px 13px color-mix(in srgb,var(--primary) 20%,transparent)}
-.workout-filter-icon{width:17px;height:17px;flex:none;display:inline-flex;align-items:center;justify-content:center}
-.workout-filter-icon svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-#workoutFilterSheet .difficulty-filter-row .workout-filter-chip{flex-basis:105px}
-#workoutFilterSheet .exercise-filter-actions{position:relative;display:grid!important;grid-template-columns:minmax(112px,.85fr) minmax(170px,1.4fr)!important;gap:9px!important;margin:0!important;padding:12px max(20px,calc((100vw - 680px)/2 + 20px)) calc(14px + env(safe-area-inset-bottom))!important;border-top:1px solid var(--border);background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(14px);flex:none}
-#workoutFilterSheet .exercise-filter-reset,#workoutFilterSheet .exercise-filter-results{height:46px!important;margin:0!important;border-radius:14px!important;font-size:10px!important;font-weight:900!important;display:flex;align-items:center;justify-content:center;gap:7px}
-#workoutFilterSheet .exercise-filter-reset{border:1px solid var(--border)!important;background:var(--surface)!important;color:var(--ink)!important}
-#workoutFilterSheet .exercise-filter-results{border:0!important;background:var(--primary)!important;color:#fff!important;box-shadow:0 8px 20px color-mix(in srgb,var(--primary) 24%,transparent)}
-#workoutFilterSheet .exercise-filter-results span{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:99px;background:rgba(255,255,255,.18);font-size:9px}
-#workoutFilterSheet .exercise-filter-results b{font-size:16px;font-weight:500;line-height:1}
-[data-theme="dark"] #workoutFilterSheet{background:#101613!important;border-color:transparent!important;box-shadow:none!important}
-[data-theme="dark"] .workout-filter-chip{background:#222a26;border-color:rgba(255,255,255,.09);color:rgba(244,247,245,.74)}
-[data-theme="dark"] .workout-filter-chip.active{background:var(--primary)!important;border-color:var(--primary)!important;color:#fff!important}
-[data-theme="dark"] #workoutFilterSheet .exercise-filter-actions{background:rgba(16,22,19,.94);border-color:rgba(255,255,255,.08)}
-[data-theme="dark"] #workoutFilterSheet .exercise-filter-reset{background:#1c2420!important;border-color:rgba(255,255,255,.12)!important;color:#f4f7f5!important}
-@media(max-width:420px){#workoutFilterSheet .exercise-filter-scroll{padding-left:16px;padding-right:16px}#workoutFilterSheet .exercise-filter-actions{padding-left:16px!important;padding-right:16px!important}.workout-filter-chip{flex-basis:100px}}
-@media(max-width:350px){#workoutFilterSheet .exercise-filter-actions{grid-template-columns:1fr!important}}
-</style>
-
-
-<style id="sport-library-headers-v142">
-/* En-têtes cohérents avec Défi */
-.exercise-header,.workout-header{
-  grid-template-columns:88px minmax(0,1fr) 88px!important;
-  gap:8px!important;
-}
-.exercise-header h2,.workout-header h2{
-  margin:0!important;
-  font-size:18px!important;
-  line-height:1.15!important;
-  font-weight:900!important;
-  text-align:center!important;
-  color:var(--ink)!important;
-}
-.exercise-back,.workout-back{
-  justify-self:start!important;
-  width:40px!important;
-  height:40px!important;
-  border:0!important;
-  border-radius:0!important;
-  background:transparent!important;
-  box-shadow:none!important;
-  color:var(--ink)!important;
-  font-size:22px!important;
-  font-weight:500!important;
-}
-.exercise-back:active,.workout-back:active{background:var(--surface-alt)!important;border-radius:12px!important}
-.exercise-header-actions,.workout-header-actions{
-  justify-self:end!important;
-  width:88px;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:flex-end!important;
-  gap:7px!important;
-}
-.exercise-search-open,.exercise-header .exercise-filter-open,.workout-header .workout-filter-open,.workout-add{
-  position:relative;
-  width:40px!important;
-  height:40px!important;
-  padding:0!important;
-  border:0!important;
-  border-radius:0!important;
-  background:transparent!important;
-  color:var(--ink)!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  box-sizing:border-box!important;
-  box-shadow:none!important;
-}
-.exercise-search-open svg,.exercise-header .exercise-filter-open svg,.workout-header .workout-filter-open svg{width:19px!important;height:19px!important}
-.workout-add{font-size:24px!important;font-weight:500!important;line-height:1!important}
-.exercise-search-open.active,.exercise-header .exercise-filter-open.active,.workout-header .workout-filter-open.active{
-  background:transparent!important;
-  border-color:transparent!important;
-  color:var(--primary)!important;
-}
-.exercise-search-open:active,.exercise-header .exercise-filter-open:active,.workout-header .workout-filter-open:active,.workout-add:active{
-  background:var(--surface-alt)!important;
-  border-radius:12px!important;
-}
-.exercise-search-panel{
-  display:flex;
-  align-items:center;
-  gap:7px;
-  padding:9px 14px 2px;
-  background:var(--bg);
-}
-.exercise-search-panel .exercise-search{
-  flex:1;
-  min-width:0;
-  height:40px!important;
-  margin:0!important;
-  padding:0 13px!important;
-  border:1px solid var(--border)!important;
-  border-radius:13px!important;
-  background:var(--surface)!important;
-  color:var(--ink)!important;
-  box-shadow:none!important;
-}
-.exercise-search-clear{
-  width:40px;
-  height:40px;
-  flex:none;
-  border:0;
-  border-radius:12px;
-  background:transparent;
-  color:var(--ink-soft);
-  font:inherit;
-  font-size:24px;
-  line-height:1;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.exercise-search-clear:active{background:var(--surface-alt)}
-.exercise-quick-zones-head{display:none!important}
-.exercise-quick-zones-section{padding-top:10px!important}
-.workout-quick-zones{padding-top:10px!important}
-[data-theme="dark"] .exercise-search-open,
-[data-theme="dark"] .exercise-header .exercise-filter-open,
-[data-theme="dark"] .workout-header .workout-filter-open,
-[data-theme="dark"] .workout-add{background:transparent!important}
-[data-theme="dark"] .exercise-search-open.active,
-[data-theme="dark"] .exercise-header .exercise-filter-open.active,
-[data-theme="dark"] .workout-header .workout-filter-open.active{background:transparent!important}
-@media(max-width:350px){
-  .exercise-header,.workout-header{grid-template-columns:82px minmax(0,1fr) 82px!important}
-  .exercise-header-actions,.workout-header-actions{width:82px;gap:4px!important}
-  .exercise-search-open,.exercise-header .exercise-filter-open,.workout-header .workout-filter-open,.workout-add{width:39px!important;height:39px!important}
-}
-</style>
 </head>
 <body data-theme="light">
 <div id="welcomeScreen" aria-label="Bienvenue dans VitaTrack">
@@ -2352,26 +2225,44 @@ body[data-theme="dark"] .calendar-nutrition-summary.bad{background:rgba(224,105,
 <button class="small-link" onclick="toggleCustomFoodForm()">+ Créer un aliment personnalisé</button><div id="customFoodForm" style="display:none;margin-top:12px"><div class="field"><label>Nom</label><input id="cf_name"></div><div class="field-row"><div class="field"><label>kcal / 100g</label><input type="number" id="cf_kcal"></div><div class="field"><label>Protéines / 100g</label><input type="number" id="cf_protein"></div></div><div class="field-row"><div class="field"><label>Glucides / 100g</label><input type="number" id="cf_carbs"></div><div class="field"><label>Sucres / 100g</label><input type="number" id="cf_sugar"></div></div><div class="field-row"><div class="field"><label>Fibres / 100g</label><input type="number" id="cf_fiber"></div><div class="field"><label>Lipides / 100g</label><input type="number" id="cf_fat"></div></div><div class="field-row"><div class="field"><label>Graisses saturées / 100g</label><input type="number" id="cf_satfat"></div><div class="field"><label>Sel / 100g</label><input type="number" id="cf_salt"></div></div><div class="field"><label>Glycémie (optionnel)</label><select id="cf_gi"><option value="">Non renseignée</option><option value="faible">Faible</option><option value="moyen">Moyen</option><option value="élevé">Élevé</option></select></div><button class="btn btn-ghost btn-block" onclick="saveCustomFood()">Enregistrer</button></div></div></div>
 
 <div class="guide-catalog-panel" id="guideCatalogPanel" aria-hidden="true">
-  <div class="guide-catalog-panel-head">
-    <div><span class="guide-panel-eyebrow">Nutrition</span><h2>Catalogue alimentaire</h2></div>
-    <button type="button" class="sport-close" onclick="closeGuideCatalog()" aria-label="Fermer le catalogue">×</button>
+  <div class="guide-catalog-topbar">
+    <button type="button" class="guide-topbar-back" onclick="closeGuideCatalog()" aria-label="Retour au suivi nutrition">←</button>
+    <div class="guide-topbar-center"><h2>Catalogue alimentaire</h2></div>
+    <div class="guide-topbar-actions">
+      <button type="button" class="guide-topbar-btn" id="guideSearchToggle" onclick="toggleGuideSearch()" aria-label="Rechercher un aliment" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.5 4.5"></path></svg>
+      </button>
+      <button type="button" class="guide-topbar-btn" id="guideFiltersToggle" onclick="toggleGuideFilters()" aria-label="Afficher les filtres du catalogue" aria-pressed="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16l-6.2 7.1v5.4l-3.6 1.8v-7.2L4 5z"></path></svg>
+      </button>
+    </div>
   </div>
   <div class="guide-catalog-panel-body">
-    <div class="card guide-catalog-head">
-      <div class="guide-catalog-intro"><strong>Explorer les aliments</strong><span>Compare les calories et l’indice glycémique par type d’aliment.</span></div>
+    <div class="guide-search-shell" id="guideSearchShell">
       <input id="guideSearch" oninput="filterGuide(this.value)" placeholder="Rechercher un aliment…" class="guide-search">
-      <div class="guide-label">Type d’aliment</div>
-      <div class="guide-chip-row" id="guideCategories"></div>
-      <div class="guide-label">Comparer par</div>
-      <div class="guide-chip-row guide-compare-row" id="guideCompareRow" onclick="clearGuideCompareFromRow(event)" title="Cliquer dans l’espace vide pour annuler le classement">
-        <button type="button" class="guide-chip" data-guide-compare="kcal" onclick="setGuideCompare('kcal')">Calories</button>
-        <button type="button" class="guide-chip" data-guide-compare="gi" onclick="setGuideCompare('gi')">IG</button>
-        <button type="button" class="guide-chip" data-guide-compare="protein" onclick="setGuideCompare('protein')">Protéines</button>
-        <button type="button" class="guide-chip" data-guide-compare="carbs" onclick="setGuideCompare('carbs')">Glucides</button>
-        <button type="button" class="guide-chip" data-guide-compare="fat" onclick="setGuideCompare('fat')">Lipides</button>
-        <button type="button" class="guide-chip" data-guide-compare="fiber" onclick="setGuideCompare('fiber')">Fibres</button>
+    </div>
+    <div class="card guide-catalog-head open" id="guideFiltersCard">
+      <div class="guide-catalog-intro"><strong>Explorer les aliments</strong><span>Repère vite les aliments stars, les bons choix, ceux à doser et ceux à limiter.</span></div>
+      <div class="guide-filter-group">
+        <div class="guide-label">Repère rapide</div>
+        <div class="guide-chip-row" id="guideQualityFilters"></div>
       </div>
-      <div class="guide-count-row"><span id="guideCount">0 aliment</span></div>
+      <div class="guide-filter-group">
+        <div class="guide-label">Type d’aliment</div>
+        <div class="guide-chip-row" id="guideCategories"></div>
+      </div>
+      <div class="guide-filter-group">
+        <div class="guide-label">Comparer par</div>
+        <div class="guide-chip-row guide-compare-row" id="guideCompareRow" onclick="clearGuideCompareFromRow(event)" title="Cliquer dans l’espace vide pour annuler le classement">
+          <button type="button" class="guide-chip" data-guide-compare="kcal" onclick="setGuideCompare('kcal')">Calories</button>
+          <button type="button" class="guide-chip" data-guide-compare="gi" onclick="setGuideCompare('gi')">IG</button>
+          <button type="button" class="guide-chip" data-guide-compare="protein" onclick="setGuideCompare('protein')">Protéines</button>
+          <button type="button" class="guide-chip" data-guide-compare="carbs" onclick="setGuideCompare('carbs')">Glucides</button>
+          <button type="button" class="guide-chip" data-guide-compare="fat" onclick="setGuideCompare('fat')">Lipides</button>
+          <button type="button" class="guide-chip" data-guide-compare="fiber" onclick="setGuideCompare('fiber')">Fibres</button>
+        </div>
+      </div>
+      <div class="guide-count-row"><span id="guideCount">0 aliment</span><span class="guide-active-hint" id="guideActiveHint">Toutes les catégories</span></div>
     </div>
     <div class="guide-card-grid" id="guideList"></div>
   </div>
@@ -2405,8 +2296,8 @@ body[data-theme="dark"] .calendar-nutrition-summary.bad{background:rgba(224,105,
         </div>
         <div class="profile-subpanel" id="profileEditPanel">
           <div class="field"><label>Prénom (facultatif)</label><input id="pf_name"></div>
-          <div class="field-row"><div class="field"><label>Âge</label><input type="number" id="pf_age"></div><div class="field"><label>Sexe</label><select id="pf_sex"><option value="homme">Homme</option><option value="femme">Femme</option></select></div></div>
-          <div class="field-row"><div class="field"><label>Taille (cm)</label><input type="number" id="pf_height"></div><div class="field"><label>Poids actuel (kg)</label><input type="number" step="0.01" id="pf_weight"></div></div>
+          <div class="field-row"><div class="field"><label>Âge</label><input type="number" id="pf_age" min="18" max="100" inputmode="numeric"></div><div class="field"><label>Sexe</label><select id="pf_sex"><option value="homme">Homme</option><option value="femme">Femme</option></select></div></div>
+          <div class="field-row"><div class="field"><label>Taille (cm)</label><input type="number" id="pf_height" min="120" max="230" inputmode="decimal"></div><div class="field"><label>Poids actuel (kg)</label><input type="number" step="0.01" id="pf_weight" min="35" max="300" inputmode="decimal"></div></div>
           <button class="btn btn-primary btn-block" onclick="saveProfile()">Enregistrer mon profil</button>
         </div>
         <div class="profile-setting-row" onclick="toggleProfilePanel('goalEditPanel')">
@@ -2416,10 +2307,19 @@ body[data-theme="dark"] .calendar-nutrition-summary.bad{background:rgba(224,105,
           <div class="card" style="padding:12px;margin-bottom:12px"><div class="row small"><span class="muted">Calories de départ</span><strong id="profileCalorieTarget">À calculer</strong></div><div class="row small" style="margin-top:8px"><span class="muted">Protéines</span><strong id="profileProteinTarget">À calculer</strong></div></div>
           <div class="field"><label>Objectif principal</label><select id="pf_goal"><option value="fat_loss">🔥 Perdre du gras</option><option value="recomposition">🔄 Recomposition</option><option value="muscle_gain">💪 Construire du muscle</option><option value="maintain">⚖️ Maintenir</option><option value="weight_target">🎯 Atteindre un poids</option></select></div>
           <div class="field"><label>Activité quotidienne</label><select id="pf_activity"><option value="sedentary">Peu actif</option><option value="light">Légèrement actif</option><option value="moderate">Actif</option><option value="active">Très actif</option><option value="very_active">Très actif +</option></select></div>
-          <div class="field"><label>Poids cible (facultatif)</label><input type="number" step="0.1" id="pf_target"></div>
+          <div class="field"><label>Poids cible (facultatif)</label><input type="number" step="0.1" id="pf_target" min="35" max="300" inputmode="decimal"></div>
           <div class="field-row"><div class="field"><label>% masse grasse cible</label><input type="number" step="0.1" id="pf_bodyfat_target"></div><div class="field"><label>Tour de taille cible</label><input type="number" step="0.5" id="pf_waist_target"></div></div>
           <div class="field"><label>Objectif de pas quotidien</label><div class="input-with-unit"><input type="number" step="500" min="1000" max="50000" id="pf_steps_goal" placeholder="Objectif adaptatif"><span>pas</span></div><div class="muted small" style="margin-top:6px">Laisse vide pour laisser VitaTrack adapter l’objectif à ton profil et à ton activité récente.</div></div>
           <button class="btn btn-primary btn-block" onclick="saveGoals()">Enregistrer l'objectif</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-group">
+      <div class="profile-group-title">Suivi</div>
+      <div class="card profile-card">
+        <div class="profile-setting-row" onclick="openProgressAlbum()">
+          <div class="profile-setting-icon">📷</div><div class="profile-setting-main"><strong>Photos d’évolution</strong><span id="profilePhotoSummary">Ajoute des photos pour comparer ton évolution</span></div><button class="profile-chevron" type="button">›</button>
         </div>
       </div>
     </div>
@@ -2509,9 +2409,70 @@ body[data-theme="dark"] .calendar-nutrition-summary.bad{background:rgba(224,105,
     </div>
   </div>
 </div>
-<div class="sheet-overlay" id="setupSheetOverlay"><div class="sheet"><div class="sheet-handle"></div><h3>Bienvenue dans VitaTrack</h3><p class="setup-intro">On commence simplement. Donne-moi quelques informations pour estimer tes besoins. Ensuite, tu enregistres normalement tes repas et je regarderai ta progression avant de modifier quoi que ce soit.</p><div class="field"><label>Prénom (facultatif)</label><input id="setup_name"></div><div class="field-row"><div class="field"><label>Âge</label><input type="number" id="setup_age"></div><div class="field"><label>Sexe</label><select id="setup_sex"><option value="homme">Homme</option><option value="femme">Femme</option></select></div></div><div class="field-row"><div class="field"><label>Taille (cm)</label><input type="number" id="setup_height"></div><div class="field"><label>Poids (kg)</label><input type="number" step="0.01" id="setup_weight"></div></div><div class="field"><label>Objectif principal</label><select id="setup_goal"><option value="fat_loss">🔥 Perdre du gras</option><option value="recomposition">🔄 Recomposition</option><option value="muscle_gain">💪 Construire du muscle</option><option value="maintain">⚖️ Maintenir</option><option value="weight_target">🎯 Atteindre un poids</option></select></div><div class="field"><label>Activité quotidienne</label><select id="setup_activity"><option value="sedentary">Peu actif</option><option value="light">Légèrement actif</option><option value="moderate">Actif</option><option value="active">Très actif</option><option value="very_active">Très actif +</option></select></div><div class="field"><label>Poids cible (facultatif)</label><input type="number" step="0.1" id="setup_target"></div><button class="btn btn-primary btn-block" onclick="saveSetup()">Créer mon point de départ</button></div></div>
+<div class="progress-album" id="progressAlbum" aria-hidden="true">
+  <div class="progress-album-shell">
+    <div class="progress-album-header">
+      <button class="progress-album-back" type="button" onclick="closeProgressAlbum()" aria-label="Fermer">←</button>
+      <div><div class="eyebrow">Suivi visuel</div><h2>Photos d’évolution</h2></div>
+      <div class="progress-album-header-spacer"></div>
+    </div>
+    <div class="progress-album-content">
+      <div class="card progress-album-intro">
+        <strong>Compare ton évolution dans les mêmes conditions</strong>
+        <p class="muted small">Pour mieux voir les changements, essaie de garder la même lumière, la même distance et la même posture.</p>
+        <div class="progress-photo-controls">
+          <div class="progress-photo-date-wrap"><label for="progressPhotoDate">Date</label><input id="progressPhotoDate" type="date"></div>
+        </div>
+        <div class="progress-photo-actions">
+          <button class="btn btn-primary" type="button" onclick="document.getElementById('progressPhotoCamera').click()">📷 Prendre une photo</button>
+        </div>
+        <input id="progressPhotoCamera" type="file" accept="image/*" capture="environment" hidden onchange="addProgressPhotoFromInput(this)">
+        <div class="progress-photo-privacy">🔒 Les photos restent stockées sur cet appareil et ne sont pas envoyées dans la synchronisation cloud.</div>
+      </div>
+
+      <div id="progressComparison"></div>
+
+      <div class="progress-album-section-head">
+        <div><div class="eyebrow">Album</div><h3>Mes photos</h3></div>
+        <div class="progress-album-count" id="progressAlbumCount">0 photo</div>
+      </div>
+      <div class="progress-photo-grid" id="progressPhotoGrid"></div>
+    </div>
+  </div>
+</div>
+
+<div class="progress-photo-viewer" id="progressPhotoViewer" aria-hidden="true">
+  <div class="progress-photo-viewer-shell">
+    <button class="progress-viewer-close" type="button" onclick="closeProgressPhotoViewer()" aria-label="Fermer">×</button>
+    <img id="progressViewerImage" alt="Photo d’évolution">
+    <div class="progress-viewer-meta">
+      <div class="field"><label>Date</label><input id="progressViewerDate" type="date"></div>
+      <div class="progress-viewer-actions"><button class="btn btn-primary" type="button" onclick="saveProgressPhotoMetadata()">Enregistrer</button><button class="btn btn-ghost progress-delete-btn" type="button" onclick="deleteCurrentProgressPhoto()">Supprimer</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-overlay" id="setupSheetOverlay"><div class="sheet"><div class="sheet-handle"></div><h3>Bienvenue dans VitaTrack</h3><p class="setup-intro">On commence simplement. Donne-moi quelques informations pour estimer tes besoins. Ensuite, tu enregistres normalement tes repas et je regarderai ta progression avant de modifier quoi que ce soit.</p><div class="field"><label>Prénom (facultatif)</label><input id="setup_name"></div><div class="field-row"><div class="field"><label>Âge</label><input type="number" id="setup_age" min="18" max="100" inputmode="numeric"></div><div class="field"><label>Sexe</label><select id="setup_sex"><option value="homme">Homme</option><option value="femme">Femme</option></select></div></div><div class="field-row"><div class="field"><label>Taille (cm)</label><input type="number" id="setup_height" min="120" max="230" inputmode="decimal"></div><div class="field"><label>Poids (kg)</label><input type="number" step="0.01" id="setup_weight" min="35" max="300" inputmode="decimal"></div></div><div class="field"><label>Objectif principal</label><select id="setup_goal"><option value="fat_loss">🔥 Perdre du gras</option><option value="recomposition">🔄 Recomposition</option><option value="muscle_gain">💪 Construire du muscle</option><option value="maintain">⚖️ Maintenir</option><option value="weight_target">🎯 Atteindre un poids</option></select></div><div class="field"><label>Activité quotidienne</label><select id="setup_activity"><option value="sedentary">Peu actif</option><option value="light">Légèrement actif</option><option value="moderate">Actif</option><option value="active">Très actif</option><option value="very_active">Très actif +</option></select></div><div class="field"><label>Poids cible (facultatif)</label><input type="number" step="0.1" id="setup_target" min="35" max="300" inputmode="decimal"></div><button class="btn btn-primary btn-block" onclick="saveSetup()">Créer mon point de départ</button></div></div>
+
+<style id="progress-photo-album-style">
+.progress-album{position:fixed;inset:0;z-index:90;background:var(--bg);display:none;overflow:auto;overscroll-behavior:contain}
+.progress-album.open{display:block}
+.progress-album-shell{max-width:720px;margin:0 auto;min-height:100%;padding-bottom:calc(32px + env(safe-area-inset-bottom))}
+.progress-album-header{position:sticky;top:0;z-index:3;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:10px;padding:12px 16px;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+.progress-album-header h2{margin:1px 0 0;font-size:21px}.progress-album-back,.progress-viewer-close{width:40px;height:40px;border:0;border-radius:50%;background:var(--surface-alt);color:var(--ink);font-size:22px}.progress-album-header-spacer{width:40px}
+.progress-album-content{padding:14px 16px}.progress-album-intro{padding:15px}.progress-album-intro>strong{font-size:15px}.progress-album-intro p{margin:6px 0 14px;line-height:1.45}
+.progress-photo-controls{display:flex;align-items:flex-end;justify-content:flex-start;gap:12px;flex-wrap:wrap}
+.progress-photo-date-wrap{min-width:128px}.progress-photo-date-wrap label{display:block;font-size:10px;font-weight:800;color:var(--ink-soft);margin-bottom:5px}.progress-photo-date-wrap input{width:100%;border:1px solid var(--border);background:var(--surface-alt);color:var(--ink);border-radius:11px;padding:9px 10px;font:inherit;font-size:12px}
+.progress-photo-actions{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px}.progress-photo-actions .btn{min-height:44px}.progress-photo-privacy{margin-top:11px;padding:9px 10px;border-radius:11px;background:var(--surface-alt);color:var(--ink-soft);font-size:10px;line-height:1.4}
+.progress-comparison-card{margin-top:12px}.progress-comparison-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.progress-comparison-head h3{margin:2px 0 0;font-size:16px}.progress-comparison-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.progress-comparison-photo{position:relative;overflow:hidden;border-radius:14px;background:var(--surface-alt);aspect-ratio:3/4}.progress-comparison-photo img{width:100%;height:100%;object-fit:cover;display:block}.progress-comparison-label{position:absolute;left:7px;bottom:7px;background:rgba(0,0,0,.62);color:#fff;border-radius:8px;padding:5px 7px;font-size:9.5px;font-weight:800}
+.progress-comparison-empty{margin-top:12px;padding:14px;border:1px dashed var(--border);border-radius:14px;color:var(--ink-soft);font-size:11px;line-height:1.45;text-align:center}.progress-album-section-head{display:flex;align-items:flex-end;justify-content:space-between;margin:18px 2px 8px}.progress-album-section-head h3{margin:2px 0 0;font-size:18px}.progress-album-count{font-size:10px;color:var(--ink-soft);font-weight:800}
+.progress-photo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.progress-photo-card{position:relative;border:0;padding:0;background:var(--surface);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);text-align:left;color:var(--ink)}.progress-photo-card img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;background:var(--surface-alt)}.progress-photo-card-meta{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px 9px}.progress-photo-card-meta strong{font-size:10.5px}.progress-photo-card-meta span{font-size:9px;color:var(--ink-soft)}.progress-photo-empty{grid-column:1/-1;padding:28px 16px;border:1px dashed var(--border);border-radius:14px;text-align:center;color:var(--ink-soft);font-size:11px;line-height:1.5}
+.progress-photo-viewer{position:fixed;inset:0;z-index:100;background:rgba(8,12,11,.94);display:none;align-items:center;justify-content:center;padding:16px}.progress-photo-viewer.open{display:flex}.progress-photo-viewer-shell{position:relative;width:min(100%,560px);max-height:96vh;overflow:auto;background:var(--surface);border-radius:20px}.progress-viewer-close{position:absolute;right:10px;top:10px;z-index:2;background:rgba(0,0,0,.55);color:#fff}.progress-photo-viewer img{width:100%;max-height:70vh;object-fit:contain;display:block;background:#090b0a;border-radius:20px 20px 0 0}.progress-viewer-meta{padding:14px}.progress-viewer-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.progress-delete-btn{color:#b43b3b!important}.progress-photo-error{padding:24px;text-align:center;color:var(--ink-soft);font-size:12px}
+@media(min-width:680px){.progress-photo-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:380px){.progress-photo-controls{align-items:stretch}.progress-photo-date-wrap{width:100%}}
+</style>
 <div class="toast" id="toast"></div>
-<script src="data.js"></script><script src="sport-data.js"></script><script src="exercise-content.js"></script><script src="exercise-quality.js"></script><script src="exercise-model.js"></script><script src="prescription-model.js"></script><script src="progression-model.js"></script><script src="sport-engine.js"></script><script src="app.js"></script><script src="nutrition.js"></script><script src="cloud-sync.js"></script>
+<script src="data.js"></script><script src="sport-data.js"></script><script src="exercise-content.js"></script><script src="exercise-quality.js"></script><script src="exercise-model.js"></script><script src="prescription-model.js"></script><script src="progression-model.js"></script><script src="sport-engine.js"></script><script src="app.js"></script><script src="nutrition.js"></script><script src="cloud-sync.js"></script><script src="progress-photos.js"></script>
 <script>
 /* Interactions compactes : le bloc boissons affiche son historique ; l’ajout reste séparé. */
 window.toggleDrinkHistoryCard = function(ev){
@@ -2794,7 +2755,7 @@ window.updateCalorieExcessRing=updateCalorieExcessRing;</script>
 
 <script>
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=119').catch(()=>{}));
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=103').catch(()=>{}));
 }
 </script>
 
