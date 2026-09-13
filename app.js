@@ -52,7 +52,7 @@ function validateTargetWeight(value,required=false){
 
 
 /* ---------- Navigation ---------- */
-function go(screen){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));const el=document.getElementById('screen-'+screen);if(!el)return;el.classList.add('active');document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.screen===screen));const fab=document.getElementById('globalFab');fab.style.display='flex';fab.onclick=openAddMenu;window.scrollTo(0,0);renderAll();}
+function go(screen){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));const el=document.getElementById('screen-'+screen);if(!el)return;el.classList.add('active');document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.screen===screen));const fab=document.getElementById('globalFab');fab.style.display='flex';fab.onclick=openAddMenu;window.scrollTo(0,0);renderAll();if(screen==='sport'&&typeof syncWithingsOnSportOpen==='function')syncWithingsOnSportOpen();}
 function openAddMenu(){openSheet('addMenuOverlay');}
 function openAddMeal(){closeSheet('addMenuOverlay');openFoodSheet();}
 function openWeighing(){closeSheet('addMenuOverlay');go('food');setTimeout(()=>document.getElementById('newWeight')?.focus(),100);}
@@ -1058,6 +1058,24 @@ async function refreshProfileWithingsUI(){
   }catch(e){statusEl.textContent='Connexion serveur indisponible';btn.textContent='Configurer';btn.disabled=false;if(extra)extra.style.display='none';btn.onclick=(ev)=>{ev.stopPropagation();toast('Le serveur Withings doit être configuré')}}
 }
 
+let __withingsSportSyncLast=0;
+let __withingsSportSyncRunning=false;
+async function syncWithingsOnSportOpen(){
+  const minDelay=15*60*1000;
+  if(__withingsSportSyncRunning||Date.now()-__withingsSportSyncLast<minDelay)return;
+  __withingsSportSyncRunning=true;
+  try{
+    const s=await WITHINGS_CONNECTOR.status();
+    if(s.connected){
+      __withingsSportSyncLast=Date.now();
+      await syncWithings({silent:true});
+    }
+  }catch(e){
+    console.error('Withings sport auto sync:',e);
+  }finally{
+    __withingsSportSyncRunning=false;
+  }
+}
 async function syncWithings(options={}){
   const silent=!!options.silent;
   let d;
