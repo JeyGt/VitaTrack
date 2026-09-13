@@ -228,7 +228,6 @@ input,select,textarea{font-family:inherit;}
 .meal-description-summary{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:8px;font-size:11px}.meal-description-summary strong{font-size:12px}
 
 
-
 /* ----- toast ----- */
 .toast{
   position:fixed; left:50%; bottom:calc(95px + env(safe-area-inset-bottom)); transform:translateX(-50%) translateY(10px);
@@ -1614,6 +1613,8 @@ input[type="range"]{width:100%;}
 .sport-today-pref-copy span{display:block;font-size:10px;color:var(--ink-soft);margin-top:3px;line-height:1.35}
 .sport-today-pref-actions{display:flex;gap:8px;margin-top:14px}
 .sport-today-pref-actions .btn{flex:1}
+.sport-session-summary-state{margin-top:13px;padding:9px 10px;border-radius:12px;background:var(--surface-alt);font-size:12px;font-weight:900;color:var(--ink-soft)}
+.sport-session-summary-state.done{background:var(--primary-tint);color:var(--primary)}
 [data-theme="dark"] .sport-today-quick{background:var(--surface);box-shadow:none}
 [data-theme="dark"] .sport-today-quick.program{border-top-color:#819ec5}
 [data-theme="dark"] .sport-today-quick.challenge{border-top-color:#c6a47d}
@@ -1628,6 +1629,12 @@ input[type="range"]{width:100%;}
 <style id="nutrition-simplified-v2">
 #screen-food .macro-card-wrap{display:none!important}
 #screen-food .nutrition-day-head .chip{display:inline-flex;align-items:center;gap:6px}
+.protein-intake{margin:2px 2px 0;padding:12px 13px;border-top:1px solid var(--border);background:transparent}
+.protein-intake-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.protein-intake-label{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:850;color:var(--ink)}
+.protein-intake-icon{width:24px;height:24px;border-radius:8px;display:grid;place-items:center;background:var(--primary-tint);color:var(--primary);font-size:13px;line-height:1}
+.protein-intake-value{font-size:12px;font-weight:900;color:var(--ink);white-space:nowrap}
+@media(max-width:380px){.protein-intake{margin-left:0;margin-right:0;padding-left:10px;padding-right:10px}.protein-intake-value{font-size:11px}}
 </style>
 <style id="notification-schedule-style">
 .notif-reminder{border-top:1px solid var(--border);padding:12px 0}
@@ -2075,6 +2082,12 @@ body[data-theme="dark"] .calendar-nutrition-summary.bad{background:rgba(224,105,
         <div class="calorie-side calorie-burned"><strong id="foodBurned">—</strong><span>kcal brûlées</span></div>
       </div>
       <div class="calorie-target">Objectif : <strong id="foodGoalLabel">—</strong></div>
+      <div class="protein-intake" id="proteinIntake">
+        <div class="protein-intake-head">
+          <span class="protein-intake-label"><span class="protein-intake-icon" aria-hidden="true">P</span>Protéines</span>
+          <strong class="protein-intake-value" id="proteinIntakeValue">0 g</strong>
+        </div>
+      </div>
       <div class="macro-card-wrap">
         <div class="macro-grid">
           <div class="macro-card"><div class="macro-head"><strong>Glucides</strong><span id="macroCarbs">0 / — g</span></div><div class="macro-track"><i id="macroCarbsBar"></i></div></div>
@@ -2221,7 +2234,7 @@ body[data-theme="dark"] .calendar-nutrition-summary.bad{background:rgba(224,105,
   <div id="mealDescriptionReview" class="meal-description-review"></div>
 </div>
 <div class="divider"></div><label class="search-label">Recherche automatique</label><input id="foodSearch" oninput="renderFoodSearch()" placeholder="Rechercher poulet, riz, pomme…" style="width:100%;padding:11px 13px;border-radius:12px;border:1px solid var(--border);background:var(--surface-alt);color:var(--ink);font-size:14.5px"><div class="food-browse-categories" id="foodBrowseCategories"></div><div class="search-results" id="foodSearchResults"></div>
-<div id="foodPickedBox" style="display:none"><div class="row" style="margin-bottom:8px"><strong id="foodPickedName"></strong><span style="display:flex;align-items:center;gap:6px"><span class="muted small" id="foodPickedKcal"></span><button type="button" class="food-fav-btn" id="foodPickedFavorite" onclick="togglePickedFoodFavorite()" aria-label="Ajouter aux favoris">☆</button></span></div><div id="foodPickedInfo"></div><div class="food-portion-quick" id="foodPortionQuick"></div><div class="field"><label>Quantité (g / ml)</label><input type="number" id="foodQty" value="100"></div><button class="btn btn-primary btn-block" onclick="confirmAddFood()">Ajouter au repas</button></div>
+<div id="foodPickedBox" style="display:none"><div class="row" style="margin-bottom:8px"><strong id="foodPickedName"></strong><span style="display:flex;align-items:center;gap:6px"><span class="muted small" id="foodPickedKcal"></span><button type="button" class="food-fav-btn" id="foodPickedFavorite" onclick="togglePickedFoodFavorite()" aria-label="Ajouter aux favoris">☆</button></span></div><div id="foodPickedInfo"></div><div class="food-portion-quick" id="foodPortionQuick"></div><div class="field"><label>Quantité (g / ml)</label><input type="number" id="foodQty" value="100" min="1" max="5000"></div><button class="btn btn-primary btn-block" onclick="confirmAddFood()">Ajouter au repas</button></div>
 <button class="small-link" onclick="toggleCustomFoodForm()">+ Créer un aliment personnalisé</button><div id="customFoodForm" style="display:none;margin-top:12px"><div class="field"><label>Nom</label><input id="cf_name"></div><div class="field-row"><div class="field"><label>kcal / 100g</label><input type="number" id="cf_kcal"></div><div class="field"><label>Protéines / 100g</label><input type="number" id="cf_protein"></div></div><div class="field-row"><div class="field"><label>Glucides / 100g</label><input type="number" id="cf_carbs"></div><div class="field"><label>Sucres / 100g</label><input type="number" id="cf_sugar"></div></div><div class="field-row"><div class="field"><label>Fibres / 100g</label><input type="number" id="cf_fiber"></div><div class="field"><label>Lipides / 100g</label><input type="number" id="cf_fat"></div></div><div class="field-row"><div class="field"><label>Graisses saturées / 100g</label><input type="number" id="cf_satfat"></div><div class="field"><label>Sel / 100g</label><input type="number" id="cf_salt"></div></div><div class="field"><label>Glycémie (optionnel)</label><select id="cf_gi"><option value="">Non renseignée</option><option value="faible">Faible</option><option value="moyen">Moyen</option><option value="élevé">Élevé</option></select></div><button class="btn btn-ghost btn-block" onclick="saveCustomFood()">Enregistrer</button></div></div></div>
 
 <div class="guide-catalog-panel" id="guideCatalogPanel" aria-hidden="true">
@@ -2268,7 +2281,7 @@ body[data-theme="dark"] .calendar-nutrition-summary.bad{background:rgba(224,105,
   </div>
 </div>
 
-<div class="sheet-overlay" id="waterSheetOverlay" onclick="closeSheetIfBg(event,'waterSheetOverlay')"><div class="sheet"><div class="sheet-handle"></div><h3>Ajouter de l’eau</h3><div class="water-quick"><button type="button" class="chip" onclick="setVal('waterQty',200)">200 ml</button><button type="button" class="chip" onclick="setVal('waterQty',250)">250 ml</button><button type="button" class="chip" onclick="setVal('waterQty',330)">330 ml</button><button type="button" class="chip" onclick="setVal('waterQty',500)">500 ml</button></div><div class="field"><label>Quantité (ml)</label><input type="number" id="waterQty" value="250" min="1"></div><button class="btn btn-primary btn-block" onclick="addWater()">Ajouter</button></div></div>
+<div class="sheet-overlay" id="waterSheetOverlay" onclick="closeSheetIfBg(event,'waterSheetOverlay')"><div class="sheet"><div class="sheet-handle"></div><h3>Ajouter de l’eau</h3><div class="water-quick"><button type="button" class="chip" onclick="setVal('waterQty',200)">200 ml</button><button type="button" class="chip" onclick="setVal('waterQty',250)">250 ml</button><button type="button" class="chip" onclick="setVal('waterQty',330)">330 ml</button><button type="button" class="chip" onclick="setVal('waterQty',500)">500 ml</button></div><div class="field"><label>Quantité (ml)</label><input type="number" id="waterQty" value="250" min="1" max="5000"></div><button class="btn btn-primary btn-block" onclick="addWater()">Ajouter</button></div></div>
 
 <div class="sheet-overlay" id="guideSheetOverlay" onclick="closeSheetIfBg(event,'guideSheetOverlay')"><div class="sheet"><div class="sheet-handle"></div><h3 id="guideTitle">Aliment</h3><div id="guideDetail"></div></div></div>
 
@@ -2590,6 +2603,31 @@ setTimeout(function(){ window.renderQuickAddSummary && window.renderQuickAddSumm
     }
     return Math.round(total);
   }
+  const htmlEscape=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function findSessionHistoryRecord(session){
+    if(!session)return null;
+    return (DATA.sport?.sessionHistory||[]).find(x=>x?.type==='workout'&&(
+      String(x.workoutId||x.sessionId||x.id||'')===String(session.id||'') ||
+      String(x.workoutName||x.name||'')===String(session.name||'')
+    ))||null;
+  }
+  function isProgramSessionDone(session){
+    return !!session && (session.status==='completed'||!!findSessionHistoryRecord(session));
+  }
+  window.openSportSessionSummary=function(sessionId){
+    const session=(DATA.sport?.currentProgram?.sessions||[]).find(s=>String(s.id)===String(sessionId));
+    if(!session)return;
+    const record=findSessionHistoryRecord(session);
+    const kcal=Math.round(Number(record?.estimatedKcal||session.estimatedKcal||0));
+    const duration=Math.round(Number(record?.durationMinutes||session.durationMinutes||session.targetDuration||0));
+    const done=isProgramSessionDone(session);
+    let overlay=document.getElementById('sportSessionSummaryOverlay');
+    if(!overlay){overlay=document.createElement('div');overlay.id='sportSessionSummaryOverlay';overlay.className='sheet-overlay';document.body.appendChild(overlay);}
+    overlay.innerHTML=`<div class="sheet" style="max-height:84vh;overflow:auto"><div class="sheet-handle"></div><div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><div><div class="eyebrow">Programme</div><h2 style="margin:4px 0 0">${htmlEscape(session.name||'Séance')}</h2></div><button class="sport-close" type="button" onclick="closeSportSessionSummary()">×</button></div><div class="sport-session-summary-state ${done?'done':''}">${done?'Séance terminée':'Séance à faire'}</div><div class="mini-stats" style="margin-top:12px"><span>${(session.exercises||[]).length} exercices</span><span>${duration||0} min</span><span>${kcal||0} kcal</span></div><div class="coach-note"><strong>Résumé</strong><p>${done?'Cette séance est déjà validée pour aujourd’hui. Tu peux consulter ton historique ou la refaire volontairement.':'Cette séance est prévue dans ton programme.'}</p></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px"><button class="btn btn-ghost" type="button" onclick="closeSportSessionSummary()">Fermer</button><button class="btn btn-primary" type="button" onclick="closeSportSessionSummary();openSession('${session.id}')">Refaire</button></div></div>`;
+    overlay.classList.add('open');
+    document.body.style.overflow='hidden';
+  };
+  window.closeSportSessionSummary=function(){document.getElementById('sportSessionSummaryOverlay')?.classList.remove('open');document.body.style.overflow='';};
   function ensureSportTodayPrefsSheet(){
     let overlay=document.getElementById('sportTodayPrefsOverlay');
     if(!overlay){
@@ -2620,7 +2658,7 @@ setTimeout(function(){ window.renderQuickAddSummary && window.renderQuickAddSumm
     const stepPct=Math.min(100,Math.round(todaySteps/stepGoal*100));
     const todayHistory=(DATA.sport.sessionHistory||[]).filter(x=>activityDateKey(x)===TODAY);
     const sessionRecord=sessionRecordForToday(todayHistory,s);
-    const sessionDone=!!sessionRecord;
+    const sessionDone=!!sessionRecord||s?.status==='completed';
     const completedExercises=s?.exercises?.filter(e=>(Array.isArray(e.repsCompleted)&&e.repsCompleted.length)||(Array.isArray(e.durationsSeconds)&&e.durationsSeconds.length)).length||0;
     const totalExercises=s?.exercises?.length||0;
     const programPct=s?Math.min(100,Math.round(sessionDone?100:(totalExercises?completedExercises/Math.max(1,totalExercises)*100:0))):0;
@@ -2634,7 +2672,8 @@ setTimeout(function(){ window.renderQuickAddSummary && window.renderQuickAddSumm
     const cards=[];
 
     if(widgets.program){
-      cards.push(`<button class="sport-today-quick program" type="button" ${s?`onclick="openSession('${s.id}')"`:'disabled'}><span class="sport-today-quick-label">Programme</span><span class="sport-today-quick-copy"><strong>${pname}</strong><span class="sport-today-main-value">${s?`${duration} min`:'—'}</span><span class="sport-today-detail">${s?`${exos} exercice${exos>1?'s':''} à faire`:'Aucune séance prévue'}</span><span class="sport-today-kcal"><b>${sessionKcal}</b> kcal brûlées</span><span class="sport-today-progress"><i style="width:${programPct}%"></i></span><span class="sport-today-status ${sessionDone?'done':''}">${sessionDone?'Terminé':s?'À faire':'Repos'}</span></span></button>`);
+      const programAction=s?(sessionDone?`openSportSessionSummary('${s.id}')`:`openSession('${s.id}')`):'';
+      cards.push(`<button class="sport-today-quick program" type="button" ${s?`onclick="${programAction}"`:'disabled'}><span class="sport-today-quick-label">Programme</span><span class="sport-today-quick-copy"><strong>${pname}</strong><span class="sport-today-main-value">${s?`${duration} min`:'—'}</span><span class="sport-today-detail">${s?(sessionDone?'Séance terminée':`${exos} exercice${exos>1?'s':''} à faire`):'Aucune séance prévue'}</span><span class="sport-today-kcal"><b>${sessionKcal}</b> kcal brûlées</span><span class="sport-today-progress"><i style="width:${programPct}%"></i></span><span class="sport-today-status ${sessionDone?'done':''}">${sessionDone?'Terminé':s?'À faire':'Repos'}</span></span></button>`);
     }
     if(widgets.challenge){
       cards.push(`<button class="sport-today-quick challenge" type="button" onclick="launchSportChallenge()"><span class="sport-today-quick-label">Défi</span><span class="sport-today-quick-copy"><strong>${challengeTitle}</strong><span class="sport-today-main-value compact">${c?`${c.target} ${c.unit}`:'Choisir un défi'}</span><span class="sport-today-detail">${c?`${c.actual} / ${c.target} ${c.unit} aujourd’hui`:'Aucun défi actif'}</span><span class="sport-today-kcal"><b>${challengeKcal}</b> kcal brûlées</span><span class="sport-today-progress"><i style="width:${cp}%"></i></span><span class="sport-today-status ${c?.completedToday?'done':''}">${c?.completedToday?'Terminé':c?'À faire':'À choisir'}</span></span></button>`);

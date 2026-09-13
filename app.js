@@ -1,9 +1,18 @@
 /* VitaTrack Core V2 */
 const STORAGE_KEY='vitatrack_state_v2';
 let DATA=loadState();
-const TODAY=todayStr();
+let TODAY=todayStr();
 
 function todayStr(d=new Date()){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function refreshToday(){const next=todayStr();if(next===TODAY)return false;TODAY=next;return true;}
+function handleDayBoundary(){if(refreshToday()&&typeof renderAll==='function')renderAll();}
+function initDayBoundaryWatcher(){
+  document.addEventListener('click',refreshToday,true);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)handleDayBoundary();});
+  window.addEventListener('focus',handleDayBoundary);
+  window.setInterval(handleDayBoundary,60000);
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initDayBoundaryWatcher);else initDayBoundaryWatcher();
 function formatWeight(value){const n=Number(value);return Number.isFinite(n)?n.toFixed(2).replace('.',','):'—';}
 function dateOffset(days){const d=new Date(); d.setDate(d.getDate()+days); return todayStr(d);}
 function loadState(){try{const raw=localStorage.getItem(STORAGE_KEY); if(raw)return migrate(JSON.parse(raw));}catch(e){} return defaultData();}
@@ -22,7 +31,7 @@ function migrate(d){const def=defaultData(); const p=Object.assign({},def.profil
   if(!d.objective){if(oldGoal==='lose')objective.type='fat_loss'; else if(oldGoal==='gain')objective.type='muscle_gain'; else if(oldGoal==='maintain')objective.type='maintain';}
   p.visceralFat=p.visceralFat??null; const sport=Object.assign({},def.sport,d.sport||{});sport.customWorkouts=Array.isArray(d.sport?.customWorkouts)?d.sport.customWorkouts:[];sport.favoriteExercises=Array.isArray(d.sport?.favoriteExercises)?d.sport.favoriteExercises:[]; return Object.assign({},def,d,{profile:p,objective,nutrition:Object.assign({},def.nutrition,d.nutrition||{}),sport,waterLog:d.waterLog||{},drinkLog:normaliseDrinkLog(d.drinkLog),stepsLog:d.stepsLog||{},settings:Object.assign({},def.settings,d.settings||{}),foodLog:d.foodLog||{},weights:d.weights||[],customFoods:d.customFoods||[],foodFavorites:Array.isArray(d.foodFavorites)?d.foodFavorites:[],coachDecisions:d.coachDecisions||[],reports:d.reports||{},nutritionCoach:Object.assign({},def.nutritionCoach,d.nutritionCoach||{},{baseline:Object.assign({},def.nutritionCoach.baseline,d.nutritionCoach?.baseline||{}),lastWeek:Object.assign({},def.nutritionCoach.lastWeek,d.nutritionCoach?.lastWeek||{}),goalHistory:Array.isArray(d.nutritionCoach?.goalHistory)?d.nutritionCoach.goalHistory:[],contextAnswers:Array.isArray(d.nutritionCoach?.contextAnswers)?d.nutritionCoach.contextAnswers:[],recommendationHistory:Array.isArray(d.nutritionCoach?.recommendationHistory)?d.nutritionCoach.recommendationHistory:[],calorieAdjustments:Array.isArray(d.nutritionCoach?.calorieAdjustments)?d.nutritionCoach.calorieAdjustments:[]})});
 }
-function saveState(){try{if(typeof coachUpdateObservationState==='function')coachUpdateObservationState();}catch(e){console.warn('VitaTrack coach observation:',e);}localStorage.setItem(STORAGE_KEY,JSON.stringify(DATA));}
+function saveState(){refreshToday();try{if(typeof coachUpdateObservationState==='function')coachUpdateObservationState();}catch(e){console.warn('VitaTrack coach observation:',e);}localStorage.setItem(STORAGE_KEY,JSON.stringify(DATA));}
 function toast(msg){const el=document.getElementById('toast'); if(!el)return; el.textContent=msg; el.classList.add('show'); clearTimeout(window.__toast); window.__toast=setTimeout(()=>el.classList.remove('show'),2200);}
 
 function nutritionProfileValidation(profile={}){
@@ -221,9 +230,9 @@ function escapeHtml(s){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':
 function openSheet(id){document.getElementById(id).classList.add('open');}
 function closeSheet(id){const el=document.getElementById(id);if(el)el.classList.remove('open');if(id==='foodSheetOverlay'&&typeof stopNutritionScanners==='function')stopNutritionScanners();}
 function closeSheetIfBg(ev,id){if(ev.target.id===id)closeSheet(id);}
-function exportData(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'}));a.download='vitatrack_'+TODAY+'.json';a.click();toast('Export terminé');}
+function exportData(){refreshToday();const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'}));a.download='vitatrack_'+TODAY+'.json';a.click();toast('Export terminé');}
 function importData(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{try{DATA=migrate(JSON.parse(e.target.result));saveState();applyTheme();renderAll();toast('Données importées');}catch(x){toast('Fichier invalide');}};r.readAsText(f);}
-function resetToday(){if(!confirm('Réinitialiser les repas et données du jour ?'))return;delete DATA.foodLog[TODAY];if(DATA.waterLog)delete DATA.waterLog[TODAY];saveState();renderAll();toast('Journée réinitialisée');}
+function resetToday(){refreshToday();if(!confirm('Réinitialiser les repas et données du jour ?'))return;delete DATA.foodLog[TODAY];if(DATA.waterLog)delete DATA.waterLog[TODAY];saveState();renderAll();toast('Journée réinitialisée');}
 function ensureSportV3Data(){
   DATA.sport=DATA.sport||{};
   DATA.sport.favoriteExercises=Array.isArray(DATA.sport.favoriteExercises)?DATA.sport.favoriteExercises:[];
@@ -240,11 +249,11 @@ function ensureSportV3Data(){
     }
   }catch(e){console.warn('Migration entraînements personnalisés:',e);}
 }
-function renderAll(){ensureSportV3Data();if(typeof ensureSportProgramGeneratorV6==='function')ensureSportProgramGeneratorV6();if(typeof ensureSportProgramPrescriptionsV3==='function')ensureSportProgramPrescriptionsV3();ensureTargets();renderHome();renderFood();renderGuide();renderWeightList();renderProfile();renderWeightChart();renderNutritionCoach();renderSport();}
+function renderAll(){refreshToday();ensureSportV3Data();if(typeof ensureSportProgramGeneratorV6==='function')ensureSportProgramGeneratorV6();if(typeof ensureSportProgramPrescriptionsV3==='function')ensureSportProgramPrescriptionsV3();ensureTargets();renderHome();renderFood();renderGuide();renderWeightList();renderProfile();renderWeightChart();renderNutritionCoach();renderSport();}
 /* ========== SPORT MODULE ========== */
 let SPORT_VIEW='today',SPORT_EXPLORE='home',SPORT_FILTER='all',SPORT_PROFILE_RANGE=7;
 function sportStreak(){const done=new Set((DATA.sport.sessionHistory||[]).map(s=>s.completedDate||s.date).filter(Boolean));let d=new Date(),n=0;while(done.has(d.toISOString().slice(0,10))){n++;d.setDate(d.getDate()-1)}return n}
-function sportTodaySession(){const ss=DATA.sport.currentProgram?.sessions||[],dow=['dim','lun','mar','mer','jeu','ven','sam'][new Date().getDay()];return ss.find(s=>s.dayOfWeek===dow&&s.status!=='completed')||ss.find(s=>s.status==='pending')||ss[0]}
+function sportTodaySession(){const ss=DATA.sport.currentProgram?.sessions||[],dow=['dim','lun','mar','mer','jeu','ven','sam'][new Date().getDay()];return ss.find(s=>s.dayOfWeek===dow)||ss.find(s=>s.status==='pending')||ss[0]}
 function sportSessionScore(s){if(!s?.exercises?.length)return 0;let t=0,n=0;s.exercises.forEach(e=>{if(e.repsCompleted?.length){const p=(e.plannedReps||[]).reduce((a,b)=>a+b,0),a=e.repsCompleted.reduce((x,y)=>x+y,0),c=Math.min(1,a/Math.max(1,p)),d=1-Math.min(.35,Math.abs((e.difficulty||5)-5)*.07);t+=(c*.8+d*.2)*100;n++}});return n?Math.round(t/n):0}
 function sportKcalForSession(s){return typeof window.sportKcalForActivity==='function' ? window.sportKcalForActivity(s) : Math.round(Number(s?.targetDuration||0)*7)}
 function sportMuscles(s){const set=new Set();(s?.exercises||[]).forEach(e=>{const x=EXERCISES.find(y=>y.id===e.exerciseId);(x?.muscles||[]).forEach(m=>set.add(m))});return [...set].slice(0,4).join(' · ')||'Corps entier'}
@@ -439,7 +448,7 @@ function sportCalendarProgramPct(date,history){
   if(date===TODAY&&typeof sportTodaySession==='function'){
     const session=sportTodaySession();
     if(!session)return null;
-    const sessionDone=(history||[]).some(x=>x.id===session.id||x.sessionId===session.id||x.name===session.name);
+    const sessionDone=session.status==='completed'||(history||[]).some(x=>x.id===session.id||x.sessionId===session.id||x.name===session.name);
     const completed=(session.exercises||[]).filter(e=>(Array.isArray(e.repsCompleted)&&e.repsCompleted.length)||(Array.isArray(e.durationsSeconds)&&e.durationsSeconds.length)).length;
     const total=(session.exercises||[]).length;
     return Math.min(100,Math.round(sessionDone?100:(total?completed/Math.max(1,total)*100:0)));
@@ -979,6 +988,12 @@ const WITHINGS_CONNECTOR = {
     if(!r.ok) throw new Error(d.error||'sync');
     return d;
   },
+  async activity(days=8){
+    const r=await fetch(this.endpoint+'?action=activity&days='+encodeURIComponent(days),{credentials:'include'});
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.error||'activity');
+    return d;
+  },
   async disconnect(){
     const r=await fetch(this.endpoint+'?action=disconnect',{credentials:'include'});
     return r.json();
@@ -1057,6 +1072,7 @@ async function syncWithings(options={}){
 
   const measures=Array.isArray(d.measurements)?d.measurements:[];
   let added=0;
+  let stepsUpdated=0;
 
   for(const m of measures){
     if(!(Number(m.weight)>0)) continue;
@@ -1088,6 +1104,33 @@ async function syncWithings(options={}){
     added++;
   }
 
+  let activityResult=null;
+  try{
+    activityResult=await WITHINGS_CONNECTOR.activity(8);
+    const activities=Array.isArray(activityResult.activities)?activityResult.activities:[];
+    DATA.stepsLog=DATA.stepsLog||{};
+    for(const a of activities){
+      const date=String(a.date||'');
+      const steps=Math.max(0,Math.round(Number(a.steps)||0));
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||steps<=0) continue;
+      const current=DATA.stepsLog[date];
+      const currentSteps=Math.round(Number(typeof current==='object'?current?.steps:current)||0);
+      if(current?.source==='manual'&&currentSteps>steps) continue;
+      DATA.stepsLog[date]={
+        steps,
+        source:'withings',
+        distance:Number(a.distance)||null,
+        calories:Number(a.calories)||null,
+        totalCalories:Number(a.totalCalories)||null,
+        updatedAt:new Date().toISOString()
+      };
+      stepsUpdated++;
+    }
+  }catch(e){
+    console.error('Withings activity sync:',e);
+    if(!silent && !String(e.message||'').includes('activity')) toast('Pas Withings non disponibles : reconnecte Withings si besoin');
+  }
+
   if(added){
     DATA.weights.sort((a,b)=>String(a.date).localeCompare(String(b.date)));
 
@@ -1096,20 +1139,21 @@ async function syncWithings(options={}){
       DATA.profile.weightCurrent=Number(last.weight);
       if(!DATA.profile.startingWeight)DATA.profile.startingWeight=Number(last.weight);
     }
+  }
 
+  if(added||stepsUpdated){
     try{saveState();}catch(e){console.error('Withings saveState error:',e);}
     try{renderAll();}catch(e){console.error('Withings renderAll error:',e);}
   }
 
   if(!silent){
-    toast(
-      added
-        ? `${added} nouvelle${added>1?'s':''} pesée${added>1?'s':''} importée${added>1?'s':''}`
-        : 'Aucune nouvelle pesée'
-    );
+    const parts=[];
+    if(added)parts.push(`${added} pesée${added>1?'s':''}`);
+    if(stepsUpdated)parts.push(`${stepsUpdated} jour${stepsUpdated>1?'s':''} de pas`);
+    toast(parts.length?`${parts.join(' · ')} importé${parts.length>1||added>1||stepsUpdated>1?'s':''}`:'Aucune nouvelle donnée Withings');
   }
 
-  return {...d,added};
+  return {...d,activity:activityResult,added,stepsUpdated};
 }
 
 const _renderAllOriginal=renderAll;
@@ -1130,4 +1174,3 @@ function startWithingsAutoSync(){
 startWithingsAutoSync();
 
 // Sport V10: navigation fixe — ancien carrousel supprimé.
-

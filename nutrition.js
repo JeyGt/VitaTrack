@@ -12,6 +12,11 @@ let guideSearchOpen=false;
 let guideFiltersOpen=true;
 let customDrinkSelection=null;
 
+const NUTRITION_LIMITS={foodQty:5000,waterMl:5000,drinkMl:5000,kcalPer100:1000,macroPer100:100};
+function validFoodQuantity(value){const n=Number(value);return Number.isFinite(n)&&n>0&&n<=NUTRITION_LIMITS.foodQty;}
+function drinkQuantityMl(qty,unit){const n=Number(qty);if(!Number.isFinite(n))return null;if(unit==='l')return n*1000;if(unit==='cl')return n*10;if(unit==='ml')return n;return null;}
+function validDrinkQuantity(qty,unit){const ml=drinkQuantityMl(qty,unit);return ml!==null&&ml>0&&ml<=NUTRITION_LIMITS.drinkMl;}
+
 /* ---------- Nutrition engine ---------- */
 function activityFactor(){return {sedentary:1.2,light:1.375,moderate:1.55,active:1.725,very_active:1.9}[DATA.profile.activity]||1.55;}
 function bmr(){const p=DATA.profile;if(typeof nutritionProfileValidation==='function'&&!nutritionProfileValidation(p).valid)return null;if(!p.age||!p.height||!p.weightCurrent)return null;return p.sex==='femme'?10*p.weightCurrent+6.25*p.height-5*p.age-161:10*p.weightCurrent+6.25*p.height-5*p.age+5;}
@@ -48,9 +53,8 @@ function coachInferDrinkCategory(x){
 }
 function coachReferenceTargets(date=TODAY){
   const calories=Math.round(Number(DATA.nutrition?.calorieTargetHistory?.[date])||Number(currentTargets().calories)||0);
-  const currentWeight=Number(DATA.profile?.weightCurrent)||0,targetWeight=Number(DATA.objective?.targetWeight)||0;
-  let protein=Number(currentTargets().protein)||0;
-  if(['fat_loss','recomposition'].includes(DATA.objective?.type)&&targetWeight>0)protein=Math.round(targetWeight*1.8);
+  const currentWeight=Number(DATA.profile?.weightCurrent)||0;
+  const protein=Number(currentTargets().protein)||0;
   const fat=currentWeight>0?Math.max(0,Math.round(currentWeight*.66)):0;
   const fiber=calories>0?Math.round(calories/1000*14):0;
   const carbs=calories>0?Math.max(0,Math.round((calories-protein*4-fat*9)/4)):0;
@@ -582,11 +586,14 @@ function coachCalorieAdaptationAssessment(analysis,endDate=TODAY){
   if(last&&coachDateDiff(last.date,endDate)<14){result.reason='Une adaptation a déjà été faite récemment. Je garde cette cible au moins deux semaines avant de réévaluer.';return result;}
   const lossGoal=['fat_loss','recomposition'].includes(objective)||(objective==='weight_target'&&Number(DATA.objective?.targetWeight)>0&&Number(DATA.profile?.weightCurrent)>Number(DATA.objective?.targetWeight));
   if(!lossGoal){result.reason='L’adaptation automatique est pour l’instant réservée aux objectifs de perte de poids ou recomposition.';return result;}
+  const calorieFloor=typeof nutritionCalorieFloor==='function'?nutritionCalorieFloor(DATA.profile):1400;
   if(ids.has('rapid_weight_loss')){
-    result.eligible=true;result.delta=100;result.to=Math.max(1400,current+100);result.reason='Ta perte de poids paraît rapide malgré un apport proche de la cible. Je propose une petite hausse de 100 kcal et une nouvelle observation pendant deux semaines.';return result;
+    result.eligible=true;result.delta=100;result.to=Math.max(calorieFloor,current+100);result.reason='Ta perte de poids paraît rapide malgré un apport proche de la cible. Je propose une petite hausse de 100 kcal et une nouvelle observation pendant deux semaines.';return result;
   }
   if(ids.has('weight_stagnation_with_adherence')){
-    result.eligible=true;result.delta=-100;result.to=Math.max(1400,current-100);result.delta=result.to-current;result.reason='Ton poids semble stable depuis plusieurs semaines alors que ton apport est proche de la cible. Je propose une baisse prudente de 100 kcal puis une réévaluation dans deux semaines.';return result;
+    const next=Math.max(calorieFloor,current-100);
+    if(next>=current){result.reason='Ta cible est déjà au plancher de sécurité. Je ne la réduis pas davantage.';return result;}
+    result.eligible=true;result.delta=next-current;result.to=next;result.reason='Ton poids semble stable depuis plusieurs semaines alors que ton apport est proche de la cible. Je propose une baisse prudente de 100 kcal puis une réévaluation dans deux semaines.';return result;
   }
   result.reason='La tendance actuelle ne justifie pas de modifier ta cible calorique.';
   return result;
@@ -658,9 +665,11 @@ function nutrientNumberOrNull(value){if(value===null||value===undefined||value==
 function scaledNutrient(value,ratio,digits=1){const x=nutrientNumberOrNull(value);if(x===null)return null;const m=10**digits;return Math.round(x*ratio*m)/m;}
 function nutrientDisplay(value,digits=1){const x=nutrientNumberOrNull(value);return x===null?'—':x.toLocaleString('fr-FR',{maximumFractionDigits:digits});}
 function nutrientInputValue(id){const raw=String(document.getElementById(id)?.value??'').trim();return raw===''?null:nutrientNumberOrNull(raw);}
+function nutrientInputInRange(id,max){const raw=String(document.getElementById(id)?.value??'').trim();if(raw==='')return true;const n=Number(raw.replace(',','.'));return Number.isFinite(n)&&n>=0&&n<=max;}
 function nutrientKnown(day,key){return Number(day?._known?.[key]||0)>0;}
 function nutrientPartial(day,key,date=TODAY){const entries=(DATA.foodLog?.[date]||[]).length,known=Number(day?._known?.[key]||0);return entries>0&&known>0&&known<entries;}
 function dayNutrientText(day,key,digits=0,unit='g',date=TODAY){if(!nutrientKnown(day,key))return'—';const x=Number(day[key]||0),txt=x.toLocaleString('fr-FR',{maximumFractionDigits:digits});return`${nutrientPartial(day,key,date)?'≈ ':''}${txt}${unit?' '+unit:''}`;}
+function proteinIntakeText(day,date=TODAY){const known=nutrientKnown(day,'protein'),entries=(DATA.foodLog?.[date]||[]).length;if(!known)return entries?'— g':'0 g';const consumed=Math.round(Number(day.protein)||0);return`${nutrientPartial(day,'protein',date)?'≈ ':''}${consumed} g`;}
 function dayTotals(date=TODAY){
   const list=DATA.foodLog[date]||[];
   const fields=['kcal','protein','carbs','fat','sugar','fiber','satFat','salt','sodium','potassium','calcium','iron','magnesium','vitaminC'];
@@ -708,17 +717,20 @@ function weeklyReport(){return coachDecision();}
 /* ---------- Hydration ---------- */
 function openWaterSheet(){closeSheet('addMenuOverlay');setVal('waterQty','250');openSheet('waterSheetOverlay');}
 function addWater(){
+  refreshToday();
   const input=document.getElementById('waterQty');
   const ml=Math.round(Number(input?.value||250));
-  if(!(ml>0)){toast('Indique une quantité d’eau');return;}
+  if(!(ml>0&&ml<=NUTRITION_LIMITS.waterMl)){toast('Indique une quantité d’eau entre 1 et 5 000 ml');return;}
   addWaterAmount(ml);
   closeSheet('waterSheetOverlay');
 }
 function addWaterGlass(){
+  refreshToday();
   addWaterAmount(250);
   toast('🥛 +1 verre d’eau');
 }
 function removeWaterGlass(){
+  refreshToday();
   const list=Array.isArray(DATA.waterLog?.[TODAY])?DATA.waterLog[TODAY]:[];
   if(!list.length){toast('Aucun verre à enlever');return;}
   let remaining=250;
@@ -734,11 +746,14 @@ function removeWaterGlass(){
   toast('🥛 −1 verre d’eau');
 }
 function addWaterAmount(ml){
+  refreshToday();ml=Math.round(Number(ml));
+  if(!(ml>0&&ml<=NUTRITION_LIMITS.waterMl)){toast('Quantité d’eau invalide');return false;}
   if(!DATA.waterLog || typeof DATA.waterLog!=='object') DATA.waterLog={};
   if(!Array.isArray(DATA.waterLog[TODAY])) DATA.waterLog[TODAY]=[];
   DATA.waterLog[TODAY].push({id:'w'+Date.now()+Math.random().toString(36).slice(2,6),ml,time:new Date().toTimeString().slice(0,5)});
   try{saveState();}catch(e){console.error(e);toast('Impossible d’enregistrer l’eau');return;}
   renderFood();
+  return true;
 }
 
 /* ---------- Meal timing helpers ---------- */
@@ -793,7 +808,7 @@ function showDrinkCategory(cat){
   c.innerHTML=list.map((x,i)=>`<div class="drink-choice-row"><button class="drink-choice drink-choice-main" onclick="addDrink('${cat}',${i})"><span>${x[0]}</span><small>${x[1]} · ${x[2]} kcal</small></button><button class="drink-customize" type="button" onclick="event.stopPropagation();openCustomDrink('${cat}',${i})">Personnaliser</button></div>`).join('');
   c.style.display='grid';
 }
-function addDrink(cat,i){const x=DRINK_CATALOG[cat]?.[i];if(!x)return;if(!Array.isArray(DATA.drinkLog))DATA.drinkLog=normaliseDrinkLog(DATA.drinkLog);rememberDailyCalorieTarget(TODAY);DATA.drinkLog.push({date:TODAY,name:x[0],portion:x[1],kcal:Number(x[2])||0,category:cat,time:new Date().toTimeString().slice(0,5)});saveState();renderAll();toast(x[0]+' ajouté');}
+function addDrink(cat,i){refreshToday();const x=DRINK_CATALOG[cat]?.[i];if(!x)return;if(!Array.isArray(DATA.drinkLog))DATA.drinkLog=normaliseDrinkLog(DATA.drinkLog);rememberDailyCalorieTarget(TODAY);DATA.drinkLog.push({date:TODAY,name:x[0],portion:x[1],kcal:Number(x[2])||0,category:cat,time:new Date().toTimeString().slice(0,5)});saveState();renderAll();toast(x[0]+' ajouté');}
 function openCustomDrink(cat,i){
   const x=DRINK_CATALOG[cat]?.[i],meta=drinkPortionMeta(x?.[1]);if(!x||!meta)return;
   customDrinkSelection={cat,i,baseQty:meta.qty,unit:meta.unit,baseKcal:Number(x[2])||0,name:x[0]};
@@ -802,10 +817,10 @@ function openCustomDrink(cat,i){
   c.style.display='grid';updateCustomDrinkPreview();setTimeout(()=>document.getElementById('customDrinkQty')?.select(),0);
 }
 function customDrinkQty(){const input=document.getElementById('customDrinkQty');return Number(String(input?.value||'').replace(',','.'));}
-function customDrinkCalories(){const s=customDrinkSelection,qty=customDrinkQty();if(!s||!(qty>0)||!(s.baseQty>0))return null;return Math.max(0,Math.round(s.baseKcal*qty/s.baseQty));}
+function customDrinkCalories(){const s=customDrinkSelection,qty=customDrinkQty();if(!s||!validDrinkQuantity(qty,s.unit)||!(s.baseQty>0))return null;return Math.max(0,Math.round(s.baseKcal*qty/s.baseQty));}
 function updateCustomDrinkPreview(){const kcal=customDrinkCalories(),el=document.getElementById('customDrinkKcal');if(el)el.textContent=kcal===null?'—':`${kcal} kcal`;}
 function confirmCustomDrink(){
-  const s=customDrinkSelection,qty=customDrinkQty(),kcal=customDrinkCalories();if(!s||!(qty>0)||kcal===null){toast('Indique une quantité valide');return;}
+  refreshToday();const s=customDrinkSelection,qty=customDrinkQty(),kcal=customDrinkCalories();if(!s||!validDrinkQuantity(qty,s.unit)||kcal===null){toast('Indique une quantité comprise entre 1 ml et 5 L');return;}
   if(!Array.isArray(DATA.drinkLog))DATA.drinkLog=normaliseDrinkLog(DATA.drinkLog);rememberDailyCalorieTarget(TODAY);
   const qtyLabel=qty.toLocaleString('fr-FR',{maximumFractionDigits:1});DATA.drinkLog.push({date:TODAY,name:s.name,portion:`${qtyLabel} ${s.unit}`,kcal,category:s.cat,time:new Date().toTimeString().slice(0,5)});
   saveState();renderAll();toast(`${s.name} · ${qtyLabel} ${s.unit} ajouté`);showDrinkCategory(s.cat);
@@ -849,9 +864,11 @@ function renderSteps(){
   setText('homeStepsCalories',estimate?`≈ ${estimate.kcal} kcal`:'—');
   setText('homeStepsDistance',estimate?`≈ ${estimate.distanceKm.toFixed(1).replace('.',',')} km`:'—');
   setText('homeStepsGoalType',DATA.settings?.stepsGoal?'Objectif personnalisé':(history.length>=3?'Objectif adaptatif':'Objectif de départ'));
-  setText('homeStepsSource',steps?'Estimation calories · pas saisis manuellement':'Saisie locale · connexion Santé à venir');
+  const stepEntry=DATA.stepsLog?.[TODAY];
+  const stepSource=stepEntry?.source==='withings'?'Withings · synchronisé':steps?'Estimation calories · pas saisis manuellement':'Saisie locale · connexion Santé à venir';
+  setText('homeStepsSource',stepSource);
 }
-function editSteps(){const current=stepsForDate();const raw=prompt('Nombre de pas aujourd’hui',String(current));if(raw===null)return;const cleaned=String(raw).replace(/[\s\u00a0]/g,'').replace(',','.');const steps=Math.round(Number(cleaned));if(!Number.isFinite(steps)||steps<0||steps>200000){toast('Indique un nombre de pas entre 0 et 200 000');return;}DATA.stepsLog=DATA.stepsLog||{};DATA.stepsLog[TODAY]={steps,source:'manual',updatedAt:new Date().toISOString()};saveState();renderSteps();if(typeof renderFood==='function')renderFood();if(typeof renderSport==='function')renderSport();if(typeof renderHome==='function')renderHome();toast('Nombre de pas enregistré');}
+function editSteps(){refreshToday();const current=stepsForDate();const raw=prompt('Nombre de pas aujourd’hui',String(current));if(raw===null)return;const cleaned=String(raw).replace(/[\s\u00a0]/g,'').replace(',','.');const steps=Math.round(Number(cleaned));if(!Number.isFinite(steps)||steps<0||steps>200000){toast('Indique un nombre de pas entre 0 et 200 000');return;}DATA.stepsLog=DATA.stepsLog||{};DATA.stepsLog[TODAY]={steps,source:'manual',updatedAt:new Date().toISOString()};saveState();renderSteps();if(typeof renderFood==='function')renderFood();if(typeof renderSport==='function')renderSport();if(typeof renderHome==='function')renderHome();toast('Nombre de pas enregistré');}
 function vitaCoachSnapshot(date=TODAY){
   const totals=dayTotals(date),targets=currentTargets(),steps=stepsForDate(date),goal=stepsGoal(),stepEstimate=estimateStepCalories(steps);
   const sessions=(DATA.sport?.sessionHistory||[]).filter(s=>(s.completedDate||s.date)===date);
@@ -930,9 +947,7 @@ function renderDailySummary(){
 function renderHome(){const p=DATA.profile,t=currentTargets(),today=dayTotals();document.getElementById('homeCalories').textContent=Math.round(today.kcal);document.getElementById('homeCaloriesGoal').textContent=t.calories?`${t.calories} kcal`:'—';document.getElementById('homeProtein').textContent=dayNutrientText(today,'protein',0,'g');document.getElementById('homeProteinGoal').textContent=t.protein?`${t.protein} g`:'—';document.getElementById('homeRemaining').textContent=t.calories?Math.max(0,Math.round(t.calories-today.kcal))+' kcal restantes':'Configure ton profil';setBar('homeCalBar',t.calories?Math.min(100,today.kcal/t.calories*100):0);const tr=weightTrend();document.getElementById('homeWeight').textContent=p.weightCurrent?formatWeight(p.weightCurrent)+' kg':'—';document.getElementById('homeTrend').textContent=tr?`${tr.delta>0?'+':''}${tr.delta.toFixed(1)} kg / période récente`:'Pas encore de données';setText('homeCurrentWeight',p.weightCurrent?formatWeight(p.weightCurrent)+' kg':'—');setText('homeWeightGoal',DATA.objective.targetWeight?formatWeight(DATA.objective.targetWeight)+' kg':'—');const ws=DATA.weights.slice().sort((a,b)=>b.date.localeCompare(a.date));setText('nutritionPreviousWeight',ws[1]?formatWeight(ws[1].weight)+' kg':'—');renderWeeklyReport('weeklyReportHome');renderDrinkLog();renderSteps();renderDailySummary();const wl=waterTotal();const wine=DATA.wineLog?.[TODAY]||0;setText('nutritionWaterToday',wl?Math.round(wl)+' ml':'—');setText('nutritionWineToday',wine?wine:'—');}
 
 /* ---------- Food ---------- */
-function entryFoodBase(){return FOOD_DB.concat(typeof FOOD_ENTRY_DB!=='undefined'?FOOD_ENTRY_DB:[]);}
-function allFoods(){return entryFoodBase().concat(DATA.customFoods||[]);}
-function guideFoods(){return FOOD_DB.concat(DATA.customFoods||[]);}
+function allFoods(){return FOOD_DB.concat(DATA.customFoods||[]);}
 let selectedMealType=mealTypeForHour(new Date().getHours());
 let externalFoodResults=[];
 let foodSearchTimer=null;
@@ -967,7 +982,7 @@ function frequentFoods(limit=6){
 }
 function favoriteFoods(limit=8){ensureFoodLibraryState();return allFoods().filter(isFoodFavorite).slice(0,limit);}
 function foodCategories(){return [...new Set(allFoods().map(f=>f.category).filter(Boolean))];}
-function foodCategoryIcon(cat){return({'Protéines':'🥩','Féculents':'🍚','Fruits':'🍎','Légumes':'🥦','Légumineuses':'🫘','Laitiers':'🥛','Matières grasses':'🥜','Condiments':'🥫','Snacks':'🍫','Plats':'🍽️'})[cat]||'•';}
+function foodCategoryIcon(cat){return({'Protéines':'🥩','Féculents':'🍚','Fruits':'🍎','Légumes':'🥦','Légumineuses':'🫘','Laitiers':'🥛','Matières grasses':'🥜','Snacks':'🍫','Plats':'🍽️'})[cat]||'•';}
 function resetFoodUiRows(){foodUiRows=[];}
 function foodRowHtml(food,sub=''){
   const idx=foodUiRows.push(food)-1,fav=isFoodFavorite(food);
@@ -1058,7 +1073,7 @@ async function searchOpenFoodFacts(query,seq,locals){
   }catch(e){if(e.name==='AbortError')return;if(seq!==foodSearchSeq)return;renderFoodSearchResults(query,locals,[],'offline');}
 }
 function rememberExternalFood(food){
-  if(!food)return null;DATA.customFoods=DATA.customFoods||[];const key=foodKey(food);const existing=allFoods().find(f=>foodKey(f)===key);if(existing)return existing;
+  if(!food)return null;DATA.customFoods=DATA.customFoods||[];const key=foodKey(food);const existing=DATA.customFoods.find(f=>foodKey(f)===key)||FOOD_DB.find(f=>foodKey(f)===key);if(existing)return existing;
   const saved={name:food.name,kcal:Math.round(Number(food.kcal)||0),protein:nutrientNumberOrNull(food.protein),carbs:nutrientNumberOrNull(food.carbs),fat:nutrientNumberOrNull(food.fat),sugar:nutrientNumberOrNull(food.sugar),fiber:nutrientNumberOrNull(food.fiber),satFat:nutrientNumberOrNull(food.satFat),salt:nutrientNumberOrNull(food.salt),sodium:nutrientNumberOrNull(food.sodium),potassium:nutrientNumberOrNull(food.potassium),calcium:nutrientNumberOrNull(food.calcium),iron:nutrientNumberOrNull(food.iron),magnesium:nutrientNumberOrNull(food.magnesium),vitaminC:nutrientNumberOrNull(food.vitaminC),giLabel:food.giLabel||'',source:food.source||'openfoodfacts',barcode:food.code||''};DATA.customFoods.push(saved);saveState();return saved;
 }
 function pickRemoteFood(index){const food=externalFoodResults[index];if(!food)return;pickedFood=rememberExternalFood(food);showPickedFood();}
@@ -1068,9 +1083,16 @@ function renderPickedInfo(){if(!pickedFood)return;const box=document.getElementB
 function renderFoodPortionQuick(){const box=document.getElementById('foodPortionQuick');if(!box||!pickedFood)return;const unit=pickedFood.unit||'g',opts=[];if(Number(pickedFood.portionQty)>0&&pickedFood.portionLabel)opts.push([pickedFood.portionLabel,Number(pickedFood.portionQty)]);opts.push([`100 ${unit}`,100]);box.innerHTML=opts.map(([label,qty],i)=>`<button type="button" class="food-portion-chip ${i===0&&opts.length>1?'suggested':''}" onclick="setFoodQty(${qty})">${escapeHtml(label)}</button>`).join('');}
 function setFoodQty(qty){const e=document.getElementById('foodQty');if(e)e.value=qty;}
 function toggleCustomFoodForm(){const f=document.getElementById('customFoodForm');f.style.display=f.style.display==='none'?'block':'none';}
-function saveCustomFood(){const name=document.getElementById('cf_name').value.trim(),kcal=nutrientInputValue('cf_kcal');if(!name||kcal===null){toast('Nom et kcal sont nécessaires');return;}const food={name,kcal,protein:nutrientInputValue('cf_protein'),carbs:nutrientInputValue('cf_carbs'),fat:nutrientInputValue('cf_fat'),sugar:nutrientInputValue('cf_sugar'),fiber:nutrientInputValue('cf_fiber'),satFat:nutrientInputValue('cf_satfat'),salt:nutrientInputValue('cf_salt'),giLabel:document.getElementById('cf_gi').value||'',category:'Personnalisés'};DATA.customFoods.push(food);saveState();toast('Aliment enregistré');document.getElementById('customFoodForm').style.display='none';pickFood(name);}
-function confirmAddFood(){if(!pickedFood)return;const qty=+document.getElementById('foodQty').value;if(!(qty>0)){toast('Quantité invalide');return;}rememberDailyCalorieTarget(TODAY);const r=qty/100;const meta=localTimeMeta();const e={id:'f'+Date.now(),name:pickedFood.name,qty,kcal:Math.round(pickedFood.kcal*r),protein:scaledNutrient(pickedFood.protein,r),carbs:scaledNutrient(pickedFood.carbs,r),fat:scaledNutrient(pickedFood.fat,r),sugar:scaledNutrient(pickedFood.sugar,r),fiber:scaledNutrient(pickedFood.fiber,r),satFat:scaledNutrient(pickedFood.satFat,r),salt:scaledNutrient(pickedFood.salt,r,2),sodium:scaledNutrient(pickedFood.sodium,r,2),potassium:scaledNutrient(pickedFood.potassium,r),calcium:scaledNutrient(pickedFood.calcium,r),iron:scaledNutrient(pickedFood.iron,r),magnesium:scaledNutrient(pickedFood.magnesium,r),vitaminC:scaledNutrient(pickedFood.vitaminC,r),time:meta.time,timezone:meta.timezone,unit:pickedFood.unit||'g',mealType:selectedMealType||meta.mealType};if(!DATA.foodLog[TODAY])DATA.foodLog[TODAY]=[];DATA.foodLog[TODAY].push(e);saveState();closeSheet('foodSheetOverlay');toast('Ajouté à aujourd’hui');renderAll();}
-function removeFood(id){DATA.foodLog[TODAY]=(DATA.foodLog[TODAY]||[]).filter(x=>x.id!==id);saveState();renderAll();}
+function saveCustomFood(){
+  const name=document.getElementById('cf_name').value.trim(),kcal=nutrientInputValue('cf_kcal');
+  if(!name||kcal===null){toast('Nom et kcal sont nécessaires');return;}
+  if(!nutrientInputInRange('cf_kcal',NUTRITION_LIMITS.kcalPer100)){toast('Les calories doivent être comprises entre 0 et 1 000 kcal / 100 g');return;}
+  const macroIds=['cf_protein','cf_carbs','cf_fat','cf_sugar','cf_fiber','cf_satfat','cf_salt'];
+  if(macroIds.some(id=>!nutrientInputInRange(id,NUTRITION_LIMITS.macroPer100))){toast('Les nutriments doivent être compris entre 0 et 100 g / 100 g');return;}
+  const food={name,kcal,protein:nutrientInputValue('cf_protein'),carbs:nutrientInputValue('cf_carbs'),fat:nutrientInputValue('cf_fat'),sugar:nutrientInputValue('cf_sugar'),fiber:nutrientInputValue('cf_fiber'),satFat:nutrientInputValue('cf_satfat'),salt:nutrientInputValue('cf_salt'),giLabel:document.getElementById('cf_gi').value||'',category:'Personnalisés'};DATA.customFoods.push(food);saveState();toast('Aliment enregistré');document.getElementById('customFoodForm').style.display='none';pickFood(name);
+}
+function confirmAddFood(){refreshToday();if(!pickedFood)return;const qty=Number(document.getElementById('foodQty').value);if(!validFoodQuantity(qty)){toast('Indique une quantité comprise entre 1 et 5 000 g ou ml');return;}rememberDailyCalorieTarget(TODAY);const r=qty/100;const meta=localTimeMeta();const e={id:'f'+Date.now(),name:pickedFood.name,qty,kcal:Math.round(pickedFood.kcal*r),protein:scaledNutrient(pickedFood.protein,r),carbs:scaledNutrient(pickedFood.carbs,r),fat:scaledNutrient(pickedFood.fat,r),sugar:scaledNutrient(pickedFood.sugar,r),fiber:scaledNutrient(pickedFood.fiber,r),satFat:scaledNutrient(pickedFood.satFat,r),salt:scaledNutrient(pickedFood.salt,r,2),sodium:scaledNutrient(pickedFood.sodium,r,2),potassium:scaledNutrient(pickedFood.potassium,r),calcium:scaledNutrient(pickedFood.calcium,r),iron:scaledNutrient(pickedFood.iron,r),magnesium:scaledNutrient(pickedFood.magnesium,r),vitaminC:scaledNutrient(pickedFood.vitaminC,r),time:meta.time,timezone:meta.timezone,unit:pickedFood.unit||'g',mealType:selectedMealType||meta.mealType};if(!DATA.foodLog[TODAY])DATA.foodLog[TODAY]=[];DATA.foodLog[TODAY].push(e);saveState();closeSheet('foodSheetOverlay');toast('Ajouté à aujourd’hui');renderAll();}
+function removeFood(id){refreshToday();DATA.foodLog[TODAY]=(DATA.foodLog[TODAY]||[]).filter(x=>x.id!==id);saveState();renderAll();}
 function renderFood(){
   const t=currentTargets(),d=dayTotals(),
         totalKcal=Math.round(d.kcal),
@@ -1116,6 +1138,8 @@ function renderFood(){
   setBar('macroProteinBar',nutrientKnown(d,'protein')?macroPct(d.protein,t.protein):0);
   setBar('macroFatBar',nutrientKnown(d,'fat')?macroPct(d.fat,mt.fat):0);
   setBar('macroFiberBar',nutrientKnown(d,'fiber')?macroPct(d.fiber,mt.fiber):0);
+
+  setText('proteinIntakeValue',proteinIntakeText(d));
 
   const water=waterTotal(),waterGoal=(DATA.nutrition.waterTarget||2)*1000,glasses=water/250;
   setText('waterGlasses',`${glasses.toLocaleString('fr-FR',{maximumFractionDigits:1})} ${glasses===1?'verre':'verres'}`);
@@ -1301,15 +1325,17 @@ function renderMealDescriptionReview(state='ready'){
   const total=mealDescriptionDraft.reduce((s,x)=>s+mealDescriptionCalories(x),0);
   box.classList.add('open');
   box.innerHTML=`<div class="meal-description-note">${mealDescriptionDraft.length} aliment${mealDescriptionDraft.length>1?'s':''} reconnu${mealDescriptionDraft.length>1?'s':''}. Les quantités sont des estimations : vérifie-les avant d’ajouter.</div>`+
-    mealDescriptionDraft.map((item,i)=>`<div class="meal-desc-row"><div class="meal-desc-main"><strong>${escapeHtml(item.genericLabel?item.genericLabel+' · '+item.food.name:item.food.name)}</strong>${item.choices?.length?`<select class="meal-desc-choice" onchange="updateMealDescriptionFood(${i},this.value)">${item.choices.map(f=>`<option value="${escapeHtml(f.name)}" ${f.name===item.food.name?'selected':''}>${escapeHtml(f.name)}</option>`).join('')}</select>`:''}<small>${item.food.portionLabel?`Repère : ${escapeHtml(item.food.portionLabel)}`:'Quantité estimée'} · <span id="mealDescKcal${i}">${mealDescriptionCalories(item)} kcal</span></small></div><div class="meal-desc-qty"><input type="number" min="1" step="1" value="${Number(item.qty)}" oninput="updateMealDescriptionQty(${i},this.value)"><span>${item.food.unit||'g'}</span></div><button type="button" class="meal-desc-remove" aria-label="Retirer ${escapeHtml(item.food.name)}" onclick="removeMealDescriptionItem(${i})">×</button></div>`).join('')+
+    mealDescriptionDraft.map((item,i)=>`<div class="meal-desc-row"><div class="meal-desc-main"><strong>${escapeHtml(item.genericLabel?item.genericLabel+' · '+item.food.name:item.food.name)}</strong>${item.choices?.length?`<select class="meal-desc-choice" onchange="updateMealDescriptionFood(${i},this.value)">${item.choices.map(f=>`<option value="${escapeHtml(f.name)}" ${f.name===item.food.name?'selected':''}>${escapeHtml(f.name)}</option>`).join('')}</select>`:''}<small>${item.food.portionLabel?`Repère : ${escapeHtml(item.food.portionLabel)}`:'Quantité estimée'} · <span id="mealDescKcal${i}">${mealDescriptionCalories(item)} kcal</span></small></div><div class="meal-desc-qty"><input type="number" min="1" max="5000" step="1" value="${Number(item.qty)}" oninput="updateMealDescriptionQty(${i},this.value)"><span>${item.food.unit||'g'}</span></div><button type="button" class="meal-desc-remove" aria-label="Retirer ${escapeHtml(item.food.name)}" onclick="removeMealDescriptionItem(${i})">×</button></div>`).join('')+
     `<div class="meal-description-summary"><span>Total estimé</span><strong id="mealDescriptionTotal">${total} kcal</strong></div><button type="button" class="btn btn-primary btn-block" style="margin-top:8px" onclick="confirmMealDescription()">Ajouter ces aliments au repas</button>`;
 }
 function updateMealDescriptionFood(index,name){const item=mealDescriptionDraft[index],food=foodByName(name);if(!item||!food)return;item.food=food;if(item.estimated)item.qty=Number(food.portionQty)||item.qty||100;renderMealDescriptionReview();}
-function updateMealDescriptionQty(index,value){const item=mealDescriptionDraft[index],q=Number(String(value).replace(',','.'));if(!item||!(q>0))return;item.qty=q;const kcal=document.getElementById('mealDescKcal'+index);if(kcal)kcal.textContent=mealDescriptionCalories(item)+' kcal';const total=document.getElementById('mealDescriptionTotal');if(total)total.textContent=mealDescriptionDraft.reduce((s,x)=>s+mealDescriptionCalories(x),0)+' kcal';}
+function updateMealDescriptionQty(index,value){const item=mealDescriptionDraft[index],q=Number(String(value).replace(',','.'));if(!item)return;item.qty=q;const valid=validFoodQuantity(q),kcal=document.getElementById('mealDescKcal'+index);if(kcal)kcal.textContent=valid?mealDescriptionCalories(item)+' kcal':'quantité invalide';const total=document.getElementById('mealDescriptionTotal');if(total)total.textContent=mealDescriptionDraft.every(x=>validFoodQuantity(x.qty))?mealDescriptionDraft.reduce((s,x)=>s+mealDescriptionCalories(x),0)+' kcal':'—';}
 function removeMealDescriptionItem(index){mealDescriptionDraft.splice(index,1);renderMealDescriptionReview();}
 function clearMealDescription(clearText=true){mealDescriptionDraft=[];const box=document.getElementById('mealDescriptionReview');if(box){box.classList.remove('open');box.innerHTML='';}if(clearText){const input=document.getElementById('mealDescriptionText');if(input)input.value='';}}
 function confirmMealDescription(){
   if(!mealDescriptionDraft.length){toast('Aucun aliment à ajouter');return;}
+  if(mealDescriptionDraft.some(item=>!validFoodQuantity(item.qty))){toast('Chaque quantité doit être comprise entre 1 et 5 000 g ou ml');return;}
+  refreshToday();
   const meta=localTimeMeta();rememberDailyCalorieTarget(TODAY);if(!DATA.foodLog[TODAY])DATA.foodLog[TODAY]=[];
   mealDescriptionDraft.forEach((item,i)=>{const f=item.food,qty=Number(item.qty)||0,r=qty/100;DATA.foodLog[TODAY].push({id:'f'+Date.now()+i,name:f.name,qty:Math.round(qty*10)/10,kcal:Math.round((f.kcal||0)*r),protein:scaledNutrient(f.protein,r),carbs:scaledNutrient(f.carbs,r),fat:scaledNutrient(f.fat,r),sugar:scaledNutrient(f.sugar,r),fiber:scaledNutrient(f.fiber,r),satFat:scaledNutrient(f.satFat,r),salt:scaledNutrient(f.salt,r,2),sodium:scaledNutrient(f.sodium,r,2),potassium:scaledNutrient(f.potassium,r),calcium:scaledNutrient(f.calcium,r),iron:scaledNutrient(f.iron,r),magnesium:scaledNutrient(f.magnesium,r),vitaminC:scaledNutrient(f.vitaminC,r),time:meta.time,timezone:meta.timezone,unit:f.unit||'g',mealType:selectedMealType||meta.mealType,source:'description'});});
   const count=mealDescriptionDraft.length;saveState();clearMealDescription();closeSheet('foodSheetOverlay');toast(`${count} aliment${count>1?'s':''} ajouté${count>1?'s':''}`);renderAll();
@@ -1464,12 +1490,12 @@ function openGuideCatalog(){const p=document.getElementById('guideCatalogPanel')
 function closeGuideCatalog(){const p=document.getElementById('guideCatalogPanel');if(!p)return;p.classList.remove('open');p.setAttribute('aria-hidden','true');document.body.style.overflow='';}
 function toggleGuideSearch(){guideSearchOpen=!guideSearchOpen;syncGuideToolbar();if(guideSearchOpen)setTimeout(()=>document.getElementById('guideSearch')?.focus(),60);}
 function toggleGuideFilters(){guideFiltersOpen=!guideFiltersOpen;syncGuideToolbar();}
-function openGuideFood(name){const f=guideFoods().find(x=>x.name===name);if(!f)return;const meta=guideQualityMeta(f);const macro=v=>nutrientNumberOrNull(v)===null?'—':nutrientDisplay(v)+' g';document.getElementById('guideTitle').textContent=f.name;document.getElementById('guideDetail').innerHTML=`<div class="guide-detail-top"><span class="guide-quality-badge ${meta.key}">${meta.badge}</span><span class="guide-detail-sub">${escapeHtml(f.category||'Aliment')}</span></div><div class="guide-hero"><div class="num">${Math.round(Number(f.kcal)||0)}</div><span>kcal / 100 g</span></div><div class="mini-stats"><span>🥩 ${macro(f.protein)} protéines</span><span>🍬 ${macro(f.sugar)} sucres</span><span>🌾 ${macro(f.fiber)} fibres</span></div><div class="guide-detail-grid"><div class="metric"><strong>${macro(f.carbs)}</strong><span>Glucides</span></div><div class="metric"><strong>${macro(f.fat)}</strong><span>Lipides</span></div><div class="metric"><strong>${f.giLabel?escapeHtml(f.giLabel):'—'}</strong><span>Indice glycémique</span></div><div class="metric"><strong>${escapeHtml(f.portionLabel||'100 g')}</strong><span>Portion repère</span></div></div><div class="guide-gi"><strong>🎯 Repère rapide</strong><div>${meta.hint}</div></div><div class="coach-note"><strong>${meta.badge}</strong><p>${foodAdvice(f)}</p></div>`;openSheet('guideSheetOverlay');}
+function openGuideFood(name){const f=allFoods().find(x=>x.name===name);if(!f)return;const meta=guideQualityMeta(f);const macro=v=>nutrientNumberOrNull(v)===null?'—':nutrientDisplay(v)+' g';document.getElementById('guideTitle').textContent=f.name;document.getElementById('guideDetail').innerHTML=`<div class="guide-detail-top"><span class="guide-quality-badge ${meta.key}">${meta.badge}</span><span class="guide-detail-sub">${escapeHtml(f.category||'Aliment')}</span></div><div class="guide-hero"><div class="num">${Math.round(Number(f.kcal)||0)}</div><span>kcal / 100 g</span></div><div class="mini-stats"><span>🥩 ${macro(f.protein)} protéines</span><span>🍬 ${macro(f.sugar)} sucres</span><span>🌾 ${macro(f.fiber)} fibres</span></div><div class="guide-detail-grid"><div class="metric"><strong>${macro(f.carbs)}</strong><span>Glucides</span></div><div class="metric"><strong>${macro(f.fat)}</strong><span>Lipides</span></div><div class="metric"><strong>${f.giLabel?escapeHtml(f.giLabel):'—'}</strong><span>Indice glycémique</span></div><div class="metric"><strong>${escapeHtml(f.portionLabel||'100 g')}</strong><span>Portion repère</span></div></div><div class="guide-gi"><strong>🎯 Repère rapide</strong><div>${meta.hint}</div></div><div class="coach-note"><strong>${meta.badge}</strong><p>${foodAdvice(f)}</p></div>`;openSheet('guideSheetOverlay');}
 function foodAdvice(f){const meta=guideQualityMeta(f);if(meta.key==='star')return'Excellent repère pour ton objectif : cet aliment apporte soit beaucoup de protéines, soit beaucoup de fibres, soit une très bonne satiété pour une portion raisonnable.';if(meta.key==='limit')return'À consommer surtout de manière occasionnelle : cet aliment est souvent plus riche en calories, en sucres ajoutés, en graisses ou moins rassasiant.';if(meta.key==='dose')return'Bon aliment, mais la portion compte beaucoup. Il peut être très intéressant, simplement pas en grande quantité si ton objectif est de perdre du poids.';if(Number(f.kcal)>=500&&Number(f.protein)<12)return'À intégrer avec attention : cet aliment peut vite faire monter les calories si la portion grossit.';if(Number(f.protein)>=20&&Number(f.kcal)<=220)return'Très intéressant pour ton objectif : beaucoup de protéines pour une quantité de calories modérée.';if(Number(f.kcal)<=100)return'Facile à intégrer dans une journée de perte de gras, surtout si la portion reste adaptée à ton objectif.';return'Peut parfaitement trouver sa place dans une alimentation équilibrée. La quantité et l’ensemble de ta journée comptent plus que l’idée de bon ou mauvais aliment.';}
 function guideGiRank(label){return({faible:1,moyen:2,'élevé':3,eleve:3})[String(label||'').toLowerCase()]||9;}
 function renderGuideCategories(){
   const box=document.getElementById('guideCategories');if(!box)return;
-  const cats=[...new Set(guideFoods().map(f=>f.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fr'));
+  const cats=[...new Set(allFoods().map(f=>f.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fr'));
   const values=['all',...cats];
   box.innerHTML=values.map(cat=>`<button type="button" class="guide-chip ${currentGuideCategory===cat?'active':''}" onclick='setGuideCategory(${JSON.stringify(cat)})'>${cat==='all'?'Tous':escapeHtml(cat)}</button>`).join('');
 }
@@ -1484,7 +1510,7 @@ function renderGuide(){
   renderGuideCategories();
   renderGuideQualityFilters();
   const q=normalizeFoodText(currentGuideQuery);
-  let res=guideFoods().filter(f=>{
+  let res=allFoods().filter(f=>{
     const matchesQ=!q||normalizeFoodText(f.name).includes(q)||normalizeFoodText(f.name).replace(/\s+/g,'').includes(q.replace(/\s+/g,''));
     const matchesCat=currentGuideCategory==='all'||f.category===currentGuideCategory;
     const quality=guideQualityMeta(f);
@@ -1529,7 +1555,7 @@ function clearGuideCompareFromRow(event){if(event.target!==event.currentTarget||
 
 /* ---------- Weight / weekly report ---------- */
 function openWeightEntry(){const f=document.getElementById('weightEntryForm');if(!f)return;const h=document.getElementById('nutritionWeightHistory');if(h)h.style.display='none';const hidden=getComputedStyle(f).display==='none';f.style.display=hidden?'block':'none';if(f.style.display==='block')setTimeout(()=>document.getElementById('newWeight')?.focus(),50);}
-function logWeight(){const w=+document.getElementById('newWeight').value;if(!Number.isFinite(w)||w<35||w>300){toast('Indique un poids entre 35 et 300 kg');return;}const waist=+document.getElementById('newWaist').value||null;const visceral=+document.getElementById('newVisceralFat').value||null;DATA.weights.push({date:TODAY,weight:w,waist,visceralFat:visceral});DATA.profile.weightCurrent=w;DATA.profile.waist=waist||DATA.profile.waist;DATA.profile.visceralFat=visceral||DATA.profile.visceralFat;if(!DATA.profile.startingWeight)DATA.profile.startingWeight=w;saveState();document.getElementById('newWeight').value='';document.getElementById('newWaist').value='';document.getElementById('newVisceralFat').value='';const form=document.getElementById('weightEntryForm');if(form)form.style.display='none';toast('Pesée enregistrée');renderAll();}
+function logWeight(){refreshToday();const w=+document.getElementById('newWeight').value;if(!Number.isFinite(w)||w<35||w>300){toast('Indique un poids entre 35 et 300 kg');return;}const waist=+document.getElementById('newWaist').value||null;const visceral=+document.getElementById('newVisceralFat').value||null;DATA.weights.push({date:TODAY,weight:w,waist,visceralFat:visceral});DATA.profile.weightCurrent=w;DATA.profile.waist=waist||DATA.profile.waist;DATA.profile.visceralFat=visceral||DATA.profile.visceralFat;if(!DATA.profile.startingWeight)DATA.profile.startingWeight=w;saveState();document.getElementById('newWeight').value='';document.getElementById('newWaist').value='';document.getElementById('newVisceralFat').value='';const form=document.getElementById('weightEntryForm');if(form)form.style.display='none';toast('Pesée enregistrée');renderAll();}
 function renderWeightList(){const count=DATA.weights.length;setText('nutritionWeightHistoryCount',count?`${count} pesée${count>1?'s':''}`:'Aucune pesée');const targets=document.querySelectorAll('#weightListCard,#homeWeightListCard');targets.forEach(c=>{if(!c)return;if(!count){c.innerHTML=emptyState('⚖️','Aucune pesée enregistrée.');return;}const sorted=DATA.weights.map((x,i)=>({...x,idx:i})).sort((a,b)=>b.date.localeCompare(a.date));c.innerHTML=sorted.map(x=>`<div class="item-row"><div class="item-ico">⚖️</div><div class="item-main"><div class="item-title">${formatWeight(x.weight)} kg${x.source==='withings'?'<span class="weight-source">Withings</span>':''}</div><div class="item-sub">${formatDate(x.date)}${x.waist?` · tour ${x.waist} cm`:''}${x.visceralFat?` · graisse viscérale ${x.visceralFat}`:''}</div></div><button class="item-del" onclick="removeWeight(${x.idx})" aria-label="Supprimer cette pesée">×</button></div>`).join('');});}
 function removeWeight(i){DATA.weights.splice(i,1);const sorted=DATA.weights.slice().sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));const latest=sorted.length?sorted[sorted.length-1]:null;DATA.profile.weightCurrent=latest?(Number(latest.weight)||null):null;saveState();renderAll();}
 function formatDate(d){const [y,m,day]=d.split('-');return `${day}/${m}/${y}`;}
@@ -1569,4 +1595,3 @@ function renderWeeklyReport(targetId='weeklyReportHome'){
 function weeklyFoodSuggestion(){const d=dayTotals(),pt=proteinTarget();if(pt&&nutrientKnown(d,'protein')&&!nutrientPartial(d,'protein')&&d.protein<pt*0.7)return'Ajoute une source de protéines simple à un repas que tu manges déjà : skyr, fromage blanc, œufs, poulet, poisson ou légumineuses.';if(d.kcal>calorieTarget())return'Privilégie les aliments rassasiants et peu denses en calories : légumes, fruits entiers, pommes de terre, soupes, protéines maigres.';return'Garde les aliments que tu apprécies. Pour varier, compare leurs fiches dans le Guide nutritionnel et choisis une alternative qui te convient.';}
 
 function renderNutritionCoach(){const r=weeklyReport();setText('nutritionCoachTitle',r.title);setText('nutritionCoachText',r.text);}
-

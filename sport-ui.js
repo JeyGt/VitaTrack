@@ -292,8 +292,7 @@
       document.getElementById('exerciseFilterBackdrop')?.classList.remove('open');
       document.body.style.overflow='hidden';
     }else if(typeof toast==='function')toast('Impossible de lancer cet exercice');
-  };
-  window.toggleSportFavorite = id=>window.exerciseFavorite(null,id);
+  };  window.toggleSportFavorite = id=>window.exerciseFavorite(null,id);
   window.exerciseFavoriteFilter = ()=>updateExerciseFilter(()=>{S.favorite=!S.favorite;});
   window.exerciseFiltersReset = ()=>updateExerciseFilter(()=>{S.difficulty=[];S.equipment=[];S.duration=[];S.body=[];S.type=[];S.zone=[];S.goal=[];S.favorite=false;},true);
   window.exerciseFiltersToggle = ()=>{const panel=document.getElementById("exerciseFilterSheet"),back=document.getElementById("exerciseFilterBackdrop");if(!panel)return;const open=!panel.classList.contains("open");if(open)panel.classList.remove("filter-refresh");panel.classList.toggle("open",open);back?.classList.toggle("open",open);};

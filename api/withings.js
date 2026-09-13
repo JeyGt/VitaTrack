@@ -4,7 +4,7 @@ const crypto = require('crypto');
 
 const API = 'https://wbsapi.withings.net';
 const AUTH = 'https://account.withings.com/oauth2_user/authorize2';
-const SCOPES = 'user.metrics,user.info';
+const SCOPES = 'user.metrics,user.info,user.activity';
 const SYNC_COOKIE = 'vt_withings_sync';
 const USER_COOKIE = 'vt_user_session';
 
@@ -287,6 +287,42 @@ async function fetchMeasurements(c,conn,lastupdate){
   return mapMeasurements(d.body?.measuregrps||[]);
 }
 
+function mapActivityRows(rows){
+  return (Array.isArray(rows)?rows:[]).map(row=>({
+    date:String(row.date||''),
+    steps:Number(row.steps)||0,
+    distance:Number(row.distance)||0,
+    calories:Number(row.calories)||0,
+    totalCalories:Number(row.totalcalories)||0
+  })).filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x.date)&&x.steps>=0);
+}
+
+async function fetchActivity(c,conn,days=8){
+  const count=Math.max(1,Math.min(30,Math.round(Number(days)||8)));
+  const end=new Date();
+  const start=new Date(end);
+  start.setDate(start.getDate()-(count-1));
+  const dateKey=d=>d.toISOString().slice(0,10);
+  const form=new URLSearchParams({
+    action:'getactivity',
+    startdateymd:dateKey(start),
+    enddateymd:dateKey(end),
+    data_fields:'steps,distance,calories,totalcalories'
+  });
+
+  const r=await fetch(API+'/v2/measure',{
+    method:'POST',
+    headers:{Authorization:`Bearer ${conn.access_token}`,'Content-Type':'application/x-www-form-urlencoded'},
+    body:form
+  });
+  const d=await r.json();
+  if(d.status!==0){
+    console.error('Withings activity:',d);
+    throw new Error('Withings activity request failed');
+  }
+  return {activities:mapActivityRows(d.body?.activities||[])};
+}
+
 module.exports=async(req,res)=>{
   const c=cfg();
   const action=(req.query&&req.query.action)||'status';
@@ -390,6 +426,25 @@ module.exports=async(req,res)=>{
   }
   if(!conn?.refresh_token)return json(res,401,{error:'Not connected'});
 
+  if(action==='activity'){
+    let session;
+    try{session=await refreshSession(c,conn);}catch(e){
+      console.error('Token refresh:',e);
+      return json(res,502,{error:'Withings token refresh failed'});
+    }
+
+    const days=Math.max(1,Math.min(30,Math.round(Number(req.query.days)||8)));
+    let result;
+    try{result=await fetchActivity(c,session,days);}catch(e){
+      return json(res,502,{error:e.message});
+    }
+
+    if(result.activities.length){
+      try{await updateConnection(c,session.id,{last_sync_at:new Date().toISOString()});}catch(e){console.error('last_sync_at:',e);}
+    }
+
+    return json(res,200,result);
+  }
   if(action==='measurements'){
     let session;
     try{session=await refreshSession(c,conn);}catch(e){
