@@ -1006,6 +1006,17 @@ function ensureWithingsUI(){
   if(oldBox)oldBox.remove();
 }
 
+function formatWithingsLastSync(value){
+  if(!value)return '';
+  const d=new Date(value);
+  if(!Number.isFinite(d.getTime()))return String(value);
+  const today=new Date();
+  const sameDay=d.getFullYear()===today.getFullYear()&&d.getMonth()===today.getMonth()&&d.getDate()===today.getDate();
+  const time=d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  if(sameDay)return `aujourd’hui à ${time}`;
+  return `${d.toLocaleDateString('fr-FR')} à ${time}`;
+}
+
 async function refreshWithingsUI(){
   const statusEl=document.getElementById('withingsStatus'),btn=document.getElementById('withingsAction');
   if(!statusEl||!btn)return;
@@ -1014,7 +1025,7 @@ async function refreshWithingsUI(){
     const dataEl=document.getElementById('withingsData');
     const disconnectBtn=document.getElementById('withingsDisconnect');
     if(d.connected){
-      statusEl.textContent=d.lastSync?`Connectée · dernière synchro ${d.lastSync}`:'Connectée';
+      statusEl.textContent=d.lastSync?`Connectée · dernière synchro ${formatWithingsLastSync(d.lastSync)}`:'Connectée';
       btn.textContent='Synchroniser';
       btn.onclick=async()=>{btn.disabled=true;btn.textContent='…';try{await syncWithings();}catch(e){toast('Synchronisation impossible');}finally{btn.disabled=false;btn.textContent='Synchroniser';}};
       if(dataEl)dataEl.style.display='block';
@@ -1047,7 +1058,7 @@ async function refreshProfileWithingsUI(){
   try{
     const d=await WITHINGS_CONNECTOR.status();
     if(d.connected){
-      statusEl.textContent=d.lastSync?`Connectée · dernière synchro ${d.lastSync}`:'Connectée';btn.textContent='Synchroniser';btn.disabled=false;
+      statusEl.textContent=d.lastSync?`Connectée · dernière synchro ${formatWithingsLastSync(d.lastSync)}`:'Connectée';btn.textContent='Synchroniser';btn.disabled=false;
       if(extra)extra.style.display='flex';
       btn.onclick=async(e)=>{e.stopPropagation();btn.disabled=true;try{await syncWithings();await refreshProfileWithingsUI();}catch(err){toast('Synchronisation impossible')}finally{btn.disabled=false}};
       if(disconnectBtn)disconnectBtn.onclick=async(e)=>{e.stopPropagation();disconnectBtn.disabled=true;try{await WITHINGS_CONNECTOR.disconnect();toast('Withings déconnecté');await refreshProfileWithingsUI();await refreshWithingsUI();}catch(err){toast('Déconnexion Withings impossible')}finally{disconnectBtn.disabled=false}};
@@ -1123,6 +1134,8 @@ async function syncWithings(options={}){
   }
 
   let activityResult=null;
+  let todayWithingsSteps=null;
+  let todayStepsChanged=false;
   try{
     activityResult=await WITHINGS_CONNECTOR.activity(8);
     const activities=Array.isArray(activityResult.activities)?activityResult.activities:[];
@@ -1133,7 +1146,10 @@ async function syncWithings(options={}){
       if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||steps<=0) continue;
       const current=DATA.stepsLog[date];
       const currentSteps=Math.round(Number(typeof current==='object'?current?.steps:current)||0);
+      const isToday=date===TODAY;
+      if(isToday)todayWithingsSteps=steps;
       if(current?.source==='manual'&&currentSteps>steps) continue;
+      const changed=currentSteps!==steps||current?.source!=='withings';
       DATA.stepsLog[date]={
         steps,
         source:'withings',
@@ -1142,7 +1158,10 @@ async function syncWithings(options={}){
         totalCalories:Number(a.totalCalories)||null,
         updatedAt:new Date().toISOString()
       };
-      stepsUpdated++;
+      if(changed){
+        stepsUpdated++;
+        if(isToday)todayStepsChanged=true;
+      }
     }
   }catch(e){
     console.error('Withings activity sync:',e);
@@ -1167,11 +1186,15 @@ async function syncWithings(options={}){
   if(!silent){
     const parts=[];
     if(added)parts.push(`${added} pesée${added>1?'s':''}`);
-    if(stepsUpdated)parts.push(`${stepsUpdated} jour${stepsUpdated>1?'s':''} de pas`);
-    toast(parts.length?`${parts.join(' · ')} importé${parts.length>1||added>1||stepsUpdated>1?'s':''}`:'Aucune nouvelle donnée Withings');
+    if(todayWithingsSteps!==null){
+      parts.push(todayStepsChanged?`pas Withings mis à jour : ${todayWithingsSteps}`:`pas Withings aujourd’hui : ${todayWithingsSteps}`);
+    }else if(stepsUpdated){
+      parts.push(`${stepsUpdated} jour${stepsUpdated>1?'s':''} de pas`);
+    }
+    toast(parts.length?parts.join(' · '):'Aucune nouvelle donnée Withings');
   }
 
-  return {...d,activity:activityResult,added,stepsUpdated};
+  return {...d,activity:activityResult,added,stepsUpdated,todayWithingsSteps,todayStepsChanged};
 }
 
 const _renderAllOriginal=renderAll;
