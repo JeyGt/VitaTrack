@@ -258,6 +258,7 @@ function mapMeasurements(groups){
     const out={
       id:g.grpid,
       date:new Date(Number(g.date)*1000).toISOString().slice(0,10),
+      timestamp:Number(g.date)*1000,
       modified
     };
     for(const m of g.measures||[]){
@@ -269,6 +270,7 @@ function mapMeasurements(groups){
       if(m.type===76)out.muscleMass=v;
       if(m.type===77)out.hydration=v;
       if(m.type===88)out.boneMass=v;
+      if(m.type===170)out.visceralFat=v;
     }
     return out;
   }).filter(x=>x.weight>0);
@@ -279,7 +281,7 @@ async function fetchMeasurements(c,conn,lastupdate){
   const end=Math.floor(Date.now()/1000);
   const form=new URLSearchParams({
     action:'getmeas',
-    meastype:'1,5,6,8,76,77,88',
+    meastype:'1,5,6,8,76,77,88,170',
     category:'1'
   });
 
@@ -476,7 +478,8 @@ module.exports=async(req,res)=>{
       return json(res,502,{error:'Withings token refresh failed'});
     }
 
-    const lastupdate=parseIntSafe(getCookie(req,SYNC_COOKIE));
+    const fullHistory=String(req.query.full||'')==='1';
+    const lastupdate=fullHistory?0:parseIntSafe(getCookie(req,SYNC_COOKIE));
     let result;
     try{result=await fetchMeasurements(c,session,lastupdate);}catch(e){
       return json(res,502,{error:e.message});

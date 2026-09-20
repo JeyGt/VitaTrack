@@ -402,6 +402,25 @@ input[type="range"]{width:100%;}
   .weigh-label{font-size:10px}
   .weigh-form-grid{grid-template-columns:1fr}
 }
+
+.bodycomp-panel{border-top:1px solid var(--border);padding:16px 14px 14px;background:linear-gradient(180deg,var(--surface),var(--surface-alt))}
+.bodycomp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}
+.bodycomp-head strong{font-size:14px}.bodycomp-head span{font-size:10.5px;color:var(--ink-soft);text-align:right}
+.bodycomp-overview{display:grid;grid-template-columns:1.25fr 2fr;gap:9px;margin-bottom:12px}
+.bodycomp-main{border:1px solid var(--border);border-radius:14px;padding:12px;background:var(--surface);color:var(--ink);font:inherit;text-align:left;cursor:pointer;min-height:94px;display:flex;flex-direction:column;justify-content:center}
+.bodycomp-main span,.bodycomp-mini span{font-size:10px;color:var(--ink-soft);font-weight:650}.bodycomp-main strong{font-size:27px;line-height:1.1;margin:4px 0}.bodycomp-main small,.bodycomp-mini small{font-size:10px;color:var(--ink-soft)}
+.bodycomp-mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.bodycomp-mini{border:1px solid var(--border);border-radius:12px;padding:10px 7px;background:var(--surface);color:var(--ink);font:inherit;text-align:left;min-width:0;cursor:pointer;color:var(--ink)}
+.bodycomp-mini strong{display:block;font-size:15px;line-height:1.15;margin:5px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bodycomp-mini.active{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary) inset}
+.bodycomp-tabs,.bodycomp-ranges{display:flex;gap:6px;overflow:auto;scrollbar-width:none}.bodycomp-tabs::-webkit-scrollbar,.bodycomp-ranges::-webkit-scrollbar{display:none}
+.bodycomp-tab,.bodycomp-range{border:1px solid var(--border);background:var(--surface);color:var(--ink-soft);border-radius:999px;padding:6px 9px;font-size:10.5px;font-weight:700;white-space:nowrap;cursor:pointer}.bodycomp-tab.active,.bodycomp-range.active{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.bodycomp-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:10px 0 8px}.bodycomp-ranges{justify-content:flex-end}
+.bodycomp-chart-head{display:flex;align-items:end;justify-content:space-between;gap:10px;margin-bottom:5px}.bodycomp-chart-head strong{font-size:20px}.bodycomp-chart-head span{font-size:10.5px;color:var(--ink-soft);text-align:right}
+.bodycomp-chart-wrap{position:relative;height:154px;border-radius:12px;background:var(--surface);border:1px solid var(--border);overflow:hidden}.bodycomp-chart{display:block;width:100%;height:154px}.bodycomp-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;color:var(--ink-soft);font-size:12px}
+.bodycomp-insight{margin-top:9px;padding:9px 10px;border-radius:11px;background:var(--surface);border:1px solid var(--border);font-size:11px;line-height:1.4;color:var(--ink-soft)}.bodycomp-insight strong{color:var(--ink)}
+.weight-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.weight-detail-cell{padding:11px;border:1px solid var(--border);border-radius:12px;background:var(--surface-alt)}.weight-detail-cell span{display:block;font-size:10px;color:var(--ink-soft);margin-bottom:4px}.weight-detail-cell strong{font-size:17px}.weight-detail-source{margin-top:12px;font-size:11px;color:var(--ink-soft)}
+.weigh-history-list .item-row.weight-row-clickable{cursor:pointer}.weight-history-chevron{color:var(--ink-soft);font-size:20px;margin-left:3px}.weigh-history-list .item-del{position:relative;z-index:2}
+@media(max-width:520px){.bodycomp-overview{grid-template-columns:1fr}.bodycomp-mini-grid{grid-template-columns:repeat(3,1fr)}.bodycomp-main{min-height:auto}.bodycomp-main strong{font-size:25px}.bodycomp-toolbar{align-items:flex-start;flex-direction:column}.bodycomp-ranges{justify-content:flex-start;width:100%}}
 </style>
 
 <style>
@@ -2172,6 +2191,37 @@ body[data-theme="dark"] .calendar-nutrition-summary.bad{background:rgba(224,105,
           </div>
         </div>
 
+
+        <div class="bodycomp-panel" id="bodyCompPanel">
+          <div class="bodycomp-head"><strong>Composition corporelle</strong><span id="bodyCompLastDate">Ajoute une pesée pour commencer</span></div>
+          <div class="bodycomp-overview">
+            <button type="button" class="bodycomp-main" onclick="setBodyCompMetric('weight')">
+              <span>Poids</span><strong id="bodyCompWeight">—</strong><small id="bodyCompWeightDelta">Tendance indisponible</small>
+            </button>
+            <div class="bodycomp-mini-grid">
+              <button type="button" class="bodycomp-mini" data-bodycomp-card="bodyFat" onclick="setBodyCompMetric('bodyFat')"><span>Graisse</span><strong id="bodyCompFat">—</strong><small id="bodyCompFatDelta">—</small></button>
+              <button type="button" class="bodycomp-mini" data-bodycomp-card="muscleMass" onclick="setBodyCompMetric('muscleMass')"><span>Muscle</span><strong id="bodyCompMuscle">—</strong><small id="bodyCompMuscleDelta">—</small></button>
+              <button type="button" class="bodycomp-mini" data-bodycomp-card="visceralFat" onclick="setBodyCompMetric('visceralFat')"><span>Viscérale</span><strong id="bodyCompVisceral">—</strong><small id="bodyCompVisceralDelta">indice</small></button>
+            </div>
+          </div>
+          <div class="bodycomp-tabs" aria-label="Mesure affichée">
+            <button type="button" class="bodycomp-tab active" data-bodycomp-metric="weight" onclick="setBodyCompMetric('weight')">Poids</button>
+            <button type="button" class="bodycomp-tab" data-bodycomp-metric="bodyFat" onclick="setBodyCompMetric('bodyFat')">Graisse</button>
+            <button type="button" class="bodycomp-tab" data-bodycomp-metric="muscleMass" onclick="setBodyCompMetric('muscleMass')">Muscle</button>
+            <button type="button" class="bodycomp-tab" data-bodycomp-metric="visceralFat" onclick="setBodyCompMetric('visceralFat')">Viscérale</button>
+          </div>
+          <div class="bodycomp-toolbar">
+            <div class="bodycomp-chart-head"><div><strong id="bodyCompChartValue">—</strong><div class="muted small" id="bodyCompChartMetricLabel">Poids</div></div><span id="bodyCompChartTrend">Pas assez de données</span></div>
+            <div class="bodycomp-ranges" aria-label="Période du graphique">
+              <button type="button" class="bodycomp-range" data-bodycomp-range="7" onclick="setBodyCompRange(7)">7 j</button>
+              <button type="button" class="bodycomp-range active" data-bodycomp-range="30" onclick="setBodyCompRange(30)">30 j</button>
+              <button type="button" class="bodycomp-range" data-bodycomp-range="90" onclick="setBodyCompRange(90)">3 mois</button>
+              <button type="button" class="bodycomp-range" data-bodycomp-range="365" onclick="setBodyCompRange(365)">1 an</button>
+            </div>
+          </div>
+          <div class="bodycomp-chart-wrap"><svg id="bodyCompChart" class="bodycomp-chart" viewBox="0 0 340 154" aria-label="Évolution de la composition corporelle"></svg><div class="bodycomp-empty" id="bodyCompChartEmpty">Ajoute au moins 2 mesures pour voir la tendance.</div></div>
+          <div class="bodycomp-insight" id="bodyCompInsight"><strong>Conseil :</strong> regarde surtout la tendance sur plusieurs pesées plutôt qu’une variation isolée.</div>
+        </div>
         <div id="weightEntryForm" class="weigh-form" style="display:none">
           <div class="weigh-form-head">
             <strong>Nouvelle pesée</strong>
@@ -2281,6 +2331,9 @@ body[data-theme="dark"] .calendar-nutrition-summary.bad{background:rgba(224,105,
     <div class="guide-card-grid" id="guideList"></div>
   </div>
 </div>
+
+
+<div class="sheet-overlay" id="weightDetailOverlay" onclick="closeSheetIfBg(event,'weightDetailOverlay')"><div class="sheet"><div class="sheet-handle"></div><div class="row"><div><div class="eyebrow">Détail de la pesée</div><h3 id="weightDetailTitle" style="margin:3px 0 0">Pesée</h3></div><button type="button" class="weigh-close" onclick="closeSheet('weightDetailOverlay')" aria-label="Fermer">×</button></div><div id="weightDetailContent"></div></div></div>
 
 <div class="sheet-overlay" id="waterSheetOverlay" onclick="closeSheetIfBg(event,'waterSheetOverlay')"><div class="sheet"><div class="sheet-handle"></div><h3>Ajouter de l’eau</h3><div class="water-quick"><button type="button" class="chip" onclick="setVal('waterQty',200)">200 ml</button><button type="button" class="chip" onclick="setVal('waterQty',250)">250 ml</button><button type="button" class="chip" onclick="setVal('waterQty',330)">330 ml</button><button type="button" class="chip" onclick="setVal('waterQty',500)">500 ml</button></div><div class="field"><label>Quantité (ml)</label><input type="number" id="waterQty" value="250" min="1" max="5000"></div><button class="btn btn-primary btn-block" onclick="addWater()">Ajouter</button></div></div>
 
@@ -2795,7 +2848,7 @@ window.updateCalorieExcessRing=updateCalorieExcessRing;</script>
 
 <script>
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=104').catch(()=>{}));
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=137').catch(()=>{}));
 }
 </script>
 

@@ -982,8 +982,8 @@ const WITHINGS_CONNECTOR = {
     return r.json();
   },
   connect(){ window.location.href=this.endpoint+'?action=connect'; },
-  async sync(){
-    const r=await fetch(this.endpoint+'?action=measurements',{credentials:'include'});
+  async sync(full=false){
+    const r=await fetch(this.endpoint+'?action=measurements'+(full?'&full=1':''),{credentials:'include'});
     const d=await r.json();
     if(!r.ok) throw new Error(d.error||'sync');
     return d;
@@ -1087,12 +1087,18 @@ async function syncWithingsOnSportOpen(){
     __withingsSportSyncRunning=false;
   }
 }
+const WITHINGS_BODYCOMP_BACKFILL_KEY='vitatrack_withings_bodycomp_backfill_v1';
 async function syncWithings(options={}){
   const silent=!!options.silent;
+  let full=options.full;
+  if(full===undefined){
+    try{full=!silent&&localStorage.getItem(WITHINGS_BODYCOMP_BACKFILL_KEY)!=='done';}catch(e){full=!silent;}
+  }
   let d;
 
   try{
-    d=await WITHINGS_CONNECTOR.sync();
+    d=await WITHINGS_CONNECTOR.sync(!!full);
+    if(full){try{localStorage.setItem(WITHINGS_BODYCOMP_BACKFILL_KEY,'done');}catch(e){}}
   }catch(e){
     console.error('Withings API error:',e);
     if(!silent) throw new Error('Impossible de récupérer les données Withings');
@@ -1101,25 +1107,16 @@ async function syncWithings(options={}){
 
   const measures=Array.isArray(d.measurements)?d.measurements:[];
   let added=0;
+  let enriched=0;
   let stepsUpdated=0;
 
   for(const m of measures){
     if(!(Number(m.weight)>0)) continue;
 
     const date=m.date||TODAY;
-    const exists=DATA.weights.some(x=>
-      x.withingsId===m.id ||
-      (
-        x.date===date &&
-        Math.abs(Number(x.weight)-Number(m.weight))<0.01 &&
-        x.source==='withings'
-      )
-    );
-
-    if(exists) continue;
-
-    DATA.weights.push({
+    const incoming={
       date,
+      timestamp:Number(m.timestamp)||null,
       weight:Number(m.weight),
       source:'withings',
       withingsId:m.id||null,
@@ -1128,8 +1125,30 @@ async function syncWithings(options={}){
       fatMass:m.fatMass??null,
       muscleMass:m.muscleMass??null,
       hydration:m.hydration??null,
-      boneMass:m.boneMass??null
-    });
+      boneMass:m.boneMass??null,
+      visceralFat:m.visceralFat??null
+    };
+    const existingIndex=DATA.weights.findIndex(x=>
+      x.withingsId===m.id ||
+      (
+        x.date===date &&
+        Math.abs(Number(x.weight)-Number(m.weight))<0.01 &&
+        x.source==='withings'
+      )
+    );
+
+    if(existingIndex>=0){
+      const current=DATA.weights[existingIndex];
+      let changed=false;
+      Object.entries(incoming).forEach(([key,value])=>{
+        if(value===null||value===undefined||value==='')return;
+        if(current[key]!==value){current[key]=value;changed=true;}
+      });
+      if(changed) enriched++;
+      continue;
+    }
+
+    DATA.weights.push(incoming);
     added++;
   }
 
@@ -1178,7 +1197,7 @@ async function syncWithings(options={}){
     }
   }
 
-  if(added||stepsUpdated){
+  if(added||enriched||stepsUpdated){
     try{saveState();}catch(e){console.error('Withings saveState error:',e);}
     try{renderAll();}catch(e){console.error('Withings renderAll error:',e);}
   }
@@ -1186,6 +1205,7 @@ async function syncWithings(options={}){
   if(!silent){
     const parts=[];
     if(added)parts.push(`${added} pesée${added>1?'s':''}`);
+    if(enriched)parts.push(`${enriched} pesée${enriched>1?'s':''} enrichie${enriched>1?'s':''}`);
     if(todayWithingsSteps!==null){
       parts.push(todayStepsChanged?`pas Withings mis à jour : ${todayWithingsSteps}`:`pas Withings aujourd’hui : ${todayWithingsSteps}`);
     }else if(stepsUpdated){
@@ -1194,7 +1214,7 @@ async function syncWithings(options={}){
     toast(parts.length?parts.join(' · '):'Aucune nouvelle donnée Withings');
   }
 
-  return {...d,activity:activityResult,added,stepsUpdated,todayWithingsSteps,todayStepsChanged};
+  return {...d,activity:activityResult,added,enriched,stepsUpdated,todayWithingsSteps,todayStepsChanged};
 }
 
 const _renderAllOriginal=renderAll;
