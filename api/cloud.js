@@ -110,7 +110,13 @@ function writeSession(res,c,s){
 async function readSession(req,res,c){
   let s=decrypt(c.sessionSecret,getCookie(req,CLOUD_COOKIE));
   if(!s?.user?.id||!s.refresh_token)return null;
-  if(Number(s.expires_at||0)>Date.now()+120000)return s;
+  // Keep the Withings identity bridge aligned with the authenticated cloud
+  // account on every device. This also repairs older sessions that were
+  // created before vt_user_session was introduced.
+  if(Number(s.expires_at||0)>Date.now()+120000){
+    setWithingsUserCookie(res,c,s.user.id);
+    return s;
+  }
   try{
     const d=await authRequest(c,'token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:s.refresh_token})});
     const fresh=sessionFromAuth(d);

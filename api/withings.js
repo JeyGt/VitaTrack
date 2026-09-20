@@ -382,20 +382,28 @@ module.exports=async(req,res)=>{
       if(good)payload=JSON.parse(Buffer.from(body,'base64url').toString());
     }catch{}
 
-    if(!payload||!payload.nonce||!payload.iat||payload.appUserId!==appUserId||Date.now()-Number(payload.iat)>10*60*1000||!code){
+    const callbackUserId=payload?.appUserId;
+    // The OAuth state is HMAC-signed by our server. Use the user id carried in
+    // that signed state rather than requiring the callback browser to still
+    // have the same cookie. On mobile, an installed PWA can hand OAuth to the
+    // system browser, which may use a different cookie jar.
+    if(!payload||!payload.nonce||!payload.iat||!/^[a-f0-9-]{36}$/.test(String(callbackUserId||''))||Date.now()-Number(payload.iat)>10*60*1000||!code){
       return json(res,400,{error:'Invalid Withings authorization state'});
     }
 
     try{
       const session=await exchangeCode(c,code);
-      await saveConnection(c,appUserId,session);
+      await saveConnection(c,callbackUserId,session);
+      // Also align the browser that handled the callback. This is useful when
+      // OAuth returned through Safari/Chrome instead of the standalone PWA.
+      setCookie(res,USER_COOKIE,`${callbackUserId}.${signValue(c.sessionSecret,callbackUserId)}`,60*60*24*365*2);
     }catch(e){
       console.error('Withings callback save error:',e);
       return json(res,500,{error:'Unable to save Withings connection',details:e.message});
     }
 
     res.statusCode=302;
-    res.setHeader('Location','/');
+    res.setHeader('Location','/?withings=connected');
     return res.end();
   }
 

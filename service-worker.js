@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'vitatrack-sport-custom-v1';
-const CACHE_VERSION = 'v134-nutrition-reliability';
+const CACHE_VERSION = 'v136-withings-mobile';
 const CORE_CACHE = `${CACHE_PREFIX}core-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}runtime-${CACHE_VERSION}`;
 
