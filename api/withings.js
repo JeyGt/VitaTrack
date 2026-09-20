@@ -77,7 +77,11 @@ async function supabaseRequest(c,path,options={}){
   try{data=text?JSON.parse(text):null;}catch{data=text;}
   if(!r.ok){
     console.error('Supabase error:',r.status,data);
-    throw new Error(`Supabase request failed (${r.status})`);
+    const dbCode=data&&typeof data==='object'&&data.code?String(data.code):'';
+    const dbMessage=data&&typeof data==='object'&&data.message?String(data.message):'';
+    const dbDetails=data&&typeof data==='object'&&data.details?String(data.details):'';
+    const suffix=[dbCode,dbMessage,dbDetails].filter(Boolean).join(' — ');
+    throw new Error(`Supabase request failed (${r.status})${suffix?`: ${suffix}`:''}`);
   }
   return data;
 }
@@ -93,7 +97,19 @@ async function getConnection(c,appUserId){
 
 async function saveConnection(c,appUserId,s){
   if(!appUserId)throw new Error('Missing VitaTrack user session');
-  // Replace only this VitaTrack user's Withings authorization.
+  const withingsUserId=String(s.userid||'').trim();
+  if(!withingsUserId)throw new Error('Missing Withings user id');
+
+  // A successful OAuth callback proves control of this Withings account.
+  // Clean up both sides before inserting the fresh authorization:
+  //  - stale row for this VitaTrack account
+  //  - stale/legacy row for the same Withings userid (for example a desktop
+  //    connection created before the mobile/PWA identity was aligned).
+  // This avoids a 409 uniqueness conflict when userid is UNIQUE in an older
+  // version of the Supabase table.
+  await supabaseRequest(c,`withings_connection?userid=eq.${encodeURIComponent(withingsUserId)}`,{
+    method:'DELETE',headers:{Prefer:'return=minimal'}
+  });
   await supabaseRequest(c,`withings_connection?app_user_id=eq.${encodeURIComponent(appUserId)}`,{
     method:'DELETE',headers:{Prefer:'return=minimal'}
   });
@@ -102,7 +118,7 @@ async function saveConnection(c,appUserId,s){
     method:'POST',headers:{Prefer:'return=minimal'},
     body:JSON.stringify({
       app_user_id:appUserId,
-      userid:String(s.userid),
+      userid:withingsUserId,
       access_token:encryptToken(c,s.access_token),
       refresh_token:encryptToken(c,s.refresh_token),
       expires_at:new Date(s.expires_at).toISOString(),
