@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'vitatrack-sport-custom-v1';
-const CACHE_VERSION = 'v138-body-composition-deployfix';
+const CACHE_VERSION = 'v139-body-composition-zones-goals';
 const CORE_CACHE = `${CACHE_PREFIX}core-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}runtime-${CACHE_VERSION}`;
 

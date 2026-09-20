@@ -407,12 +407,20 @@ input[type="range"]{width:100%;}
 .bodycomp-panel{border-top:1px solid var(--border);padding:16px 14px 14px;background:linear-gradient(180deg,var(--surface),var(--surface-alt))}
 .bodycomp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}
 .bodycomp-head strong{font-size:14px}.bodycomp-head span{font-size:10.5px;color:var(--ink-soft);text-align:right}
-.bodycomp-overview{display:grid;grid-template-columns:1.25fr 2fr;gap:9px;margin-bottom:12px}
-.bodycomp-main{border:1px solid var(--border);border-radius:14px;padding:12px;background:var(--surface);color:var(--ink);font:inherit;text-align:left;cursor:pointer;min-height:94px;display:flex;flex-direction:column;justify-content:center}
+.bodycomp-overview{display:grid;grid-template-columns:1.25fr 2fr;gap:9px;margin-bottom:10px}
+.bodycomp-main{border:1px solid var(--border);border-radius:14px;padding:12px;background:var(--surface);color:var(--ink);font:inherit;text-align:left;cursor:pointer;min-height:104px;display:flex;flex-direction:column;justify-content:center}
 .bodycomp-main span,.bodycomp-mini span{font-size:10px;color:var(--ink-soft);font-weight:650}.bodycomp-main strong{font-size:27px;line-height:1.1;margin:4px 0}.bodycomp-main small,.bodycomp-mini small{font-size:10px;color:var(--ink-soft)}
+.bodycomp-objective{display:block;margin-top:3px;font-weight:750!important;color:var(--primary)!important}
 .bodycomp-mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
-.bodycomp-mini{border:1px solid var(--border);border-radius:12px;padding:10px 7px;background:var(--surface);color:var(--ink);font:inherit;text-align:left;min-width:0;cursor:pointer;color:var(--ink)}
-.bodycomp-mini strong{display:block;font-size:15px;line-height:1.15;margin:5px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bodycomp-mini.active{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary) inset}
+.bodycomp-mini{border:1px solid var(--border);border-radius:12px;padding:10px 7px;background:var(--surface);color:var(--ink);font:inherit;text-align:left;min-width:0;cursor:pointer}
+.bodycomp-mini strong{display:block;font-size:15px;line-height:1.15;margin:5px 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bodycomp-mini.active{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary) inset}
+.bodycomp-mini-status{display:block!important;font-size:9.5px!important;font-weight:800!important;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bodycomp-mini-status.good{color:#16835d!important}.bodycomp-mini-status.low{color:#a06a13!important}.bodycomp-mini-status.high{color:#b64d3e!important}.bodycomp-mini-status.neutral{color:var(--ink-soft)!important}
+.bodycomp-position{margin:2px 0 13px;padding:11px 11px 10px;border-radius:13px;background:var(--surface);border:1px solid var(--border)}
+.bodycomp-position-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:9px}.bodycomp-position-head div{min-width:0}.bodycomp-position-kicker{display:block;font-size:9px;color:var(--ink-soft);font-weight:750;text-transform:uppercase;letter-spacing:.04em}.bodycomp-position-head strong{display:block;font-size:13px;margin-top:2px}.bodycomp-position-goal{font-size:10px;color:var(--primary);font-weight:800;text-align:right;white-space:nowrap;border:0;background:transparent;padding:1px 0;cursor:pointer}
+.bodycomp-scale{position:relative;display:flex;height:10px;border-radius:999px;overflow:hidden;background:var(--surface-alt)}.bodycomp-zone{height:100%;min-width:1px}.bodycomp-zone.low{background:#e4c987}.bodycomp-zone.normal{background:#78caa5}.bodycomp-zone.high{background:#e8a298}.bodycomp-zone.muscle-high{background:#93b8de}.bodycomp-zone.neutral{background:var(--border)}
+.bodycomp-marker,.bodycomp-goal-marker{position:absolute;top:-5px;width:3px;height:20px;border-radius:3px;background:var(--ink);transform:translateX(-50%);box-shadow:0 0 0 2px var(--surface)}.bodycomp-goal-marker{width:2px;background:var(--primary);height:16px;top:-3px;box-shadow:none}
+.bodycomp-scale-labels{display:flex;justify-content:space-between;gap:8px;margin-top:6px;font-size:9px;color:var(--ink-soft)}.bodycomp-scale-labels span:nth-child(2){text-align:center}.bodycomp-scale-labels span:last-child{text-align:right}
+.bodycomp-reference{margin-top:7px;font-size:9.5px;line-height:1.35;color:var(--ink-soft)}
 .bodycomp-tabs,.bodycomp-ranges{display:flex;gap:6px;overflow:auto;scrollbar-width:none}.bodycomp-tabs::-webkit-scrollbar,.bodycomp-ranges::-webkit-scrollbar{display:none}
 .bodycomp-tab,.bodycomp-range{border:1px solid var(--border);background:var(--surface);color:var(--ink-soft);border-radius:999px;padding:6px 9px;font-size:10.5px;font-weight:700;white-space:nowrap;cursor:pointer}.bodycomp-tab.active,.bodycomp-range.active{background:var(--ink);border-color:var(--ink);color:var(--surface)}
 .bodycomp-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:10px 0 8px}.bodycomp-ranges{justify-content:flex-end}
@@ -421,7 +429,7 @@ input[type="range"]{width:100%;}
 .bodycomp-insight{margin-top:9px;padding:9px 10px;border-radius:11px;background:var(--surface);border:1px solid var(--border);font-size:11px;line-height:1.4;color:var(--ink-soft)}.bodycomp-insight strong{color:var(--ink)}
 .weight-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.weight-detail-cell{padding:11px;border:1px solid var(--border);border-radius:12px;background:var(--surface-alt)}.weight-detail-cell span{display:block;font-size:10px;color:var(--ink-soft);margin-bottom:4px}.weight-detail-cell strong{font-size:17px}.weight-detail-source{margin-top:12px;font-size:11px;color:var(--ink-soft)}
 .weigh-history-list .item-row.weight-row-clickable{cursor:pointer}.weight-history-chevron{color:var(--ink-soft);font-size:20px;margin-left:3px}.weigh-history-list .item-del{position:relative;z-index:2}
-@media(max-width:520px){.bodycomp-overview{grid-template-columns:1fr}.bodycomp-mini-grid{grid-template-columns:repeat(3,1fr)}.bodycomp-main{min-height:auto}.bodycomp-main strong{font-size:25px}.bodycomp-toolbar{align-items:flex-start;flex-direction:column}.bodycomp-ranges{justify-content:flex-start;width:100%}}
+@media(max-width:520px){.bodycomp-overview{grid-template-columns:1fr}.bodycomp-mini-grid{grid-template-columns:repeat(3,1fr)}.bodycomp-main{min-height:auto}.bodycomp-main strong{font-size:25px}.bodycomp-toolbar{align-items:flex-start;flex-direction:column}.bodycomp-ranges{justify-content:flex-start;width:100%}.bodycomp-position{padding:10px}.bodycomp-position-goal{white-space:normal;max-width:125px}}
 </style>
 
 <style>
@@ -2197,18 +2205,24 @@ body[data-theme="dark"] .calendar-nutrition-summary.bad{background:rgba(224,105,
           <div class="bodycomp-head"><strong>Composition corporelle</strong><span id="bodyCompLastDate">Ajoute une pesée pour commencer</span></div>
           <div class="bodycomp-overview">
             <button type="button" class="bodycomp-main" onclick="setBodyCompMetric('weight')">
-              <span>Poids</span><strong id="bodyCompWeight">—</strong><small id="bodyCompWeightDelta">Tendance indisponible</small>
+              <span>Poids</span><strong id="bodyCompWeight">—</strong><small id="bodyCompWeightDelta">Tendance indisponible</small><small class="bodycomp-objective" id="bodyCompWeightObjective">Objectif non défini</small>
             </button>
             <div class="bodycomp-mini-grid">
-              <button type="button" class="bodycomp-mini" data-bodycomp-card="bodyFat" onclick="setBodyCompMetric('bodyFat')"><span>Graisse</span><strong id="bodyCompFat">—</strong><small id="bodyCompFatDelta">—</small></button>
-              <button type="button" class="bodycomp-mini" data-bodycomp-card="muscleMass" onclick="setBodyCompMetric('muscleMass')"><span>Muscle</span><strong id="bodyCompMuscle">—</strong><small id="bodyCompMuscleDelta">—</small></button>
-              <button type="button" class="bodycomp-mini" data-bodycomp-card="visceralFat" onclick="setBodyCompMetric('visceralFat')"><span>Viscérale</span><strong id="bodyCompVisceral">—</strong><small id="bodyCompVisceralDelta">indice</small></button>
+              <button type="button" class="bodycomp-mini" data-bodycomp-card="bodyFat" onclick="setBodyCompMetric('bodyFat')"><span>Graisse</span><strong id="bodyCompFat">—</strong><small class="bodycomp-mini-status neutral" id="bodyCompFatStatus">Repère —</small><small id="bodyCompFatDelta">—</small></button>
+              <button type="button" class="bodycomp-mini" data-bodycomp-card="musclePct" onclick="setBodyCompMetric('musclePct')"><span>Muscle</span><strong id="bodyCompMuscle">—</strong><small class="bodycomp-mini-status neutral" id="bodyCompMuscleStatus">Repère —</small><small id="bodyCompMuscleDelta">—</small></button>
+              <button type="button" class="bodycomp-mini" data-bodycomp-card="visceralFat" onclick="setBodyCompMetric('visceralFat')"><span>Viscérale</span><strong id="bodyCompVisceral">—</strong><small class="bodycomp-mini-status neutral" id="bodyCompVisceralStatus">Repère —</small><small id="bodyCompVisceralDelta">indice</small></button>
             </div>
+          </div>
+          <div class="bodycomp-position" id="bodyCompPosition">
+            <div class="bodycomp-position-head"><div><span class="bodycomp-position-kicker">Ton repère</span><strong id="bodyCompPositionStatus">Sélectionne une mesure</strong></div><button type="button" class="bodycomp-position-goal" id="bodyCompPositionGoal" onclick="openBodyCompGoals()">Définir un objectif</button></div>
+            <div class="bodycomp-scale" id="bodyCompScale"></div>
+            <div class="bodycomp-scale-labels" id="bodyCompScaleLabels"><span>—</span><span>—</span><span>—</span></div>
+            <div class="bodycomp-reference" id="bodyCompReference">Les repères de composition corporelle dépendent du profil.</div>
           </div>
           <div class="bodycomp-tabs" aria-label="Mesure affichée">
             <button type="button" class="bodycomp-tab active" data-bodycomp-metric="weight" onclick="setBodyCompMetric('weight')">Poids</button>
             <button type="button" class="bodycomp-tab" data-bodycomp-metric="bodyFat" onclick="setBodyCompMetric('bodyFat')">Graisse</button>
-            <button type="button" class="bodycomp-tab" data-bodycomp-metric="muscleMass" onclick="setBodyCompMetric('muscleMass')">Muscle</button>
+            <button type="button" class="bodycomp-tab" data-bodycomp-metric="musclePct" onclick="setBodyCompMetric('musclePct')">Muscle</button>
             <button type="button" class="bodycomp-tab" data-bodycomp-metric="visceralFat" onclick="setBodyCompMetric('visceralFat')">Viscérale</button>
           </div>
           <div class="bodycomp-toolbar">
@@ -2376,7 +2390,7 @@ body[data-theme="dark"] .calendar-nutrition-summary.bad{background:rgba(224,105,
           <div class="field"><label>Objectif principal</label><select id="pf_goal"><option value="fat_loss">🔥 Perdre du gras</option><option value="recomposition">🔄 Recomposition</option><option value="muscle_gain">💪 Construire du muscle</option><option value="maintain">⚖️ Maintenir</option><option value="weight_target">🎯 Atteindre un poids</option></select></div>
           <div class="field"><label>Activité quotidienne</label><select id="pf_activity"><option value="sedentary">Peu actif</option><option value="light">Légèrement actif</option><option value="moderate">Actif</option><option value="active">Très actif</option><option value="very_active">Très actif +</option></select></div>
           <div class="field"><label>Poids cible (facultatif)</label><input type="number" step="0.1" id="pf_target" min="35" max="300" inputmode="decimal"></div>
-          <div class="field-row"><div class="field"><label>% masse grasse cible</label><input type="number" step="0.1" id="pf_bodyfat_target"></div><div class="field"><label>Tour de taille cible</label><input type="number" step="0.5" id="pf_waist_target"></div></div>
+          <div class="field-row"><div class="field"><label>% masse grasse cible</label><input type="number" step="0.1" id="pf_bodyfat_target" min="3" max="70" inputmode="decimal"></div><div class="field"><label>% muscle cible</label><input type="number" step="0.1" id="pf_muscle_target" min="20" max="95" inputmode="decimal"></div></div><div class="field"><label>Tour de taille cible</label><input type="number" step="0.5" id="pf_waist_target"></div>
           <div class="field"><label>Objectif de pas quotidien</label><div class="input-with-unit"><input type="number" step="500" min="1000" max="50000" id="pf_steps_goal" placeholder="Objectif adaptatif"><span>pas</span></div><div class="muted small" style="margin-top:6px">Laisse vide pour laisser VitaTrack adapter l’objectif à ton profil et à ton activité récente.</div></div>
           <button class="btn btn-primary btn-block" onclick="saveGoals()">Enregistrer l'objectif</button>
         </div>

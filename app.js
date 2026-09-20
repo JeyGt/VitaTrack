@@ -68,7 +68,7 @@ function renderProfile(){
   const p=DATA.profile,t=currentTargets(),goal=goalLabel(DATA.objective.type||'fat_loss');
   setText('profileCalorieTarget',t.calories?t.calories+' kcal/j':'À calculer');
   setText('profileProteinTarget',t.protein?t.protein+' g/j':'À calculer');
-  setVal('pf_name',p.name||'');setVal('pf_age',p.age||'');setVal('pf_sex',p.sex||'homme');setVal('pf_height',p.height||'');setVal('pf_weight',p.weightCurrent||'');setVal('pf_goal',DATA.objective.type||'fat_loss');setVal('pf_activity',p.activity||'moderate');setVal('pf_target',DATA.objective.targetWeight||'');setVal('pf_bodyfat_target',DATA.objective.targetBodyFat||'');setVal('pf_waist_target',DATA.objective.targetWaist||'');setVal('pf_steps_goal',DATA.settings?.stepsGoal||'');
+  setVal('pf_name',p.name||'');setVal('pf_age',p.age||'');setVal('pf_sex',p.sex||'homme');setVal('pf_height',p.height||'');setVal('pf_weight',p.weightCurrent||'');setVal('pf_goal',DATA.objective.type||'fat_loss');setVal('pf_activity',p.activity||'moderate');setVal('pf_target',DATA.objective.targetWeight||'');setVal('pf_bodyfat_target',DATA.objective.targetBodyFat||'');setVal('pf_muscle_target',DATA.objective.targetMusclePercent||'');setVal('pf_waist_target',DATA.objective.targetWaist||'');setVal('pf_steps_goal',DATA.settings?.stepsGoal||'');
   setText('profileDisplayName',p.name?`Profil de ${p.name}`:'Mon profil');setText('profileDisplayGoal',goal);
   const initials=(p.name||'VT').trim().split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase()||'VT';setText('profileAvatar',initials);
   const summary=[p.age?`${p.age} ans`:null,p.height?`${p.height} cm`:null,p.weightCurrent?`${formatWeight(p.weightCurrent)} kg`:null].filter(Boolean).join(' · ')||'Âge, taille, poids';setText('profileSummary',summary);
@@ -94,9 +94,10 @@ function saveGoals(){
   const nextType=document.getElementById('pf_goal').value;
   const targetCheck=validateTargetWeight(document.getElementById('pf_target').value,nextType==='weight_target');if(!targetCheck.valid){toast(targetCheck.message);return;}
   const bfRaw=String(document.getElementById('pf_bodyfat_target').value||'').trim(),bf=Number(bfRaw);if(bfRaw&&(!Number.isFinite(bf)||bf<3||bf>70)){toast('Choisis une masse grasse cible entre 3 et 70 %.');return;}
+  const muscleRaw=String(document.getElementById('pf_muscle_target')?.value||'').trim(),muscleTarget=Number(muscleRaw);if(muscleRaw&&(!Number.isFinite(muscleTarget)||muscleTarget<20||muscleTarget>95)){toast('Choisis un objectif de muscle entre 20 et 95 %.');return;}
   const waRaw=String(document.getElementById('pf_waist_target').value||'').trim(),wa=Number(waRaw);if(waRaw&&(!Number.isFinite(wa)||wa<40||wa>200)){toast('Choisis un tour de taille cible entre 40 et 200 cm.');return;}
   const stepsRaw=String(document.getElementById('pf_steps_goal')?.value||'').trim();const stepGoalValue=Math.round(Number(stepsRaw));if(stepsRaw&&(!Number.isFinite(stepGoalValue)||stepGoalValue<1000||stepGoalValue>50000)){toast('Choisis un objectif entre 1 000 et 50 000 pas');return;}
-  DATA.objective.type=nextType;DATA.profile.activity=document.getElementById('pf_activity').value;DATA.objective.targetWeight=targetCheck.value;DATA.objective.targetBodyFat=bfRaw?bf:null;DATA.objective.targetWaist=waRaw?wa:null;
+  DATA.objective.type=nextType;DATA.profile.activity=document.getElementById('pf_activity').value;DATA.objective.targetWeight=targetCheck.value;DATA.objective.targetBodyFat=bfRaw?bf:null;DATA.objective.targetMusclePercent=muscleRaw?muscleTarget:null;DATA.objective.targetWaist=waRaw?wa:null;
   DATA.settings=DATA.settings||{};if(stepsRaw)DATA.settings.stepsGoal=stepGoalValue;else delete DATA.settings.stepsGoal;
   DATA.nutrition.manualCalories=false;DATA.nutrition.manualProtein=false;ensureTargets();if(typeof coachRecordGoalChange==='function'&&(previousObjectiveState.type!==DATA.objective.type||Number(previousObjectiveState.targetWeight||0)!==Number(DATA.objective.targetWeight||0)))coachRecordGoalChange(previousObjectiveState,{type:DATA.objective.type,targetWeight:DATA.objective.targetWeight});saveState();toast('Objectif mis à jour');renderAll();
 }
